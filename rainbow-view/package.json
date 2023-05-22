@@ -1,0 +1,14 @@
+{
+  "name": "@rainbow_ljy/rainbow-view",
+  "version": "1.0.4",
+  "description": "",
+  "private": false,
+  "typings": "index.d.ts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}

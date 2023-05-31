@@ -10,6 +10,9 @@ importers:
       '@rainbow_ljy/rainbow-view':
         specifier: workspace:^
         version: link:rainbow-view
+      '@rainbow_ljy/v-hooks':
+        specifier: workspace:^
+        version: link:v-hooks
       core-js:
         specifier: ^3.30.1
         version: 3.30.1
@@ -100,6 +103,9 @@ importers:
       core-js:
         specifier: ^3.30.1
         version: 3.30.1
+      element-plus:
+        specifier: ^2.3.4
+        version: 2.3.4(vue@3.2.40)
       vue:
         specifier: 3.2.40
         version: 3.2.40
@@ -174,9 +180,13 @@ importers:
         specifier: ^4.13.3
         version: 4.13.3(debug@4.3.4)(webpack-cli@5.0.2)(webpack@5.82.0)
 
+  r-hooks: {}
+
   rainbow-js: {}
 
   rainbow-view: {}
+
+  v-hooks: {}
 
 packages:
 

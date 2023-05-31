@@ -35,6 +35,7 @@
   "dependencies": {
     "@rainbow_ljy/rainbow-js": "1.0.50",
     "@rainbow_ljy/rainbow-view": "workspace:^",
+    "@rainbow_ljy/v-hooks": "workspace:^",
     "core-js": "^3.30.1",
     "element-plus": "^2.3.4",
     "vue": "3.2.40",

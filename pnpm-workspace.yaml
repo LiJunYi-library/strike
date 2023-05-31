@@ -10,6 +10,8 @@ packages:
   - 'rainbow-ui/**'
   - 'rainbow-utils/**'
   - 'rainbow-view/**'
+  - 'r-hooks/**'
+  - 'v-hooks/**'
   
  
 

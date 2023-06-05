@@ -4,6 +4,12 @@ importers:
 
   .:
     dependencies:
+      '@rainbow_ljy/element-library':
+        specifier: workspace:^
+        version: link:element-library
+      '@rainbow_ljy/element-plus-lib':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@rainbow_ljy/rainbow-js':
         specifier: 1.0.50
         version: link:rainbow-js
@@ -92,6 +98,8 @@ importers:
       webpack-dev-server:
         specifier: ^4.13.3
         version: 4.13.3(debug@4.3.4)(webpack-cli@5.0.2)(webpack@5.82.0)
+
+  element-library: {}
 
   firm/test/react: {}
 
@@ -1577,6 +1585,10 @@ packages:
   /@polka/url@1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
+
+  /@rainbow_ljy/element-plus-lib@1.0.1:
+    resolution: {integrity: sha512-0CM3Jcd18LCmk/IdsovqEhEO0cXRJghpiIIH9CLdnSX/IANVQJIDxQe5LcYCosEh2XTHrv4FoMNWzVZ2zwoXUw==}
+    dev: false
 
   /@sideway/address@4.1.4:
     resolution: {integrity: sha512-7vwq+rOHVWjyXxVlR76Agnvhy8I9rpzjosTESvmhNeXOXdZZB15Fl+TI9x1SiHZH5Jv2wTGduSxFDIaq0m3DUw==}

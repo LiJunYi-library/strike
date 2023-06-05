@@ -1,4 +1,5 @@
 import { ReactiveEffect, UnwrapNestedRefs, Ref } from "vue";
+import { PromiseHooks, AsyncFun, PromiseConfig } from "../promise";
 
 export declare function useListRadio<T>(options: any): [
   [Ref<any>, Ref<T>, Ref<number>, Ref<string>, Ref<T[]>],
@@ -29,13 +30,58 @@ export declare function useListRadio<T>(options: any): [
   }
 ];
 
+export declare function useListMultiple(options: any): [...any];
+export declare function useListSelect(options: any): [...any];
 
+/**
+ *
+ */
+export declare type FetchListHooks = PromiseHooks & {
+  list: any[];
+  begin: boolean;
+  fetch: AsyncFun;
+};
+export declare type FetchListConfig = PromiseConfig & {
+  fetchCB?: AsyncFun;
+  formatterList?: (hooks: FetchListHooks) => any[];
+};
+export declare function getFetchListConfig(options: FetchListConfig): FetchListConfig;
+export declare function useFetchList(options: FetchListConfig): FetchListHooks;
 
-
-
-
-
-
-
-
-
+/**
+ *
+ */
+export declare type PaginationListHooks = FetchListHooks & {
+  currentPage: number;
+  pageSize: number;
+  total: number;
+  finished: boolean;
+  currentSize: number;
+  resolve: (accumulation: boolean) => void;
+  beginning: AsyncFun;
+  concat: AsyncFun;
+  replace: AsyncFun;
+  reset: AsyncFun;
+  fetch: AsyncFun;
+};
+export declare type PaginationListConfig = FetchListConfig & {
+  _super?: FetchListConfig;
+  formatterTotal?: (PaginationListHooks) => number;
+  formatterFinished?: (PaginationListHooks) => boolean;
+  formatterCurrentPage?: (PaginationListHooks) => number;
+  formatterList?: (PaginationListHooks) => any[];
+  serverPaging?: boolean;
+  currentPage?: number;
+  pageSize?: number;
+  total?: number;
+};
+export declare function getPaginationConfig(options: PaginationListConfig): PaginationListConfig;
+export declare function usePaginationList(options: PaginationListConfig): PaginationListHooks;
+/**
+ *
+ *
+ */
+export declare type TablePaginationHooks = PaginationListHooks & {
+  onPageChange: (currentPage: number, pageSize: number) => void;
+};
+export declare function useTablePagination(options: PaginationListConfig): TablePaginationHooks;

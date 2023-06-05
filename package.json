@@ -33,6 +33,8 @@
     "webpack-dev-server": "^4.13.3"
   },
   "dependencies": {
+    "@rainbow_ljy/element-library": "workspace:^",
+    "@rainbow_ljy/element-plus-lib": "^1.0.1",
     "@rainbow_ljy/rainbow-js": "1.0.50",
     "@rainbow_ljy/rainbow-view": "workspace:^",
     "@rainbow_ljy/v-hooks": "workspace:^",

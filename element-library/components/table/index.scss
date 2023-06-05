@@ -1,0 +1,43 @@
+.lib-table {
+  position: relative;
+  .el-skeleton__p.is-first {
+    width: 100%;
+  }
+
+  .el-skeleton__p.is-last {
+    width: 100%;
+  }
+
+  .el-table__empty-text {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+
+  .lib-loading {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    background-color: rgba(54, 59, 59, 0.5);
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    color: #bad5ff;
+  }
+  .el-result {
+    cursor: pointer;
+  }
+  .el-pagination{
+    justify-content: center;
+    padding-top: 15px;
+  }
+}

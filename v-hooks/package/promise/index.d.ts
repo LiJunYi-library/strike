@@ -53,6 +53,10 @@ export declare type PromiseHooks = {
 };
 export declare function usePromise(fun: AsyncFun, config?: PromiseConfig): PromiseHooks;
 
+export declare function usePromiseTask(fun: AsyncFun, config?: PromiseConfig): any;
+
+export declare function apply(fun: AsyncFun, context?: any): any;
+export declare function useInterceptPromiseApply(config?: any): any;
 /**
  *
  */

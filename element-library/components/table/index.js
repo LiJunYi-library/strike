@@ -6,12 +6,10 @@ import {
   ElResult,
   ElPagination,
   paginationProps,
-  paginationEmits,
+  ElTableColumn,
 } from "element-plus";
 import elTableProps from "element-plus/es/components/table/src/table/defaults.mjs";
 import "./index.scss";
-
-// console.log(paginationEmits);
 
 const defaultProps = {
   ...elTableProps,
@@ -112,9 +110,11 @@ const loadingEmits = [
   "page-change",
 ];
 
+ElTable.inheritAttrs = false;
+paginationProps.inheritAttrs = false;
+
 export const TableHoc = (option = {}) => {
   const config = {
-    ...option,
     renderBegin: (props, context, VM) => {
       return [props.beginText, <ElSkeleton rows={4} animated></ElSkeleton>];
     },
@@ -148,20 +148,51 @@ export const TableHoc = (option = {}) => {
         </span>
       );
     },
+    props: {},
+    class: "",
+    emits: [],
+    inheritAttrs: false,
+    ...option,
   };
-
   return defineComponent({
     props: {
       ...paginationProps,
       ...defaultProps,
       ...loadingProps,
+      checkList: {
+        type: Array,
+        default: () => [],
+      },
+      formatterId: {
+        type: Function,
+        default: (item) => {
+          return item && item.id;
+        },
+      },
+      modelValue: {
+        type: Array,
+        default: () => [],
+      },
+      ...config.props,
     },
-    emits: [...loadingEmits],
+    inheritAttrs: config.inheritAttrs,
+    emits: [
+      ...loadingEmits,
+      "select",
+      "update:checkList",
+      "select-all",
+      "update:modelValue",
+      "selection-change",
+      ...config.emits,
+    ],
     setup(props, context) {
-      const bool0 = (val) => val === 0 || val;
+      // console.log("props", props);
+      // console.log("context", context);
 
+      const bool0 = (val) => val === 0 || val;
       const pageSize = ref(props.pageSize);
       const currentPage = ref(props.currentPage);
+      const checkList = ref(props.checkList);
 
       watch(
         () => props.pageSize,
@@ -177,6 +208,15 @@ export const TableHoc = (option = {}) => {
         }
       );
 
+      watch(
+        () => props.list,
+        (val) => {
+          checkList.value = [];
+          context.emit("update:checkList", []);
+          context.emit("update:modelValue", []);
+        }
+      );
+
       // eslint-disable-next-line
       let maxHeight = props.maxHeight;
       if (bool0(props.calcMaxHeight)) {
@@ -189,15 +229,49 @@ export const TableHoc = (option = {}) => {
       }
 
       return (VM, _cache) => {
+        // console.log("VM", VM);
         return (
-          <div class={["lib-table"]}>
-            {/* <div>{props.data.length}</div> */}
+          <div class={["lib-table", config.class]}>
             {props.loading && !props.begin && (
               <div class={["lib-loading"]}>
                 {context?.slots?.loading?.() || config.renderLoading(props, context, VM)}
               </div>
             )}
-            <ElTable {...props} maxHeight={maxHeight} height={height} data={props.list}>
+            <ElTable
+              {...props}
+              {...context.attrs}
+              maxHeight={maxHeight}
+              height={height}
+              ref={"elTable"}
+              data={props.list}
+              onSelect={(list, ...arg) => {
+                checkList.value = list;
+                context.emit("select", list, ...arg);
+                context.emit("update:checkList", list);
+                context.emit(
+                  "update:modelValue",
+                  list.map((el) => props.formatterId(el))
+                );
+              }}
+              onSelect-all={(list, ...arg) => {
+                checkList.value = list;
+                context.emit("select-all", list, ...arg);
+                context.emit("update:checkList", list);
+                context.emit(
+                  "update:modelValue",
+                  list.map((el) => props.formatterId(el))
+                );
+              }}
+              onSelection-change={(list, ...arg) => {
+                checkList.value = list;
+                context.emit("selection-change", list, ...arg);
+                context.emit("update:checkList", list);
+                context.emit(
+                  "update:modelValue",
+                  list.map((el) => props.formatterId(el))
+                );
+              }}
+            >
               {{
                 ...context.slots,
                 empty: () => {
@@ -217,6 +291,7 @@ export const TableHoc = (option = {}) => {
             </ElTable>
             {h(ElPagination, {
               layout: "total, sizes, prev, pager, next, jumper",
+              ...context.attrs,
               total: props.total,
               "current-page": currentPage.value,
               "page-size": pageSize.value,
@@ -253,3 +328,4 @@ export const TableHoc = (option = {}) => {
 };
 
 export const Table = TableHoc();
+export * from "./tableColumn";

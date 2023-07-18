@@ -1,6 +1,21 @@
 import { ReactiveEffect, UnwrapNestedRefs, Ref } from "vue";
 import { PromiseHooks, AsyncFun, PromiseConfig } from "../promise";
 
+export declare class Radio {
+  constructor(params: any);
+}
+
+export declare function useList(options: any): any;
+
+export declare function useLazyList(options: any): any;
+
+export declare function usePagination(options: any): any;
+
+export declare function useListSelect(options: any): any;
+
+/***************** */
+
+
 export declare function useListRadio<T>(options: any): [
   [Ref<any>, Ref<T>, Ref<number>, Ref<string>, Ref<T[]>],
   [
@@ -30,8 +45,10 @@ export declare function useListRadio<T>(options: any): [
   }
 ];
 
+export declare function useAsyncListRadio<T>(options: any): any;
+
 export declare function useListMultiple(options: any): [...any];
-export declare function useListSelect(options: any): [...any];
+
 
 /**
  *

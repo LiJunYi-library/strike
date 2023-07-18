@@ -1,314 +1,230 @@
-// export function useListRadio(options = {}) {
-//   const config = selectConfig(options);
-//   const list = ref(config.list);
-
-//   const activeItem = ref();
-//   const activeIndex = ref();
-//   const activeValue = ref();
-//   const activeLable = ref();
-//   const parms = reactive({ activeItem, activeIndex, activeValue, activeLable, list });
-
-//   const vFindIt = (val, item) => config.formatterValue(item) === val;
-//   const LFindIt = (val, item) => config.formatterLable(item) === val;
-
-//   const same = (val) => activeItem.value === val;
-//   const vFindItem = (val) => list.value.find(vFindIt.bind(undefined, val));
-//   const lFindItem = (val) => list.value.find(LFindIt.bind(undefined, val));
-
-//   const setValue = (val) => {
-//     activeValue.value = val;
-//     activeItem.value = vFindItem(val);
-//     activeLable.value = config.formatterLable(activeItem.value);
-//     activeIndex.value = list.value.findIndex((el) => el === activeItem.value);
-//   };
-
-//   const setItem = (val, index) => {
-//     activeItem.value = val;
-//     activeValue.value = config.formatterValue(activeItem.value);
-//     activeLable.value = config.formatterLable(activeItem.value);
-//     if (index === 0 || index) activeLable.value = index;
-//     else activeIndex.value = list.value.findIndex((el) => el === activeItem.value);
-//   };
-
-//   let store = {
-//     activeItem: null,
-//     activeIndex: null,
-//     activeValue: null,
-//     activeLable: null,
-//   };
-
-//   const save = () => {
-//     store = {
-//       activeItem: activeItem.value,
-//       activeValue: activeValue.value,
-//       activeLable: activeLable.value,
-//       activeIndex: activeIndex.value,
-//     };
-//     // console.log('save', store);
-//   };
-
-//   const restore = () => {
-//     activeItem.value = store.activeItem;
-//     activeValue.value = store.activeValue;
-//     activeLable.value = store.activeLable;
-//     activeIndex.value = store.activeIndex;
-//     // console.log('restore', store);
-//   };
-
-//   setValue(config.activeValue);
-//   save();
-// }
-
 import { ref, reactive, computed, watch } from "vue";
 import { selectConfig } from "../common";
-import { usePromise, getPromiseConfig } from "../promise";
+import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
+import { useSelect } from "./select";
 
-export const useListRadio = (options = {}) => {
-  const config = selectConfig(options);
-  const find = (val) => (el) => config.formatterValue(el) === val;
-  let listArray = config.list;
+export { getListProps, useList, useLazyList, useListSelect };
+export * from "./radio";
+export * from "./pagination";
 
-  const item = (() => {
-    if (config.activeItem) return config.activeItem;
-    const map = {
-      indexItem: undefined,
-      valueItem: undefined,
-      lableItem: undefined,
+function getListProps(options = {}) {
+  const config = {
+    ...options,
+    afterSetList: () => undefined,
+    listStorage: options.list || [],
+  };
+  return config;
+}
+
+function useList(props = {}) {
+  const config = getListProps(props);
+  let filterFun;
+
+  const listStorage = ref(config.listStorage);
+  const list = ref(config.list);
+
+  const arguments_ = {
+    listStorage,
+    list,
+    afterSetList: config.afterSetList,
+    updateList,
+    reset,
+    remove,
+    pop,
+    shift,
+    push,
+    unshift,
+    filter,
+    filterIncludes,
+    filterRegExp,
+    sort,
+    ascendingOrder,
+    descendingOrder,
+  };
+  arguments_.proxy = reactive(arguments_);
+
+  function getList() {
+    const list_ = listStorage.value;
+    // if( filterFun) list_ = listStorage.value.filter(filterFun);
+    return list_;
+  }
+
+  function updateList(l) {
+    listStorage.value = l;
+    list.value = listStorage.value;
+    arguments_.afterSetList(arguments_);
+  }
+
+  function reset() {
+    list.value = listStorage.value;
+    arguments_.afterSetList(arguments_);
+  }
+
+  /////////////////////////////////////
+  /**增加**/
+  /////////////////////////////////////
+  function push(...args) {
+    listStorage.value.push(...args);
+    list.value = getList();
+    arguments_.afterSetList(arguments_);
+  }
+
+  function unshift(...args) {
+    listStorage.value.unshift(...args);
+    list.value = getList();
+    arguments_.afterSetList(arguments_);
+  }
+
+  /////////////////////////////////////
+  /**删除**/
+  /////////////////////////////////////
+  function pop() {
+    listStorage.value.pop();
+    list.value = getList();
+    arguments_.afterSetList(arguments_);
+  }
+
+  function shift() {
+    listStorage.value.shift();
+    list.value = getList();
+    arguments_.afterSetList(arguments_);
+  }
+
+  function remove(...args) {
+    const list_ = listStorage.value.filter((el) => !args.includes(el));
+    listStorage.value = list_;
+    list.value = getList();
+    arguments_.afterSetList(arguments_);
+  }
+
+  /////////////////////////////////////
+  /**修改**/
+  /////////////////////////////////////
+
+  /////////////////////////////////////
+  /**查找**/
+  /////////////////////////////////////
+  function filter(fun) {
+    filterFun = fun;
+    list.value = listStorage.value.filter(fun);
+    arguments_.afterSetList(arguments_, 0);
+  }
+
+  function filterIncludes(formatter, key, isOr) {
+    filterFun = (el, index) => {
+      const keyWord = formatter(el) || "";
+      const keyWords = keyWord.split(" ").filter(Boolean);
+      if (isOr) return keyWords.some((str) => str.includes(key));
+      return keyWords.every((str) => str.includes(key));
     };
+    list.value = listStorage.value.filter(filterFun);
+    arguments_.afterSetList(arguments_, 0);
+  }
 
-    if (config.activeLable) {
-      map.lableItem = listArray?.find?.((el) => config.activeLable === config.formatterLable(el));
-    }
-
-    if (config.activeIndex && config.activeIndex === 0) {
-      map.indexItem = listArray[config.activeIndex];
-    }
-
-    map.valueItem = listArray?.find?.(find(config.activeValue));
-
-    return map[config.priority] || map.indexItem || map.valueItem || map.lableItem;
-  })();
-  const value = config.activeValue || config.formatterValue(item);
-  const index = config.activeIndex || listArray?.findIndex?.(find(value));
-  const lable = config.activeLable || config.formatterLable(item);
-  // console.log('init', item, value, index, lable);
-  const listData = ref(listArray);
-  const activeItem = ref(item);
-  const activeValue = ref(value);
-  const activeLable = ref(lable);
-  const activeIndex = ref(index);
-
-  let store = {
-    activeItem: null,
-    activeIndex: null,
-    activeValue: null,
-    activeLable: null,
-  };
-
-  const save = () => {
-    store = {
-      activeItem: activeItem.value,
-      activeValue: activeValue.value,
-      activeLable: activeLable.value,
-      activeIndex: activeIndex.value,
+  function filterRegExp(formatter, regExp) {
+    filterFun = (el, index) => {
+      const keyWord = formatter(el) || "";
+      return regExp.test(keyWord);
     };
-    // console.log('save', store);
+    list.value = listStorage.value.filter(filterFun);
+    arguments_.afterSetList(arguments_, 0);
+  }
+
+  /////////////////////////////////////
+  /**排序**/
+  /////////////////////////////////////
+  function sort(fun) {
+    list.value = listStorage.value.sort(fun);
+    arguments_.afterSetList(arguments_);
+  }
+
+  function ascendingOrder(formatter) {
+    list.value = listStorage.value.sort((a, b) => formatter(a) - formatter(b));
+    arguments_.afterSetList(arguments_);
+  }
+
+  function descendingOrder(formatter) {
+    list.value = listStorage.value.sort((a, b) => formatter(b) - formatter(a));
+    arguments_.afterSetList(arguments_);
+  }
+
+  return arguments_;
+}
+
+function getListSelectProps(options = {}) {
+  const config = {
+    currentPage: 1,
+    pageSize: 10,
+    ...options,
+    listStorage: options.list || [],
+  };
+  return config;
+}
+
+function useListSelect(props = {}) {
+  const config = getListSelectProps(props);
+  const listHooks = useList(props);
+
+  const selectHooks = useSelect({ ...props, list: listHooks.list.value });
+
+  listHooks.afterSetList = (hooks, type) => {
+    // console.log("listHooks.afterSetList", type < 1);
+    selectHooks.resolveList(listHooks.list.value);
   };
 
-  const restore = () => {
-    // console.log('restore', store);
-    activeItem.value = store.activeItem;
-    activeValue.value = store.activeValue;
-    activeLable.value = store.activeLable;
-    activeIndex.value = store.activeIndex;
+  const endSlice = ref(config.pageSize);
+  function lazyListLoad() {
+    endSlice.value += config.pageSize;
+  }
+
+  const lazyList = computed(() => {
+    return listHooks.list.value.slice(0, endSlice.value);
+  });
+  const finished = computed(() => endSlice.value >= listHooks.list.value.length);
+
+  const arguments_ = {
+    ...selectHooks,
+    ...listHooks,
+    lazyListLoad,
+    lazyList,
+    finished,
   };
+  arguments_.proxy = reactive(arguments_);
+  return arguments_;
+}
 
-  save();
+function useLazyList(props = {}) {
+  const config = getListProps(props);
+  const listHooks = useList(config);
 
-  const changeItem = (el, nth) => {
-    if (config.cancelSame && activeItem.value === el) {
-      activeItem.value = undefined;
-      activeIndex.value = undefined;
-      activeValue.value = undefined;
-      activeLable.value = undefined;
-      return;
-    }
-    activeItem.value = el;
-    activeIndex.value = nth;
-    activeValue.value = config.formatterValue(activeItem.value);
-    activeLable.value = config.formatterLable(activeItem.value);
-    // console.log('changeItem -store', store);
+  const arguments_ = {
+    name: "useLazyList",
+    listHooks,
+    ...listHooks,
   };
-
-  const setValue = (val) => {
-    activeValue.value = val;
-    activeItem.value = listArray?.find?.(find(activeValue.value));
-    activeIndex.value = listArray?.findIndex?.(find(activeValue.value));
-    activeLable.value = config.formatterLable(activeItem.value);
-  };
-
-  const same = (val) => activeItem.value === val;
-
-  const setData = (data) => {
-    listArray = data;
-    listData.value = data;
-    setValue(activeValue.value);
-  };
-
-  const reset = () => {
-    activeItem.value = undefined;
-    activeValue.value = undefined;
-    activeLable.value = undefined;
-    activeIndex.value = undefined;
-  };
-
-  return [
-    [activeValue, activeItem, activeIndex, activeLable, listData],
-    [changeItem, setValue, same, reset, save, restore, setData],
-    reactive({ activeValue, activeItem, activeIndex, activeLable, listData }),
-    { changeItem, setValue, same, reset, save, restore, setData },
-  ];
-};
-
-export const useListMultiple = (options = {}) => {
-  const config = selectConfig(options);
-  let listArray = config.list;
-  const revArray = (source) => {
-    if (source instanceof Array) return source;
-    if (source === 0 || source === "") return [source];
-    if (source) return [source];
-    return [];
-  };
-  const isHave = (source) => source && source.length;
-  const isLen = (source) => (isHave(source) ? source : undefined);
-  const filter = (target, source, fun = config.formatterValue) => {
-    return target.filter((el) => source.some((val) => val === fun(el)));
-  };
-  const finIndexs = (target, source) => {
-    const arr = [];
-    target.forEach((el, index) => {
-      if (source.some((val) => config.formatterValue(val) === config.formatterValue(el))) {
-        arr.push(index);
-      }
-    });
-    return arr;
-  };
-
-  config.activeItem = revArray(config.activeItem);
-  config.activeIndex = revArray(config.activeIndex);
-  config.activeValue = revArray(config.activeValue);
-  config.activeLable = revArray(config.activeLable);
-
-  const item = (() => {
-    if (isHave(config.activeItem)) return config.activeItem;
-    const map = {
-      indexItem: [],
-      valueItem: [],
-      lableItem: [],
-    };
-    if (isHave(config.activeLable)) {
-      map.lableItem = filter(listArray, config.activeLable, config.formatterLable);
-    }
-    if (isHave(config.activeIndex)) {
-      map.indexItem = config.activeIndex.map((num) => listArray[num]);
-    }
-    if (isHave(config.activeValue)) {
-      map.valueItem = filter(listArray, config.activeValue);
-    }
-    const v =
-      isLen(map[config.priority]) ||
-      isLen(map.indexItem) ||
-      isLen(map.valueItem) ||
-      isLen(map.lableItem) ||
-      [];
-    return v.filter(Boolean);
-  })();
-  const value = isLen(config.activeValue) || item.map((el) => config.formatterValue(el));
-  const index = isLen(config.activeIndex) || finIndexs(listArray, item);
-  const lable = isLen(config.activeLable) || item.map((el) => config.formatterLable(el));
-  // console.log('init', item, value, index, lable);
-  const listData = ref(listArray);
-  const activeItem = ref(item);
-  const activeValue = ref(value);
-  const activeIndex = ref(index);
-  const activeLable = ref(lable);
-
-  const store = {
-    activeItem: null,
-    activeIndex: null,
-    activeValue: null,
-    activeLable: null,
-  };
-
-  const save = () => {
-    store.activeItem = [...activeItem.value];
-    store.activeIndex = [...activeIndex.value];
-    store.activeValue = [...activeValue.value];
-    store.activeLable = [...activeLable.value];
-  };
-
-  const restore = () => {
-    if (!store.activeItem) return;
-    activeItem.value = [...store.activeItem];
-    activeIndex.value = [...store.activeIndex];
-    activeValue.value = [...store.activeValue];
-    activeLable.value = [...store.activeLable];
-  };
-
-  save();
-
-  const same = (el) => activeItem.value.some((val) => val === el);
-
-  const changeItem = (el, nth) => {
-    const val = config.formatterValue(el);
-    const lab = config.formatterLable(el);
-    if (same(el)) {
-      activeItem.value = activeItem.value.filter((v) => v !== el);
-      activeIndex.value = activeIndex.value.filter((v) => v !== nth);
-      activeValue.value = activeItem.value.map((v) => config.formatterValue(v));
-      activeLable.value = activeItem.value.map((v) => config.formatterLable(v));
-    } else {
-      activeItem.value.push(el);
-      activeIndex.value.push(nth);
-      activeValue.value.push(val);
-      activeLable.value.push(lab);
-    }
-  };
-
-  const setValue = (v) => {
-    // console.log('setValue ----', v);
-    activeValue.value = revArray(v);
-    activeItem.value = filter(listArray, activeValue.value);
-    activeIndex.value = finIndexs(listArray, activeItem.value);
-    activeLable.value = activeItem.value.map((el) => config.formatterLable(el));
-  };
-
-  const setData = (data) => {
-    listArray = data;
-    listData.value = data;
-    setValue(activeValue.value);
-  };
-
-  const reset = () => {
-    activeValue.value = [];
-    activeItem.value = [];
-    activeIndex.value = [];
-    activeLable.value = [];
-  };
-
-  return [
-    [activeValue, activeItem, activeIndex, activeLable],
-    [changeItem, setValue, same, reset, save, restore, setData],
-    reactive({ activeValue, activeItem, activeIndex, activeLable }),
-    { changeItem, setValue, same, reset, save, restore, setData },
-  ];
-};
-
-export const useListSelect = (options = {}) => {
-  const config = selectConfig(options);
-  if (config.multiple) return useListMultiple(options);
-  return useListRadio(options);
-};
+  const proxy = reactive(arguments_);
+  arguments_.proxy = proxy;
+  return arguments_;
+}
+/**********
+ *
+ *
+ * ******
+ *
+ *
+ *
+ *
+ *
+ * ********
+ *
+ *
+ *
+ * *******
+ *
+ *
+ *
+ *********/
+     
 
 /*
  *
@@ -333,7 +249,6 @@ export const useFetchList = (options = {}) => {
     await hooks.run(...arg);
     hooks.list = config.formatterList(hooks);
   };
-  
   return hooks;
 };
 

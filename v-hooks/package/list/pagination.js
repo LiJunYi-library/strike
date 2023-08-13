@@ -1,5 +1,5 @@
 import { ref, reactive, computed, watch } from "vue";
-import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
+import { usePromiseTask } from "../promise";
 import { useSelect } from "./select";
 import { useList } from "./";
 export { getPaginationProps, usePagination };
@@ -10,6 +10,7 @@ function getPaginationProps(options = {}) {
     currentPage: 1,
     pageSize: 10,
     total: 0,
+    fetchMethod: undefined,
     afterSetList: () => undefined,
     formatterList(hooks) {
       const { currentPage, pageSize, data } = hooks;
@@ -38,18 +39,25 @@ function getPaginationProps(options = {}) {
 
 function usePagination(props = {}) {
   const config = getPaginationProps(props);
+
   const listHooks = useList(props);
 
   const paginationHooks = usePagination2({ ...config, listSource: listHooks.list.value });
 
   const selectHooks = useSelect({ ...props, list: paginationHooks.list.value });
 
+  const promiseTask = config.fetchMethod
+    ? usePromiseTask(config.fetchMethod, {
+        then: (data) => {
+          listHooks.updateList(data);
+        },
+      })
+    : {};
+
   listHooks.afterSetList = (hooks, type) => {
     // console.log("listHooks.afterSetList", type < 1);
     if (type < 1) paginationHooks.updateListAndReset(listHooks.list.value);
     else paginationHooks.updateList(listHooks.list.value);
-
-    
     // selectHooks.resolveList(paginationHooks.list.value);
   };
 
@@ -59,6 +67,7 @@ function usePagination(props = {}) {
   };
 
   const arguments_ = {
+    ...promiseTask,
     ...selectHooks,
     ...paginationHooks,
     ...listHooks,

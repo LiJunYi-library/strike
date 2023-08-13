@@ -1,0 +1,29 @@
+.r-virtual-list {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.r-virtual-list-item {
+  overflow: hidden;
+  position: absolute;
+}
+
+.r-virtual-list-container {
+  position: relative;
+}
+
+.r-virtual-list-item-over-hidden {
+  overflow: hidden;
+}
+
+.list-item-test {
+  width: 100vw;
+  background: rgba(255, 0, 0, 0.5);
+  margin-bottom: 10px;
+  height: 200px;
+}
+
+.list-item-test-div{
+  // width: 100%;
+  // height: 100px;
+  // background: gold;
+}

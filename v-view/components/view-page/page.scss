@@ -1,0 +1,16 @@
+.r-view-page {
+  --page-width: 100vw;
+}
+.r-view-page-scroll {
+  width: var(--page-width);
+  overflow: hidden;
+}
+.r-view-page-list {
+  display: inline-flex;
+  flex-wrap: nowrap;
+}
+.r-view-page-item {
+  width: var(--page-width);
+  min-height: 400px;
+  background: orange;
+}

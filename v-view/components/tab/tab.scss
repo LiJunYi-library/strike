@@ -1,0 +1,53 @@
+.r-tab {
+  background: white;
+
+  --tab-height: 38px;
+}
+
+.r-tab-scroll {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.r-tab-list {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  height: var(--tab-height);
+  position: relative;
+}
+
+.r-tab-item {
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 15px;
+  cursor: pointer;
+  color: #333;
+  font-weight: 300;
+}
+
+.r-tab-item-same {
+  color: black;
+  font-weight: 800;
+}
+
+.r-tab-item-active {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: 0.25s;
+  transition-timing-function: linear;
+  text-align: center;
+  line-height: var(--tab-height);
+  color: black;
+  font-weight: 800;
+}
+
+.r-tab-item-active-line {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: rgb(0, 200, 255);
+}

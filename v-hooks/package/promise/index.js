@@ -1,20 +1,39 @@
 import { ref, reactive, unref, onBeforeUnmount } from "vue";
 
-export const getPromiseConfig = (options = {}) => ({
-  then: () => undefined,
-  catch: () => undefined,
-  finally: () => undefined,
-  verify: () => undefined,
-  data: undefined,
-  errorData: undefined,
-  loading: false,
-  error: false,
-  formatterData: (val) => val,
-  formatterErrorData: (val) => val,
-  ...options,
-});
+export {
+  getPromiseConfig,
+  useAsync,
+  nextTaskHoc,
+  usePromise,
+  awaitTime,
+  apply,
+  useInterceptPromiseApply,
+  usePromiseTask,
+};
+export const nextTask = nextTaskHoc();
 
-export function useAsync(fun, options = {}) {
+/**
+ *
+ * @param {*} options
+ * @returns
+ */
+function getPromiseConfig(options = {}) {
+  return {
+    then: () => undefined,
+    catch: () => undefined,
+    finally: () => undefined,
+    verify: () => undefined,
+    data: undefined,
+    errorData: undefined,
+    loading: false,
+    error: false,
+    formatterData: (val) => val,
+    formatterErrorData: (val) => val,
+    ...options,
+  };
+}
+
+function useAsync(fun, options = {}) {
   const config = getPromiseConfig(options);
   const loading = ref(false);
   const error = ref(false);
@@ -44,28 +63,134 @@ export function useAsync(fun, options = {}) {
   return hooks;
 }
 
-export function usePromise(fun, options = {}) {
+function nextTaskHoc(options = {}) {
+  const config = {
+    prvePromise: undefined,
+    loading: false,
+    ...options,
+    aboutCb: undefined,
+  };
+  return function nextTask(fun) {
+    const method = (...arg) => {
+      const newPro = new Promise((resolve, reject) => {
+        const promise = fun(...arg);
+        config.prvePromise = promise;
+        if (promise instanceof Promise) {
+          promise
+            .then((result) => {
+              if (config.prvePromise !== promise) {
+                if (config.aboutCb) config.aboutCb(result);
+                return;
+              }
+              // console.log("nextTask-----------------then", result);
+              resolve(result);
+            })
+            .catch((error) => {
+              if (config.prvePromise !== promise) {
+                if (config.aboutCb) config.aboutCb(error);
+                return;
+              }
+              // console.log("nextTask-----------------catch", error);
+              reject(error);
+            });
+        } else {
+          resolve(promise);
+        }
+      });
+      newPro.about = (fun) => {
+        config.aboutCb = fun;
+        return newPro;
+      };
+      return newPro;
+    };
+    return method;
+  };
+}
+
+function waitTaskHoc(options = {}) {
+  const config = {
+    prvePromise: undefined,
+    loading: false,
+    ...options,
+    aboutCb: null,
+  };
+  return function waitTask(fun) {
+    const method = (...arg) => {
+      const newPro = new Promise((resolve, reject) => {
+        if (config.loading === true) {
+          // console.log("waitTask-----------------error",  config.aboutCb);
+          if (config.aboutCb) config.aboutCb();
+          return;
+        }
+        const promise = fun(...arg);
+        config.loading = true;
+        config.prvePromise = promise;
+        if (promise instanceof Promise) {
+          promise
+            .then((result) => {
+              if (config.prvePromise !== promise) return;
+              // console.log("waitTask-----------------then", result);
+              resolve(result);
+            })
+            .catch((error) => {
+              if (config.prvePromise !== promise) return;
+              // console.log("waitTask-----------------catch", error);
+              reject(error);
+            })
+            .finally(() => {
+              config.loading = false;
+            });
+        } else {
+          config.loading = false;
+        }
+      });
+
+      newPro.about = (fun) => {
+        config.aboutCb = fun;
+        return newPro;
+      };
+
+      return newPro;
+    };
+    return method;
+  };
+}
+
+function usePromise(fun, options = {}) {
   const config = getPromiseConfig(options);
 
   const data = ref(config.data);
   const errorData = ref(config.errorData);
   const loading = ref(config.loading);
   const error = ref(config.error);
+  const nextTaskConfig = {
+    prvePromise: undefined,
+  };
+  const waitTaskConfig = {
+    prvePromise: undefined,
+    loading: false,
+  };
+
+  const next = nextTaskHoc(nextTaskConfig);
+
+  const wait = waitTaskHoc(waitTaskConfig);
+
   const run = (...arg) => {
     loading.value = true;
     error.value = false;
     return new Promise((resolve, reject) => {
-      const res = fun(...arg);
+      const res = fun({ nextTask: next, waitTask: wait }, ...arg);
+
       const invoker = (result) => {
         data.value = config.formatterData(result);
         loading.value = false;
         error.value = false;
+        console.log("-----------------then", result);
         resolve(result);
       };
 
       if (res instanceof Promise) {
         res.then(invoker).catch((err) => {
-          // console.log('--userPromise--catch');
           errorData.value = config.formatterErrorData(err);
           error.value = true;
           loading.value = false;
@@ -81,7 +206,48 @@ export function usePromise(fun, options = {}) {
   return reactive(parms);
 }
 
-export async function awaitTime(t = 2000) {
+// export function usePromise(fun, options = {}) {
+//   const config = getPromiseConfig(options);
+
+//   const data = ref(config.data);
+//   const errorData = ref(config.errorData);
+//   const loading = ref(config.loading);
+//   const error = ref(config.error);
+//   let prvePromise = null;
+
+//   const run = (...arg) => {
+//     loading.value = true;
+//     error.value = false;
+//     return new Promise((resolve, reject) => {
+//       const res = fun(...arg);
+//       prvePromise = res;
+//       const invoker = (result) => {
+//         if (prvePromise !== res) return;
+//         data.value = config.formatterData(result);
+//         loading.value = false;
+//         error.value = false;
+//         resolve(result);
+//       };
+
+//       if (res instanceof Promise) {
+//         res.then(invoker).catch((err) => {
+//           if (prvePromise !== res) return;
+//           errorData.value = config.formatterErrorData(err);
+//           error.value = true;
+//           loading.value = false;
+//           reject(err);
+//         });
+//       } else {
+//         invoker(res);
+//       }
+//     });
+//   };
+
+//   const parms = { data, loading, error, errorData, run };
+//   return reactive(parms);
+// }
+
+async function awaitTime(t = 2000) {
   return new Promise((rev) => {
     setTimeout(() => {
       rev(true);
@@ -89,7 +255,7 @@ export async function awaitTime(t = 2000) {
   });
 }
 
-export function apply(func, context) {
+function apply(func, context) {
   // eslint-disable-next-line func-names
   const method = function (...params) {
     if (!context) return func(...params);
@@ -144,7 +310,7 @@ export function apply(func, context) {
   });
 }
 
-export function useInterceptPromiseApply(options = {}) {   
+function useInterceptPromiseApply(options = {}) {
   const config = {
     defaultDate: undefined,
     then: () => undefined,
@@ -215,10 +381,53 @@ export function useInterceptPromiseApply(options = {}) {
   return { loading, error, data, errorData };
 }
 
-export function usePromiseTask(fun, options = {}) {
-  const dataLoading = ref(false);
-  const loading = ref(false);
-  const disable = ref(false);
+function usePromiseTask(fun, options = {}) {
+  const config = getPromiseConfig(options);
 
-  const error = ref(false);
+  const data = ref(config.data);
+  const errorData = ref(config.errorData);
+  const loading = ref(config.loading);
+  const error = ref(config.error);
+  const nextTaskConfig = {
+    prvePromise: undefined,
+  };
+  const waitTaskConfig = {
+    prvePromise: undefined,
+    loading: false,
+  };
+
+  const next = nextTaskHoc(nextTaskConfig);
+
+  const wait = waitTaskHoc(waitTaskConfig);
+
+  const run = (...arg) => {
+    loading.value = true;
+    error.value = false;
+    return new Promise((resolve, reject) => {
+      const res = fun({ nextTask: next, waitTask: wait }, ...arg);
+      const invoker = (result) => {
+        data.value = config.formatterData(result);
+        loading.value = false;
+        error.value = false;
+        console.log("-----------------then", result);
+        config.then(result)
+        resolve(result);
+      };
+      if (res instanceof Promise) {
+        res.then(invoker).catch((err) => {
+          errorData.value = config.formatterErrorData(err);
+          error.value = true;
+          loading.value = false;
+          config.catch(err)
+          reject(err);
+        });
+      } else {
+        invoker(res);
+      }
+    });
+  };
+
+  const arguments_ = { data, loading, error, errorData, run };
+  arguments_.proxy = reactive(arguments_);
+  return arguments_;
 }

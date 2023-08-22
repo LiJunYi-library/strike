@@ -13,8 +13,20 @@ export declare function usePagination(options: any): any;
 
 export declare function useListSelect(options: any): any;
 
-/***************** */
+export declare function useListLoad(options: any): any;
 
+export declare function useRadio(options: any): any;
+export declare function useAsyncRadio(options: any): any;
+
+/*********
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * ******** */
 
 export declare function useListRadio<T>(options: any): [
   [Ref<any>, Ref<T>, Ref<number>, Ref<string>, Ref<T[]>],
@@ -48,7 +60,6 @@ export declare function useListRadio<T>(options: any): [
 export declare function useAsyncListRadio<T>(options: any): any;
 
 export declare function useListMultiple(options: any): [...any];
-
 
 /**
  *

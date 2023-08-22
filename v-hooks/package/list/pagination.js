@@ -1,9 +1,9 @@
 import { ref, reactive, computed, watch } from "vue";
 import { usePromiseTask } from "../promise";
 import { useSelect } from "./select";
-import { useList } from "./";
-export { getPaginationProps, usePagination };
+import { useList } from "./list";
 
+export { getPaginationProps, usePagination };
 function getPaginationProps(options = {}) {
   const config = {
     serverPaging: false,

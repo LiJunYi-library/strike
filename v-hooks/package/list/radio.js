@@ -82,22 +82,6 @@ function useRadio(props = {}) {
     return select.value === item;
   };
 
-  const onSelect = (item, i) => {
-    if (config.cancelSame && same(item, i)) {
-      select.value = undefined;
-      index.value = undefined;
-      label.value = undefined;
-      value.value = undefined;
-      return;
-    }
-    if (same(item, i)) return;
-    // console.log("onSelect");
-    select.value = item;
-    index.value = i;
-    label.value = formatterLabel(item);
-    value.value = formatterValue(item);
-  };
-
   const arguments_ = {
     list,
     select,
@@ -122,6 +106,23 @@ function useRadio(props = {}) {
   };
   const proxy = reactive(arguments_);
   arguments_.proxy = proxy;
+
+  function onSelect(item, i) {
+    if (config.cancelSame && same(item, i)) {
+      select.value = undefined;
+      index.value = undefined;
+      label.value = undefined;
+      value.value = undefined;
+      config.onChange(proxy);
+      return;
+    }
+    if (same(item, i)) return;
+    select.value = item;
+    index.value = i;
+    label.value = formatterLabel(item);
+    value.value = formatterValue(item);
+    config.onChange(proxy);
+  }
 
   function verifyValueInList() {
     return list.value.some(findForValue(value.value));
@@ -190,20 +191,22 @@ function useRadio(props = {}) {
   return arguments_;
 }
 
-function useAsyncRadio(props) {
-  const radioHooks = useRadio(props);
-
-  const asyncHooks = useInterceptPromiseApply({
+function useAsyncRadio(props = {}) {
+  const config = {
+    fetchCb: () => undefined,
     ...props,
-    listenerMethods: props.fetchListMethods,
+  };
+
+  const radioHooks = useRadio(config);
+
+  const asyncHooks = usePromise(config.fetchCb, {
+    ...config,
     then: (data) => {
-      radioHooks.updateList(data);
+      radioHooks.updateListToResolveValue(data);
     },
   });
 
-  const disabledHooks = useInterceptPromiseApply({ listenerMethods: props.disabledMethods });
-
-  const arguments_ = { ...radioHooks, ...asyncHooks, disabled: disabledHooks.loading };
+  const arguments_ = { ...radioHooks, ...asyncHooks };
   arguments_.proxy = reactive(arguments_);
   return arguments_;
 }

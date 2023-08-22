@@ -2,11 +2,19 @@ import { ref, reactive, computed, watch } from "vue";
 import { selectConfig } from "../common";
 import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
 import { useSelect } from "./select";
+import { useList } from "./list";
 
-export { getListProps, useList, useLazyList, useListSelect };
-export * from "./radio";
-export * from "./pagination";
+export { getListSelectProps, useListSelect };
 
+function getListSelectProps(options = {}) {
+  const config = {
+    currentPage: 1,
+    pageSize: 10,
+    ...options,
+    listStorage: options.list || [],
+  };
+  return config;
+}
 
 function useListSelect(props = {}) {
   const config = getListSelectProps(props);

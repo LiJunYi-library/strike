@@ -13,6 +13,7 @@ import {
 import { arrayLoop, arrayLoopMap } from "@rainbow_ljy/rainbow-js";
 import "./list.scss";
 import { nextTaskHoc } from "@rainbow_ljy/v-hooks";
+import { RLoading } from "../loading";
 
 function cTitle(num) {
   let str = "";
@@ -36,15 +37,8 @@ const create = (i, index = 0) => ({
       : "https://fuss10.elemecdn.com/2/11/6535bcfb26e4c79b48ddde44f4b6fjpeg.jpeg",
 });
 
-// const listData1000000 = arrayLoopMap(1000000, create);
-// const listData100000 = arrayLoopMap(100000, create);
-const listData10000 = arrayLoopMap(10000, create);
-// const listData1000 = arrayLoopMap(1000, create);
-const listData50 = arrayLoopMap(50, create);
-const listData502 = arrayLoopMap(50, create);
-
-var RVirtualList, RVirtualListItem;
-export { RVirtualList };
+var RVirtualListFalls, RVirtualListItem;
+export { RVirtualListFalls };
 
 function getOffsetRect(htmlNode) {
   const rect = {
@@ -79,6 +73,7 @@ class ItemAdapter {
   top = undefined;
 
   scrollTop = 0;
+  uuId = 0;
 
   constructor(props) {
     Object.assign(this, props);
@@ -97,6 +92,8 @@ class ItemAdapter {
         return self.height + self.parent.page.top + self.top;
       },
     };
+
+    this.uuId = Math.random() + "id";
   }
 
   dispatchRender() {
@@ -105,15 +102,12 @@ class ItemAdapter {
 
   updateHeight(newHeight) {
     // console.log("updateHeight", newHeight);
-    let clcH = newHeight - this.height;
-    this.parent.height = this.parent.height + clcH;
     this.height = newHeight;
 
     // requestAnimationFrame(() => {
     //   this.parent.patchList();
     //   this.parent.dispatchRender();
     // });
-
     this.parent.mergeEvent().then(() => {
       // console.log("mergeEvent");
       this.parent.patchList();
@@ -131,6 +125,7 @@ class ItemAdapter {
   onScroll(event, scrollTop) {
     this.scrollTop = scrollTop;
     // if (this.parent.ID === 2) console.log("onScroll", this.parent);
+    // console.log("onScroll small", scrollTop);
     this.isRender = this.getIsRender(scrollTop - 500, scrollTop + window.innerHeight + 500);
     if (this.isRender !== this.isRenderCache) {
       this.dispatchRender();
@@ -146,9 +141,20 @@ class Adapter {
   columnNum = 2;
   columns = [];
 
+  space = 10;
+  scrollTop = 0;
   avgHeight = 0;
   height = 0;
   winHeight = window.innerHeight;
+  winWidth = window.innerWidth;
+  sapceHorizontal = 10;
+
+  get itemWidth() {
+    return (
+      (this.winWidth - (this.columnNum - 1) * this.space - this.sapceHorizontal * 2) /
+      this.columnNum
+    );
+  }
 
   page = {
     left: 0,
@@ -177,71 +183,152 @@ class Adapter {
 
   dispatchRender() {}
 
+  getMaxHeight() {
+    let column = this.columns[0];
+    this.columns.forEach((col) => {
+      if (col.height > column.height) column = col;
+    });
+    return column;
+  }
+
+  getMinHeight() {
+    let column = this.columns[0];
+    this.columns.forEach((col) => {
+      if (col.height < column.height) column = col;
+    });
+    return column;
+  }
+
+  resetColumns() {
+    this.columns = [];
+    for (let count = 0; count < this.columnNum; count++) {
+      let left = this.space * count + this.itemWidth * count + this.sapceHorizontal;
+      this.columns.push({ height: 0, with: this.itemWidth, left });
+    }
+  }
+
+  setList(array = []) {
+    this.array = array;
+    this.updateList(this.array);
+    this.dispatchRender();
+  }
+
+  concatList(array = []) {
+    let list = array.map((data, index) => {
+      let item = new ItemAdapter({
+        data,
+        index,
+        parent: this,
+        scrollTop: this.scrollTop,
+        width: this.itemWidth,
+        height: this.avgHeight,
+      });
+      this.measureItems(item);
+      return item;
+    });
+    this.array = this.list.concat(array);
+    this.list = this.list.concat(list);
+    this.height = this.getMaxHeight()?.height ?? 0;
+    this.dispatchRender();
+  }
+
   updateList(array = []) {
-    let top = 0;
+    this.resetColumns();
+
     this.list = array.map((data, index) => {
       let item = new ItemAdapter({
         data,
         index,
         parent: this,
+        scrollTop: this.scrollTop,
+        width: this.itemWidth,
         height: this.avgHeight,
-        top,
       });
-      
-      item.isRender = item.getIsRender(
-        item.scrollTop - 500,
-        item.scrollTop + window.innerHeight + 500
-      );
-      top = top + this.avgHeight;
+      this.measureItems(item);
       return item;
     });
-    this.height = array.length * this.avgHeight;
+
+    this.height = this.getMaxHeight()?.height ?? 0;
+  }
+
+  measureItems(item) {
+    const minCol = this.getMinHeight();
+    if (minCol.height) minCol.height = minCol.height + this.space;
+    item.top = minCol.height;
+    item.left = minCol.left;
+    minCol.height = minCol.height + item.height;
+    item.isRender = item.getIsRender(
+      item.scrollTop - 500,
+      item.scrollTop + window.innerHeight + 500
+    );
   }
 
   patchList() {
-    let top = 0;
-    this.list.forEach((el) => {
-      el.top = top;
-      el.isRender = el.getIsRender(el.scrollTop - 500, el.scrollTop + window.innerHeight + 500);
-      top = el.height + top;
+    this.resetColumns();
+    this.list.forEach((item) => {
+      this.measureItems(item);
     });
+    this.height = this.getMaxHeight()?.height ?? 0;
   }
 }
 
-RVirtualList = defineComponent({
+RVirtualListFalls = defineComponent({
   props: {
-    listHook: { Object: Array, default: () => ({}) },
+    listHook: { type: Object, default: () => ({ proxy: {} }) },
     list: { type: Array, default: () => [] },
     columnNum: { type: Number, default: 1 },
     avgHeight: { type: Number, default: 210 },
     scrollContainer: { type: Object, default: () => document },
+    space: { type: Number, default: 8 },
+    sapceHorizontal: { type: Number, default: 12 },
+    setKey: { type: Function, default: (data, index, uid) => uid },
+    emptyImgSrc: {
+      type: [Number, String],
+      default: require("./empty.png"),
+    },
+    finishedText: {
+      type: [Number, String],
+      default: "没有更多了",
+    },
+    loadingText: {
+      type: [Number, String],
+      default: "正在加载中",
+    },
+    errorText: {
+      type: [Number, String],
+      default: "出错了",
+    },
+    emptyText: {
+      type: [Number, String],
+      default: "暂无相关数据，试试其他条件吧",
+    },
   },
   setup(props, context) {
     ID++;
     const id = ref(ID);
-    // console.log("RVirtualList setup");
     let vue;
     const { proxy: listHook } = props.listHook;
-    const { scrollContainer, avgHeight } = props;
-    const columns = [];
+    const { scrollContainer, avgHeight, space, sapceHorizontal, list } = props;
     const renderItems = ref([]);
-    // console.log(props);
+    let bottomHtml;
 
     const adapter = new Adapter({
       avgHeight,
+      space,
+      sapceHorizontal,
       ID,
-      array: arrayLoopMap(50, create),
+      array: list,
       dispatchRender: () => {
         renderItems.value = adapter.list.filter((el) => el.isRender);
-        // console.log("dispatchRender", id.value, renderItems.value);
+        // console.log("dispatchRender");
       },
     });
-    // adapter.updateList(arrayLoopMap(50, create));
     // console.log(adapter);
     renderItems.value = adapter.list.filter((el) => el.isRender);
 
     function onScroll(event) {
       const target = event.target.scrollingElement || event.target;
+      adapter.scrollTop = target.scrollTop;
       adapter.list.forEach((el) => {
         el.onScroll(event, target.scrollTop);
       });
@@ -255,22 +342,95 @@ RVirtualList = defineComponent({
       // if (id.value === 2) console.log("resizeObserver", adapter);
     });
 
+    const intersectionObserver = new IntersectionObserver(([entries]) => {
+      if (entries.isIntersecting && adapter.height > 0) {
+        context.emit("scrollEnd");
+      }
+    });
+
+    context.expose(adapter);
+
     onMounted(() => {
       adapter.page = getOffsetRect(vue.$el);
       resizeObserver.observe(vue.$el);
+      intersectionObserver.observe(bottomHtml);
       scrollContainer.addEventListener("scroll", onScroll);
     });
 
     onBeforeUnmount(() => {
       resizeObserver.unobserve(vue.$el);
       resizeObserver.disconnect();
+      intersectionObserver.unobserve(bottomHtml);
+      intersectionObserver.disconnect();
     });
+
+    function renderfinished() {
+      if (!listHook.finished) return null;
+      if (!listHook.list || !listHook.list.length) {
+        if (!props.emptyText && !props.emptyImgSrc) return null;
+        return renderSlot(context.slots, "empty", listHook, () => [
+          <div class="r-virtual-list-empty">
+            {renderSlot(context.slots, "emptyImg", listHook, () => [
+              props.emptyImgSrc && <Image width={100} fit="contain" src={props.emptySrc} />,
+            ])}
+            <div class={"list-hint list-empty-text"}>{props.emptyText}</div>
+          </div>,
+        ]);
+      }
+      if (!props.finishedText) return null;
+      return renderSlot(context.slots, "finished", listHook, () => [
+        <div class="r-virtual-list-finished">{props.finishedText}</div>,
+      ]);
+    }
+
+    function renderLoading() {
+      if (!listHook.loading) return null;
+      if (!props.loadingText) return null;
+      return renderSlot(context.slots, "loading", listHook, () => [
+        <div class={"list-hint list-loading"}>
+          <span class="van-loading__spinner van-loading__spinner--circular">
+            <svg class="van-loading__circular" viewBox="25 25 50 50">
+              <circle cx="50" cy="50" r="20" fill="none"></circle>
+            </svg>
+          </span>
+          <span>{props.loadingText}</span>
+        </div>,
+      ]);
+    }
+
+    function renderError() {
+      if (!listHook.error) return null;
+      return renderSlot(context.slots, "error", listHook, () => [
+        <div class={"list-error"}>
+          <div>{props.errorText}</div>
+          <div
+            onClick={() => {
+              context.emit("errorClick");
+            }}
+          >
+            点击重新加载
+          </div>
+        </div>,
+      ]);
+    }
+
+    function renderBegain() {
+      if (!listHook.begain) return null;
+
+      return (
+        <div class="r-virtual-list-begain">
+          {renderSlot(context.slots, "begain", listHook, () => [
+            <div class={"list-begain"}>正在加载中</div>,
+          ])}
+        </div>
+      );
+    }
 
     return (vm) => {
       vue = vm;
       // console.log("render virtual-list");
       return (
-        <div class="r-virtual-list" onScroll={onScroll}>
+        <div class={["r-virtual-list"]}>
           <div
             class="r-virtual-list-container"
             style={{
@@ -278,9 +438,11 @@ RVirtualList = defineComponent({
             }}
           >
             {renderList(renderItems.value, (item, index) => {
+              // console.log(item.data);
               return (
                 <RVirtualListItem
-                  key={item.index}
+                  top={item.top}
+                  key={props.setKey(item.data, item.index, item.uuId)}
                   itemAdapter={item}
                   avgHeight={props.avgHeight}
                   adapter={adapter}
@@ -290,6 +452,13 @@ RVirtualList = defineComponent({
               );
             })}
           </div>
+
+          {/* {listHook.begain && <div class='r-virtual-list-begain' >begain</div>} */}
+          {/* {listHook.loading && <div class='r-virtual-list-loading'>正在加载中</div>} */}
+          {renderError()}
+          {renderLoading()}
+          {renderfinished()}
+          <div ref={(el) => (bottomHtml = el)} class="r-virtual-list-bottom"></div>
         </div>
       );
       //
@@ -303,21 +472,26 @@ RVirtualListItem = defineComponent({
     itemAdapter: ItemAdapter,
     adapter: Adapter,
     avgHeight: { type: Number, default: 0 },
+    top: { type: Number, default: 0 },
   },
   setup(props, context) {
     const { itemAdapter } = props;
-    const count = ref(0);
-    const top = ref(0);
     let vue;
-    let resizeObserver = new ResizeObserver(async (...arg) => {
+
+    function heightListener() {
       let newWidth = vue.$el.offsetWidth;
       let newHeight = vue.$el.offsetHeight;
       if (itemAdapter.height !== newHeight) {
-        // console.log("高度发生变化", itemAdapter.height, newHeight);
         if (newHeight !== 0) itemAdapter.updateHeight(newHeight);
       }
+    }
+
+    let resizeObserver = new ResizeObserver(async (...arg) => {
+      heightListener();
     });
+
     onMounted(() => {
+      heightListener();
       resizeObserver.observe(vue.$el);
     });
 
@@ -328,7 +502,17 @@ RVirtualListItem = defineComponent({
     return (vm) => {
       vue = vm;
       return (
-        <div class="r-virtual-list-item" style={{ top: `${itemAdapter.top}px` }}>
+        <div
+          top={itemAdapter.top}
+          data-top={props.top}
+          index={itemAdapter.index}
+          class="r-virtual-list-item"
+          style={{
+            top: `${props.top}px`,
+            left: `${itemAdapter.left}px`,
+            width: `${itemAdapter.width}px`,
+          }}
+        >
           <div class="r-virtual-list-item-over-hidden">{renderSlot(context.slots, "default")}</div>
         </div>
       );

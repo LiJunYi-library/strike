@@ -1,9 +1,10 @@
 {
   "name": "@rainbow_ljy/v-hooks",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "",
   "private": false,
   "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

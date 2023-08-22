@@ -10,6 +10,7 @@ function getSelectProps(options = {}) {
     label: undefined,
     index: undefined,
     cancelSame: false, // 是否取消相同的
+    onChange: () => undefined,
     formatterValue: (item) => item?.value,
     formatterLabel: (item) => item?.label,
     priority: "valueItem", // 优先使用的 valueItem ||   indexItem || labelItem

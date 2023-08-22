@@ -1,0 +1,23 @@
+.loading-icon {
+  --color: inherit;
+  height: 24px;
+  width: 24px;
+  line-height: 24px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  fill: currentColor;
+  color: var(--color);
+  font-size: inherit;
+  animation: rotating 2s linear infinite;
+}
+
+@keyframes rotating {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

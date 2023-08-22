@@ -51,7 +51,7 @@ export declare type PromiseHooks = {
   errorData: unknown;
   run: ProFun;
 };
-export declare function usePromise(fun: AsyncFun, config?: PromiseConfig): PromiseHooks;
+export declare function usePromise(fun: any, config?: any): any;
 
 export declare function nextTask(pro: any): any;
 

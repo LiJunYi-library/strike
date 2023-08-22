@@ -4,6 +4,7 @@ export {
   getPromiseConfig,
   useAsync,
   nextTaskHoc,
+  waitTaskHoc,
   usePromise,
   awaitTime,
   apply,
@@ -26,6 +27,7 @@ function getPromiseConfig(options = {}) {
     data: undefined,
     errorData: undefined,
     loading: false,
+    begain: false,
     error: false,
     formatterData: (val) => val,
     formatterErrorData: (val) => val,
@@ -67,8 +69,8 @@ function nextTaskHoc(options = {}) {
   const config = {
     prvePromise: undefined,
     loading: false,
-    ...options,
     aboutCb: undefined,
+    ...options,
   };
   return function nextTask(fun) {
     const method = (...arg) => {
@@ -160,6 +162,7 @@ function usePromise(fun, options = {}) {
   const config = getPromiseConfig(options);
 
   const data = ref(config.data);
+  const begain = ref(config.begain);
   const errorData = ref(config.errorData);
   const loading = ref(config.loading);
   const error = ref(config.error);
@@ -185,25 +188,41 @@ function usePromise(fun, options = {}) {
         data.value = config.formatterData(result);
         loading.value = false;
         error.value = false;
-        console.log("-----------------then", result);
+        // console.log("-----------------then", result);
         resolve(result);
+        config.then(result);
       };
 
       if (res instanceof Promise) {
-        res.then(invoker).catch((err) => {
-          errorData.value = config.formatterErrorData(err);
-          error.value = true;
-          loading.value = false;
-          reject(err);
-        });
+        res
+          .then(invoker)
+          .catch((err) => {
+            errorData.value = config.formatterErrorData(err);
+            error.value = true;
+            loading.value = false;
+            reject(err);
+            config.catch(err);
+          })
+          .finally(() => {
+            config.finally();
+          });
       } else {
         invoker(res);
       }
     });
   };
 
-  const parms = { data, loading, error, errorData, run };
-  return reactive(parms);
+  const runBegain = (...arg) => {
+    begain.value = true;
+    let res = run(...arg).finally(() => {
+      begain.value = false;
+    });
+    return res;
+  };
+
+  const arguments_ = { data, begain, loading, error, errorData, run, runBegain };
+  arguments_.proxy = reactive(arguments_);
+  return arguments_;
 }
 
 // export function usePromise(fun, options = {}) {
@@ -409,8 +428,8 @@ function usePromiseTask(fun, options = {}) {
         data.value = config.formatterData(result);
         loading.value = false;
         error.value = false;
-        console.log("-----------------then", result);
-        config.then(result)
+        // console.log("-----------------then", result);
+        config.then(result);
         resolve(result);
       };
       if (res instanceof Promise) {
@@ -418,7 +437,7 @@ function usePromiseTask(fun, options = {}) {
           errorData.value = config.formatterErrorData(err);
           error.value = true;
           loading.value = false;
-          config.catch(err)
+          config.catch(err);
           reject(err);
         });
       } else {

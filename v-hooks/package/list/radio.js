@@ -93,6 +93,7 @@ function useRadio(props = {}) {
     restore,
     onSelect,
     same,
+    reset,
     formatterValue,
     formatterLabel,
     updateList,

@@ -126,7 +126,16 @@ RTab = defineComponent({
       console.log("render RTab");
       return (
         <div class="r-tab">
-          <div class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
+          <div 
+
+          onTouchend={(event)=>{
+            event.stopPropagation()
+          }}
+          onTouchstart={(event)=>{
+            event.stopPropagation()
+          }} onTouchmove={(event)=>{
+            event.stopPropagation()
+          }} class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
             <RLoading loadingHook={listHook} loadingClass="r-tab-list" slots={context.slots}>
               <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
                 {renderList(listHook.list, (item, index) => {
@@ -136,7 +145,9 @@ RTab = defineComponent({
                       ref={(el) => (htmls.itemsHtml[index] = el)}
                       key={index}
                       onClick={() => {
+                        if(listHook.same(item) ) return
                         listHook.onSelect(item, index);
+                        context.emit('change', item, index)
                       }}
                     >
                       {renderSlot(context.slots, "default", { index, item }, () => [

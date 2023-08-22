@@ -6,6 +6,14 @@
   .r-tab-scroll {
     max-width: 100%;
     overflow: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
   }
 
   .r-tab-list {

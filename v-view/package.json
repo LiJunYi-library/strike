@@ -5,9 +5,9 @@
   "main": "index.js",
   "private": false,
   "typings": "index.d.ts",
+  "author": "",
+  "license": "ISC",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC"
+  }
 }

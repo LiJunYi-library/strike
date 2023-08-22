@@ -148,6 +148,7 @@ class Adapter {
   winHeight = window.innerHeight;
   winWidth = window.innerWidth;
   sapceHorizontal = 10;
+  itemThreshold = 0.2
 
   get itemWidth() {
     return (
@@ -276,7 +277,9 @@ RVirtualListFalls = defineComponent({
   props: {
     listHook: { type: Object, default: () => ({ proxy: {} }) },
     list: { type: Array, default: () => [] },
-    columnNum: { type: Number, default: 1 },
+    itemThreshold: { type: Number, default: 0.2 },
+    columnNum: { type: Number, default: 2 },
+    skelectonCount: { type: Number, default: 4 },
     avgHeight: { type: Number, default: 210 },
     scrollContainer: { type: Object, default: () => document },
     space: { type: Number, default: 8 },
@@ -308,19 +311,21 @@ RVirtualListFalls = defineComponent({
     const id = ref(ID);
     let vue;
     const { proxy: listHook } = props.listHook;
-    const { scrollContainer, avgHeight, space, sapceHorizontal, list } = props;
+    const { scrollContainer, avgHeight, space, sapceHorizontal, list, columnNum ,itemThreshold} = props;
     const renderItems = ref([]);
     let bottomHtml;
 
     const adapter = new Adapter({
+      columnNum,
       avgHeight,
       space,
+      itemThreshold,
       sapceHorizontal,
       ID,
       array: list,
       dispatchRender: () => {
         renderItems.value = adapter.list.filter((el) => el.isRender);
-        // console.log("dispatchRender");
+        // console.log("dispatchRender",renderItems.value);
       },
     });
     // console.log(adapter);
@@ -369,9 +374,9 @@ RVirtualListFalls = defineComponent({
       if (!listHook.list || !listHook.list.length) {
         if (!props.emptyText && !props.emptyImgSrc) return null;
         return renderSlot(context.slots, "empty", listHook, () => [
-          <div class="r-virtual-list-empty">
+          <div class="list-empty">
             {renderSlot(context.slots, "emptyImg", listHook, () => [
-              props.emptyImgSrc && <Image width={100} fit="contain" src={props.emptySrc} />,
+              props.emptyImgSrc && <img width={100} fit="contain" src={props.emptyImgSrc} />,
             ])}
             <div class={"list-hint list-empty-text"}>{props.emptyText}</div>
           </div>,
@@ -379,7 +384,7 @@ RVirtualListFalls = defineComponent({
       }
       if (!props.finishedText) return null;
       return renderSlot(context.slots, "finished", listHook, () => [
-        <div class="r-virtual-list-finished">{props.finishedText}</div>,
+        <div class="list-hint  list-finished">{props.finishedText}</div>,
       ]);
     }
 
@@ -416,14 +421,34 @@ RVirtualListFalls = defineComponent({
 
     function renderBegain() {
       if (!listHook.begain) return null;
-
       return (
         <div class="r-virtual-list-begain">
           {renderSlot(context.slots, "begain", listHook, () => [
-            <div class={"list-begain"}>正在加载中</div>,
+              <div class="r-virtual-list-skelectons" style={{padding:`0 ${props.sapceHorizontal}px`}}>
+          {  renderList(props.skelectonCount, (item, index) => {
+              return [
+                <div class="r-virtual-list-skelecton" style={{
+                  width: `calc( (100% - ${space}px) / ${columnNum} )`,
+                  'margin-bottom': space + 'px'
+                }} >{
+                  renderSlot(context.slots, 'skelecton', {item, index})
+                }</div>
+                
+              ];
+            })}
+            </div>
+            // <div class={"list-hint list-begain"}>正在加载中</div>,
           ])}
         </div>
       );
+    }
+
+    function onItemIntersection(...arg) {
+      context.emit('itemIntersection',...arg)
+    }
+
+    function onItemFirstIntersection(...arg) {
+      context.emit('itemFirstIntersection',...arg)
     }
 
     return (vm) => {
@@ -441,6 +466,8 @@ RVirtualListFalls = defineComponent({
               // console.log(item.data);
               return (
                 <RVirtualListItem
+                  onFirstIntersection= {onItemFirstIntersection}
+                  onIntersection = {onItemIntersection}
                   top={item.top}
                   key={props.setKey(item.data, item.index, item.uuId)}
                   itemAdapter={item}
@@ -452,9 +479,7 @@ RVirtualListFalls = defineComponent({
               );
             })}
           </div>
-
-          {/* {listHook.begain && <div class='r-virtual-list-begain' >begain</div>} */}
-          {/* {listHook.loading && <div class='r-virtual-list-loading'>正在加载中</div>} */}
+          {renderBegain()}
           {renderError()}
           {renderLoading()}
           {renderfinished()}
@@ -475,7 +500,7 @@ RVirtualListItem = defineComponent({
     top: { type: Number, default: 0 },
   },
   setup(props, context) {
-    const { itemAdapter } = props;
+    const { itemAdapter,adapter } = props;
     let vue;
 
     function heightListener() {
@@ -490,14 +515,31 @@ RVirtualListItem = defineComponent({
       heightListener();
     });
 
+    let options = {
+      threshold: adapter.itemThreshold,
+    };
+
+    const intersectionObserver = new IntersectionObserver(([entries]) => {
+      if (entries.isIntersecting ) {
+        if(!itemAdapter.isIntersecting){ 
+          context.emit('firstIntersection',itemAdapter,entries)
+          itemAdapter.isIntersecting = true;
+        }
+        context.emit('intersection',itemAdapter,entries)
+      }
+    },options);
+
     onMounted(() => {
       heightListener();
       resizeObserver.observe(vue.$el);
+      intersectionObserver.observe(vue.$el);
     });
 
     onBeforeUnmount(() => {
       resizeObserver.unobserve(vue.$el);
       resizeObserver.disconnect();
+      intersectionObserver.unobserve(vue.$el);
+      intersectionObserver.disconnect();
     });
     return (vm) => {
       vue = vm;

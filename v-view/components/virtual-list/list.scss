@@ -1,10 +1,71 @@
+
+
+
 .r-virtual-list {
-  //
+  .list-space {
+    background: rgba(246, 246, 246, 0);
+  }
+
+  .list-begain{
+    text-align: center;
+  }
+  
+
+  .list-error {
+    color: red;
+    height: 400px;
+    background: white;
+  }
+
+  .list-hint {
+    font-size: 13px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: #666666;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .list-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 286px;
+  }
+
+  .list-empty-text {
+    line-height: 15px;
+    padding-top: 12px;
+  }
+
+  .list-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .van-loading__spinner {
+      margin-right: 5px;
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 
 .r-virtual-list-item {
   overflow: hidden;
   position: absolute;
+}
+
+.r-virtual-list-skelectons{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.r-virtual-list-skelecton{
+  margin-bottom: 10px;
 }
 
 .r-virtual-list-container {
@@ -33,4 +94,27 @@
   width: 100%;
   height: 100px;
   background: gold;
+}
+
+.r-virtual-list-loading{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 50px;
+  font-size: 13px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: #666666;
+}
+.r-virtual-list-finished{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 50px;
+  font-size: 13px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: #666666;
 }

@@ -1,5 +1,5 @@
-import { ref, reactive, computed } from "vue";
-import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
+import { ref, reactive } from "vue";
+import { usePromise } from "../promise";
 import { getSelectProps } from "./select";
 export { useRadio, useAsyncRadio };
 
@@ -12,7 +12,6 @@ function useRadio(props = {}) {
     const i = arr.findIndex((val) => val === item);
     return i < 0 ? undefined : i;
   };
-
   function resolveProps(options = config, isChange = false) {
     const map = {
       indexItem: undefined,
@@ -40,55 +39,30 @@ function useRadio(props = {}) {
   }
 
   const initParms = resolveProps(config, true);
-  // console.log("initParms", initParms.value);
-
   const list = ref(initParms.list);
   const select = ref(initParms.select);
   const value = ref(initParms.value);
   const label = ref(initParms.label);
   const index = ref(initParms.index);
 
-  let store = {
+  const store = reactive({
     list: [],
     select: null,
     value: null,
     label: null,
     index: null,
-  };
+  });
 
-  const save = () => {
-    store = {
-      list: [...list.value],
-      select: select.value,
-      value: value.value,
-      label: label.value,
-      index: index.value,
-    };
-    // console.log('save', store);
-  };
-
-  const restore = () => {
-    list.value = [...store.list];
-    select.value = store.select;
-    value.value = store.value;
-    label.value = store.label;
-    index.value = store.index;
-    // console.log('restore', store);
-  };
-
-  save();
-
-  const same = (item, i) => {
-    return select.value === item;
-  };
-
-  const arguments_ = {
+  const params = {
     list,
     select,
     value,
     label,
     index,
     store,
+    transform,
+    transformStore,
+    transformParams,
     save,
     restore,
     onSelect,
@@ -105,91 +79,126 @@ function useRadio(props = {}) {
     verifyValueInList,
     updateListToResolveValue,
   };
-  const proxy = reactive(arguments_);
-  arguments_.proxy = proxy;
+
+  params.proxy = reactive(params);
+
+  let argument = params.proxy;
+
+  function save() {
+    store.list = [...params.proxy.list];
+    store.select = params.proxy.select;
+    store.value = params.proxy.value;
+    store.label = params.proxy.label;
+    store.index = params.proxy.index;
+  }
+
+  function transformStore() {
+    argument = store;
+  }
+
+  function transformParams() {
+    argument = params.proxy;
+  }
+
+  function transform() {
+    if (argument === params.proxy) return (argument = store);
+    if (argument === store) return (argument = params.proxy);
+  }
+
+  function restore() {
+    params.proxy.list = [...store.list];
+    params.proxy.select = store.select;
+    params.proxy.value = store.value;
+    params.proxy.label = store.label;
+    params.proxy.index = store.index;
+  }
+
+  function same(item, i) {
+    return argument.select === item;
+  }
 
   function onSelect(item, i) {
     if (config.cancelSame && same(item, i)) {
-      select.value = undefined;
-      index.value = undefined;
-      label.value = undefined;
-      value.value = undefined;
-      config.onChange(proxy);
+      argument.select = undefined;
+      argument.index = undefined;
+      argument.label = undefined;
+      argument.value = undefined;
+      config.onChange(argument);
       return;
     }
     if (same(item, i)) return;
-    select.value = item;
-    index.value = i;
-    label.value = formatterLabel(item);
-    value.value = formatterValue(item);
-    config.onChange(proxy);
+    argument.select = item;
+    argument.index = i;
+    argument.label = formatterLabel(item);
+    argument.value = formatterValue(item);
+    config.onChange(argument);
   }
 
   function verifyValueInList() {
-    return list.value.some(findForValue(value.value));
+    return argument.list.some(findForValue(argument.value));
   }
 
   function reset() {
-    select.value = undefined;
-    value.value = undefined;
-    label.value = undefined;
-    index.value = undefined;
+    argument.select = undefined;
+    argument.value = undefined;
+    argument.label = undefined;
+    argument.index = undefined;
   }
 
   function updateListToResolveValue(l) {
-    list.value = l;
+    argument.list = l;
     resolveValue();
-  }
-
-  function updateValue(val) {
-    value.value = val;
-    select.value = list.value.find?.(findForValue(val));
-    label.value = formatterLabel(select.value);
-    index.value = findIndex(list.value, select.value);
   }
 
   function resolveValue() {
     if (verifyValueInList()) {
-      updateValue(value.value);
+      updateValue(argument.value);
     } else {
       reset();
     }
   }
 
-  function updateList(l) {
-    list.value = l;
-    const arg = { ...config, list: l };
-    const parms = resolveProps(arg);
-    select.value = parms.select;
-    value.value = parms.value;
-    label.value = parms.label;
-    index.value = parms.index;
+  function resolveList(l) {
+    argument.list = l;
+    const parms = resolveProps(argument);
+    argument.select = parms.select;
+    argument.value = parms.value;
+    argument.label = parms.label;
+    argument.index = parms.index;
   }
 
-  function resolveList(l) {
-    list.value = l;
-    const parms = resolveProps(proxy);
-    select.value = parms.select;
-    value.value = parms.value;
-    label.value = parms.label;
-    index.value = parms.index;
+  function updateList(l) {
+    argument.list = l;
+    const arg = { ...config, list: l };
+    const parms = resolveProps(arg);
+    argument.select = parms.select;
+    argument.value = parms.value;
+    argument.label = parms.label;
+    argument.index = parms.index;
+  }
+
+  function updateValue(val) {
+    argument.value = val;
+    argument.select = argument.list.find?.(findForValue(val));
+    argument.label = formatterLabel(argument.select);
+    argument.index = findIndex(argument.list, argument.select);
   }
 
   function updateLabel(val) {
-    label.value = val;
-    select.value = list.value.find(findForLabel(label.value));
-    value.value = formatterValue(select.value);
-    index.value = findIndex(list.value, select.value);
+    argument.label = val;
+    argument.select = argument.list.find(findForLabel(argument.label));
+    argument.value = formatterValue(argument.select);
+    argument.index = findIndex(argument.list, argument.select);
   }
 
   function updateIndex(val) {
-    index.value = val;
-    select.value = list.value[val];
-    value.value = formatterValue(select.value);
-    label.value = formatterLabel(select.value);
+    argument.index = val;
+    argument.select = argument.list[val];
+    argument.value = formatterValue(argument.select);
+    argument.label = formatterLabel(argument.select);
   }
 
-  return arguments_;
+  return params;
 }
 
 function useAsyncRadio(props = {}) {
@@ -207,7 +216,7 @@ function useAsyncRadio(props = {}) {
     },
   });
 
-  const arguments_ = { ...radioHooks, ...asyncHooks };
-  arguments_.proxy = reactive(arguments_);
-  return arguments_;
+  const params = { ...radioHooks, ...asyncHooks };
+  params.proxy = reactive(params);
+  return params;
 }

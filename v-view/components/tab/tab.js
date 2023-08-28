@@ -2,18 +2,17 @@ import {
   defineComponent,
   renderList,
   renderSlot,
-  computed,
   watch,
   onMounted,
   ref,
   nextTick,
   withMemo,
-  isMemoSame,
 } from "vue";
 import "./tab.scss";
 
 import { RLoading } from "../loading";
 
+// eslint-disable-next-line no-var
 var RTab;
 export { RTab };
 
@@ -23,6 +22,7 @@ const Active = defineComponent({
     htmls: Object,
   },
   setup(props, context) {
+    // eslint-disable-next-line vue/no-setup-props-destructure
     const { listHook } = props;
     const offset = ref({});
     let actItemHtml = null;
@@ -31,10 +31,6 @@ const Active = defineComponent({
       const { itemsHtml, parentHtml, scrollHtml } = props.htmls;
       let offset = {};
       actItemHtml = itemsHtml[listHook.index];
-      // console.log(itemsHtml);
-      // console.log(parentHtml);
-      // console.log(scrollHtml);
-      // console.log(actItemHtml);
       // debugger;
       if (!actItemHtml) return offset;
       const activeOffset = actItemHtml.getBoundingClientRect();
@@ -102,9 +98,10 @@ RTab = defineComponent({
     },
   },
   setup(props, context) {
-    const { proxy: listHook } = props.listHook;
+    // eslint-disable-next-line vue/no-setup-props-destructure
+    const { listHook } = props;
 
-    let htmls = {
+    const htmls = {
       itemsHtml: [],
       parentHtml: null,
       scrollHtml: null,
@@ -123,19 +120,22 @@ RTab = defineComponent({
     );
 
     return (vm) => {
-      console.log("render RTab");
+      console.log("render RTab>>");
       return (
         <div class="r-tab">
-          <div 
-
-          onTouchend={(event)=>{
-            event.stopPropagation()
-          }}
-          onTouchstart={(event)=>{
-            event.stopPropagation()
-          }} onTouchmove={(event)=>{
-            event.stopPropagation()
-          }} class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
+          <div
+            onTouchend={(event) => {
+              event.stopPropagation();
+            }}
+            onTouchstart={(event) => {
+              event.stopPropagation();
+            }}
+            onTouchmove={(event) => {
+              event.stopPropagation();
+            }}
+            class="r-tab-scroll"
+            ref={(el) => (htmls.scrollHtml = el)}
+          >
             <RLoading loadingHook={listHook} loadingClass="r-tab-list" slots={context.slots}>
               <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
                 {renderList(listHook.list, (item, index) => {
@@ -145,9 +145,9 @@ RTab = defineComponent({
                       ref={(el) => (htmls.itemsHtml[index] = el)}
                       key={index}
                       onClick={() => {
-                        if(listHook.same(item) ) return
+                        if (listHook.same(item)) return;
                         listHook.onSelect(item, index);
-                        context.emit('change', item, index)
+                        context.emit("change", item, index);
                       }}
                     >
                       {renderSlot(context.slots, "default", { index, item }, () => [

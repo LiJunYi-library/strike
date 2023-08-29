@@ -1,7 +1,7 @@
 import { ref, reactive, computed, watch } from "vue";
-import { useRadio } from "./radio";
-import { useMultiple } from "./multiple";
-export { getSelectProps, useSelect };
+import { useRadio, useAsyncRadio } from "./radio";
+import { useMultiple, useAsyncMultiple } from "./multiple";
+export { getSelectProps, useSelect, useAsyncSelect };
 
 function getSelectProps(options = {}) {
   return {
@@ -10,9 +10,11 @@ function getSelectProps(options = {}) {
     label: undefined,
     index: undefined,
     cancelSame: false, // 是否取消相同的
+    isMultiple: false,
     onChange: () => undefined,
     formatterValue: (item) => item?.value,
     formatterLabel: (item) => item?.label,
+    formatterDisabled: (item) => item?.disabled ?? false,
     priority: "valueItem", // 优先使用的 valueItem ||   indexItem || labelItem
     ...options,
     list: options.list || [],
@@ -22,4 +24,9 @@ function getSelectProps(options = {}) {
 function useSelect(props = {}) {
   if (props.isMultiple) return useMultiple(props);
   return useRadio(props);
+}
+
+function useAsyncSelect(props = {}) {
+  if (props.isMultiple) return useAsyncMultiple(props);
+  return useAsyncRadio(props);
 }

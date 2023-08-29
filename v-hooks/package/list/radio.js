@@ -5,7 +5,7 @@ export { useRadio, useAsyncRadio };
 
 function useRadio(props = {}) {
   const config = getSelectProps(props);
-  const { formatterValue, formatterLabel } = config;
+  const { formatterValue, formatterLabel, formatterDisabled } = config;
   const findForValue = (val) => (el) => config.formatterValue(el) === val;
   const findForLabel = (val) => (el) => config.formatterLabel(el) === val;
   const findIndex = (arr = [], item) => {
@@ -70,13 +70,16 @@ function useRadio(props = {}) {
     reset,
     formatterValue,
     formatterLabel,
+    formatterDisabled,
     updateList,
     updateValue,
     updateIndex,
     updateLabel,
-    resolveList,
+    updateSelect,
+    resolveList, // 废弃
     resolveValue,
     verifyValueInList,
+    updateListAndReset,
     updateListToResolveValue,
   };
 
@@ -134,37 +137,11 @@ function useRadio(props = {}) {
     config.onChange(argument);
   }
 
-  function verifyValueInList() {
-    return argument.list.some(findForValue(argument.value));
-  }
-
   function reset() {
     argument.select = undefined;
     argument.value = undefined;
     argument.label = undefined;
     argument.index = undefined;
-  }
-
-  function updateListToResolveValue(l) {
-    argument.list = l;
-    resolveValue();
-  }
-
-  function resolveValue() {
-    if (verifyValueInList()) {
-      updateValue(argument.value);
-    } else {
-      reset();
-    }
-  }
-
-  function resolveList(l) {
-    argument.list = l;
-    const parms = resolveProps(argument);
-    argument.select = parms.select;
-    argument.value = parms.value;
-    argument.label = parms.label;
-    argument.index = parms.index;
   }
 
   function updateList(l) {
@@ -198,6 +175,44 @@ function useRadio(props = {}) {
     argument.label = formatterLabel(argument.select);
   }
 
+  function updateSelect(val) {
+    argument.select = val;
+    argument.index = findIndex(argument.list, argument.select);
+    argument.value = formatterValue(argument.select);
+    argument.label = formatterLabel(argument.select);
+  }
+
+  function verifyValueInList() {
+    return argument.list.some(findForValue(argument.value));
+  }
+
+  function resolveValue() {
+    if (verifyValueInList()) {
+      updateValue(argument.value);
+    } else {
+      reset();
+    }
+  }
+
+  function updateListToResolveValue(l) {
+    argument.list = l;
+    resolveValue();
+  }
+
+  function updateListAndReset(li) {
+    argument.list = li;
+    reset();
+  }
+
+  function resolveList(l) {
+    argument.list = l;
+    const parms = resolveProps(argument);
+    argument.select = parms.select;
+    argument.value = parms.value;
+    argument.label = parms.label;
+    argument.index = parms.index;
+  }
+
   return params;
 }
 
@@ -210,10 +225,10 @@ function useAsyncRadio(props = {}) {
   const radioHooks = useRadio(config);
 
   const asyncHooks = usePromise(config.fetchCb, {
-    ...config,
     then: (data) => {
       radioHooks.updateListToResolveValue(data);
     },
+    ...config,
   });
 
   const params = { ...radioHooks, ...asyncHooks };

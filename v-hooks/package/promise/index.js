@@ -27,7 +27,7 @@ function getPromiseConfig(options = {}) {
     data: undefined,
     errorData: undefined,
     loading: false,
-    begain: false,
+    begin: false,
     error: false,
     formatterData: (val) => val,
     formatterErrorData: (val) => val,
@@ -43,6 +43,7 @@ function useAsync(fun, options = {}) {
     const bool = await config?.verify?.(...arg);
     if (bool === true) return;
     const rest = fun(...arg);
+    // console.log(rest);
     if (rest instanceof Promise) {
       loading.value = true;
       rest
@@ -56,8 +57,13 @@ function useAsync(fun, options = {}) {
           error.value = true;
         })
         .finally(() => {
+          // console.log("finally", ...arg);
           loading.value = false;
           config?.finally?.(loading);
+        })
+        ?.about?.(() => {
+          console.log("about", ...arg);
+          loading.value = false;
         });
     }
   };
@@ -101,6 +107,7 @@ function nextTaskHoc(options = {}) {
       });
       newPro.about = (fun) => {
         config.aboutCb = fun;
+        // console.log( config.aboutCb);
         return newPro;
       };
       return newPro;
@@ -162,7 +169,7 @@ function usePromise(fun, options = {}) {
   const config = getPromiseConfig(options);
 
   const data = ref(config.data);
-  const begain = ref(config.begain);
+  const begin = ref(config.begin);
   const errorData = ref(config.errorData);
   const loading = ref(config.loading);
   const error = ref(config.error);
@@ -192,7 +199,7 @@ function usePromise(fun, options = {}) {
         resolve(result);
         config.then(result);
       };
-
+      // console.log(">>>>>", res);
       if (res instanceof Promise) {
         res
           .then(invoker)
@@ -212,15 +219,19 @@ function usePromise(fun, options = {}) {
     });
   };
 
-  const runBegain = (...arg) => {
-    begain.value = true;
-    let res = run(...arg).finally(() => {
-      begain.value = false;
+  const runBegin = (...arg) => {
+    begin.value = true;
+    const res = run(...arg).finally(() => {
+      begin.value = false;
     });
     return res;
   };
 
-  const arguments_ = { data, begain, loading, error, errorData, run, runBegain };
+  const fetchBegin = runBegin;
+
+  const fetch = run;
+
+  const arguments_ = { data, begin, loading, error, errorData, run, runBegin, fetch, fetchBegin };
   arguments_.proxy = reactive(arguments_);
   return arguments_;
 }

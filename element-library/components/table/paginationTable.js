@@ -1,4 +1,4 @@
-import { defineComponent, h, ref, watch } from "vue";
+import { defineComponent, h, computed, renderSlot } from "vue";
 import {
   ElTable,
   ElEmpty,
@@ -6,7 +6,6 @@ import {
   ElResult,
   ElPagination,
   paginationProps,
-  ElTableColumn,
 } from "element-plus";
 import elTableProps from "element-plus/es/components/table/src/table/defaults.mjs";
 import "./index.scss";
@@ -19,26 +18,6 @@ const defaultProps = {
 };
 
 const loadingProps = {
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: Boolean,
-    default: true,
-  },
-  finished: {
-    type: Boolean,
-    default: false,
-  },
-  begin: {
-    type: Boolean,
-    default: false,
-  },
-  data: {
-    type: [Array, Object, Number, String],
-    default: () => [],
-  },
   emptyText: {
     type: String,
     default: "暂无数据",
@@ -53,67 +32,18 @@ const loadingProps = {
   },
   errorText: {
     type: String,
-    default: "前方网络有毒 请点击重试",
+    default: "前方网络拥堵 请点击重试",
   },
   finishedText: {
     type: String,
     default: "没有更多的了",
   },
-  setTotal: {
-    type: Function,
-    default(res) {
-      if (!res) return 0;
-      if (res instanceof Array) return res.length;
-      return res.total;
-    },
-  },
-  list: {
-    type: [Array, Object, Number, String],
-    default: () => [],
-  },
-  total: {
-    type: Number,
-    default: 0,
-  },
-  currentPage: {
-    type: Number,
-    default: 1,
-  },
-  pageSize: {
-    type: Number,
-    default: 10,
-  },
-  setList: {
-    type: Function,
-    default(res) {
-      if (!res) return [];
-      if (res instanceof Array) return res;
-      return res.list || [];
-    },
-  },
-  setFinished: {
-    type: Function,
-    default(listData, total, list) {
-      return listData.length >= total;
-    },
-  },
 };
-
-const loadingEmits = [
-  "errorClick",
-  "update:currentPage",
-  "update:pageSize",
-  "size-change",
-  "current-change",
-  "prev-click",
-  "size-change",
-  "page-change",
-];
 
 ElTable.inheritAttrs = false;
 paginationProps.inheritAttrs = false;
 
-export const TableHoc = (option = {}) => {
+export const PaginationTableHoc = (option = {}) => {
   const config = {
     renderBegin: (props, context, VM) => {
       return [props.beginText, <ElSkeleton rows={4} animated></ElSkeleton>];
@@ -128,7 +58,11 @@ export const TableHoc = (option = {}) => {
           title={props.errorText}
           onClick={(event) => {
             event.stopPropagation();
-            context.emit("errorClick");
+            if (context.attrs.errorClick) {
+              context.attrs.errorClick();
+            } else {
+              props?.listHook?.fetch();
+            }
           }}
         ></ElResult>
       );
@@ -159,80 +93,41 @@ export const TableHoc = (option = {}) => {
       ...paginationProps,
       ...defaultProps,
       ...loadingProps,
-      checkList: {
-        type: Array,
-        default: () => [],
-      },
-      formatterId: {
-        type: Function,
-        default: (item) => {
-          return item && item.id;
-        },
-      },
-      modelValue: {
-        type: Array,
-        default: () => [],
-      },
+      listHook: Object,
       ...config.props,
     },
     inheritAttrs: config.inheritAttrs,
     emits: [
-      ...loadingEmits,
+      "size-change",
+      "page-change",
+      "current-change",
+      "prev-click",
+      "next-click",
       "select",
-      "update:checkList",
       "select-all",
-      "update:modelValue",
       "selection-change",
       ...config.emits,
     ],
     setup(props, context) {
-      // console.log("props", props);
-      // console.log("context", context);
-
       const bool0 = (val) => val === 0 || val;
-      const pageSize = ref(props.pageSize);
-      const currentPage = ref(props.currentPage);
-      const checkList = ref(props.checkList);
 
-      watch(
-        () => props.pageSize,
-        (val) => {
-          pageSize.value = val;
-        }
-      );
+      const maxHeight = computed(() => {
+        if (bool0(props.calcMaxHeight)) return window.innerHeight - props.calcMaxHeight + "px";
+        return props.maxHeight;
+      });
 
-      watch(
-        () => props.currentPage,
-        (val) => {
-          currentPage.value = val;
-        }
-      );
-
-      watch(
-        () => props.list,
-        (val) => {
-          checkList.value = [];
-          context.emit("update:checkList", []);
-          context.emit("update:modelValue", []);
-        }
-      );
+      const height = computed(() => {
+        if (bool0(props.calcHeight)) return window.innerHeight - props.calcHeight + "px";
+        return props.height;
+      });
 
       // eslint-disable-next-line
-      let maxHeight = props.maxHeight;
-      if (bool0(props.calcMaxHeight)) {
-        maxHeight = window.innerHeight - props.calcMaxHeight + "px";
-      }
-      // eslint-disable-next-line
-      let height = props.height;
-      if (bool0(props.calcHeight)) {
-        height = window.innerHeight - props.calcHeight + "px";
-      }
+      const { listHook } = props;
 
       return (VM, _cache) => {
-        // console.log("VM", VM);
         return (
           <div class={["lib-table", config.class]}>
-            {props.loading && !props.begin && (
+            {listHook.loading && !listHook.begin && (
               <div class={["lib-loading"]}>
                 {context?.slots?.loading?.() || config.renderLoading(props, context, VM)}
               </div>
@@ -240,84 +135,78 @@ export const TableHoc = (option = {}) => {
             <ElTable
               {...props}
               {...context.attrs}
-              maxHeight={maxHeight}
-              height={height}
+              maxHeight={maxHeight.value}
+              height={height.value}
               ref={"elTable"}
-              data={props.list}
+              data={listHook.list}
               onSelect={(list, ...arg) => {
-                checkList.value = list;
                 context.emit("select", list, ...arg);
-                context.emit("update:checkList", list);
-                context.emit(
-                  "update:modelValue",
-                  list.map((el) => props.formatterId(el))
-                );
+                // console.log("select", list, ...arg);
               }}
               onSelect-all={(list, ...arg) => {
-                checkList.value = list;
                 context.emit("select-all", list, ...arg);
-                context.emit("update:checkList", list);
-                context.emit(
-                  "update:modelValue",
-                  list.map((el) => props.formatterId(el))
-                );
+                // console.log("select-all", list, ...arg);
               }}
               onSelection-change={(list, ...arg) => {
-                checkList.value = list;
                 context.emit("selection-change", list, ...arg);
-                context.emit("update:checkList", list);
-                context.emit(
-                  "update:modelValue",
-                  list.map((el) => props.formatterId(el))
-                );
+                console.log("selection-change", list, ...arg);
+                listHook?.updateSelect?.(list);
               }}
             >
               {{
                 ...context.slots,
                 empty: () => {
-                  if (props.error) {
+                  if (listHook.error === true) {
                     return context?.slots?.error?.() || config.renderError(props, context, VM);
                   }
 
-                  if (props.begin) {
+                  if (listHook.begin === true) {
                     return context?.slots?.begin?.() || config.renderBegin(props, context, VM);
                   }
 
                   return context?.slots?.empty?.() || config.renderEmpty(props, context, VM);
                 },
-                // append: () =>{
-                // },
+                append: () => {
+                  renderSlot(context.slots, "append");
+                },
               }}
             </ElTable>
             {h(ElPagination, {
+              inheritAttrs: false,
               layout: "total, sizes, prev, pager, next, jumper",
               ...context.attrs,
-              total: props.total,
-              "current-page": currentPage.value,
-              "page-size": pageSize.value,
-              "onUpdate:current-page": (v) => {
-                currentPage.value = v;
-                context.emit("update:currentPage", v);
+              total: listHook.total,
+              "current-page": listHook.currentPage,
+              "page-size": listHook.pageSize,
+              "onUpdate:current-page": (page, size) => {
+                // console.log("onUpdate:current-page", page, size);
+                listHook.updatePage(page);
+                //
               },
-              "onUpdate:page-size": (v) => {
-                pageSize.value = v;
-                context.emit("update:pageSize", v);
+              "onUpdate:page-size": (size, page) => {
+                // console.log("onUpdate:page-size", page, size);
+                listHook.updatePageSize(size);
+                //
               },
               onSizeChange: (...v) => {
                 context.emit("size-change", ...v);
-                context.emit("page-change", currentPage.value, pageSize.value);
+                context.emit("page-change");
+                // console.log("onSizeChange", ...v);
               },
               onCurrentChange: (...v) => {
                 context.emit("current-change", ...v);
-                context.emit("page-change", currentPage.value, pageSize.value);
+                context.emit("page-change");
+                // console.log("onCurrentChange", ...v);
               },
               onPrevClick: (...v) => {
                 context.emit("prev-click", ...v);
-                context.emit("page-change", currentPage.value, pageSize.value);
+                context.emit("page-change");
+                // console.log("onPrevClick", ...v);
               },
               onNextClick: (...v) => {
-                context.emit("size-change", ...v);
-                context.emit("page-change", currentPage.value, pageSize.value);
+                context.emit("next-click", ...v);
+                context.emit("page-change");
+                // console.log("onNextClick", ...v);
               },
             })}
           </div>
@@ -327,6 +216,4 @@ export const TableHoc = (option = {}) => {
   });
 };
 
-export const Table = TableHoc();
-export * from "./tableColumn";
-export * from "./paginationTable";
+export const PaginationTable = PaginationTableHoc();

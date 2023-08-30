@@ -1,4 +1,5 @@
 import { defineComponent } from "vue";
+// eslint-disable-next-line no-var
 var RCarousel;
 export { RCarousel };
 

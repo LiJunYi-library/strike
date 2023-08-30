@@ -47,7 +47,7 @@ function useMultiple(props = {}) {
     let items;
     // eslint-disable-next-line prefer-const
     items = map[options.priority] || map.valueItem || map.indexItem || map.labelItem;
-    if (!items) return { ...options };
+    if (!items) return { ...options, select: [], value: [], label: [], index: [] };
     const arg = {
       list: options.list,
       select: items,

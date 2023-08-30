@@ -19,9 +19,9 @@ function getListLoadProps(options) {
       return hooks.list.length >= hooks.total;
     },
     fetchCB: () => undefined,
-    fetchBegainCB: () => undefined,
+    fetchBeginCB: () => undefined,
     fetchConcatCB: () => undefined,
-    beforeBegain: () => undefined,
+    beforeBegin: () => undefined,
     currentPage: 1,
     pageSize: 10,
     accumulationList: true,
@@ -37,7 +37,6 @@ function useListLoad(props = {}) {
   const config = getListLoadProps(props);
   const asyncHooks = usePromise(config.fetchCb, {
     ...config,
-    then: (data) => {},
   });
 
   const list = ref(config.list);
@@ -55,26 +54,26 @@ function useListLoad(props = {}) {
     pageSize,
     finished,
     total,
-    fetchBegain,
+    fetchBegin,
     fetchConcat,
   };
   const proxy = reactive(arguments_);
   arguments_.proxy = proxy;
 
-  function fetchBegain(...arg) {
+  function fetchBegin(...arg) {
     list.value = [];
     listData.value = [];
     currentPage.value = 1;
     finished.value = false;
     total.value = 0;
-    config.beforeBegain(proxy);
-    return asyncHooks.runBegain(...arg).then((res) => {
+    config.beforeBegin(proxy);
+    return asyncHooks.runBegin(...arg).then((res) => {
       listData.value = config.setList(res, proxy);
       list.value = listData.value;
       currentPage.value = currentPage.value + 1;
       total.value = config.setTotal(res, proxy);
       finished.value = config.setFinished(res, proxy);
-      config.fetchBegainCB(proxy);
+      config.fetchBeginCB(proxy);
     });
   }
 

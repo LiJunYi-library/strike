@@ -145,6 +145,7 @@ export const TableColumnLink = TableColumnHoc({
 export const TableColumnImg = TableColumnHoc({
   props: {},
   renderDefault({ props, context, vm, cellValue }, arg) {
+    // console.log(vm.$parent.scrollTo);
     const attrs = objectFilter(context.attrs, /img_/g);
     const imgList = vm.$parent.data.map((el) => el.img);
     const popoverAttrs = objectFilter(context.attrs, /popover_/g);
@@ -172,6 +173,14 @@ export const TableColumnImg = TableColumnHoc({
                 onClick={(event) => {
                   event.stopPropagation();
                   context.emit("click", cellValue, arg);
+                }}
+                onSwitch={(num) => {
+                  const con = vm.$parent.$el.getElementsByClassName("el-table__body-wrapper")?.[0];
+                  if (!con) return;
+                  const body = con.getElementsByTagName("tbody")?.[0];
+                  if (!body) return;
+                  const row = body.children[num];
+                  row.scrollIntoView(true);
                 }}
                 {...attrs}
               >

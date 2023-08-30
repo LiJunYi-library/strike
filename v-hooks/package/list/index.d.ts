@@ -5,18 +5,24 @@ export declare class Radio {
   constructor(params: any);
 }
 
-export declare function useList(options: any): any;
-
-export declare function useLazyList(options: any): any;
-
-export declare function usePagination(options: any): any;
-
-export declare function useListSelect(options: any): any;
-
-export declare function useListLoad(options: any): any;
-
 export declare function useRadio(options: any): any;
 export declare function useAsyncRadio(options: any): any;
+export declare function useMultiple(options: any): any;
+export declare function useAsyncMultiple(options: any): any;
+
+export declare function usePagination(options: any): any;
+export declare function usePaginationSelect(options: any): any;
+export declare function useListPagination(options: any): any;
+export declare function useAsyncPagination(options: any): any;
+export declare function useAsyncPaginationSelect(options: any): any;
+export declare function useAsyncListPagination(options: any): any;
+export declare function useFetchPagination(options: any): any;
+
+
+export declare function useList(options: any): any;
+export declare function useLazyList(options: any): any;
+export declare function useListSelect(options: any): any;
+export declare function useListLoad(options: any): any;
 
 /*********
  *
@@ -27,39 +33,6 @@ export declare function useAsyncRadio(options: any): any;
  *
  *
  * ******** */
-
-export declare function useListRadio<T>(options: any): [
-  [Ref<any>, Ref<T>, Ref<number>, Ref<string>, Ref<T[]>],
-  [
-    (item: T, index: number) => void,
-    (val: any) => void,
-    (item: T) => boolean,
-    () => void,
-    () => void,
-    () => void,
-    (list: T[]) => void
-  ],
-  {
-    activeValue: Ref<any>;
-    activeItem: Ref<T>;
-    activeIndex: Ref<number>;
-    activeLable: Ref<string>;
-    listData: Ref<T[]>;
-  },
-  {
-    changeItem: (item: T, index: number) => void;
-    setValue: (val: any) => void;
-    same: (item: T) => boolean;
-    reset: () => void;
-    save: () => void;
-    restore: () => void;
-    setData: (list: T[]) => void;
-  }
-];
-
-export declare function useAsyncListRadio<T>(options: any): any;
-
-export declare function useListMultiple(options: any): [...any];
 
 /**
  *

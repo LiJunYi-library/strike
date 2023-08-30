@@ -32,7 +32,7 @@ export const RLoading = defineComponent({
   setup(props, context) {
     return () => {
       const SLOTS = props.slots || context.slots;
-      if (props.loadingHook.begain === true) {
+      if (props.loadingHook.begin === true) {
         return (
           <div class={["r-loading", props.loadingClass]}>
             {props.skelectonCount

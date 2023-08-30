@@ -9,7 +9,7 @@ export const AsyncButtonHoc = (config) =>
     },
     inheritAttrs: false,
     setup(props, context) {
-      // console.log("AsyncButton", context);
+      console.log("AsyncButton", context.attrs.onClick);
       const onClick = async (...arg) => undefined;
       const hooks = useAsync(context.attrs.onClick || onClick, config);
       return (VM, _cache) => {

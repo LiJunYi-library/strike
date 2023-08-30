@@ -1,11 +1,12 @@
 import { DefineComponent } from "vue";
 import { TableProps } from "element-plus";
 
-export declare const Table: DefineComponent<TableProps>;
-
 export declare function TableHoc(config?: any): Table;
 
 export declare function TableColumnHoc(config?: any): TableColumn;
+
+export declare const Table: DefineComponent<TableProps>;
+export declare const PaginationTable: DefineComponent<TableProps>;
 
 export declare const TableColumn: DefineComponent<any>;
 export declare const TableColumnOptions: DefineComponent<any>;

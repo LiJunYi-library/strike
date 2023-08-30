@@ -1,6 +1,7 @@
 import { defineComponent, renderList, renderSlot, computed, watch, onMounted, fo, ref } from "vue";
 import "./page.scss";
 
+// eslint-disable-next-line no-var
 var RViewPage;
 export { RViewPage };
 
@@ -9,15 +10,14 @@ RViewPage = defineComponent({
     listHook: Object,
   },
   setup(props, context) {
-    const { proxy: listHook } = props.listHook;
+    // eslint-disable-next-line vue/no-setup-props-destructure
+    const { listHook } = props;
     const itemsHtml = [];
     let parentHtml = null;
     let scrollHtml = null;
     const offset = ref({});
     const count = ref(0);
-    let actItemHtml = null; // computed(() => itemsHtml[listHook.index]);
-
-    // console.log(listHook);
+    let actItemHtml = null;
 
     function getOffset() {
       let offset = {};
@@ -55,33 +55,29 @@ RViewPage = defineComponent({
     const touch = [];
 
     function onTouchStart(event) {
-      let force = event.changedTouches[0].force;
+      const force = event.changedTouches[0].force;
       touch.push(force);
       console.log(force);
     }
 
     function onTouchEnd(event) {
-      let force = event.changedTouches[0].force;
+      const force = event.changedTouches[0].force;
       touch.push(force);
       console.log(event);
       count.value++;
     }
 
     function onTouchMove(event) {
-      let force = event.changedTouches[0].force;
+      const force = event.changedTouches[0].force;
       touch.push(force);
       console.log(force);
     }
 
     return (vm) => {
       console.log("render RViewPage");
-
       return (
         <div class="r-view-page">
-          <div
-            class="r-view-page-scroll"
-            ref={(el) => (scrollHtml = el)}
-          >
+          <div class="r-view-page-scroll" ref={(el) => (scrollHtml = el)}>
             <div class="r-view-page-list" ref={(el) => (parentHtml = el)}>
               {renderList(listHook.list, (item, index) => {
                 return (

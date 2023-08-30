@@ -1,10 +1,10 @@
 import { ref, reactive, computed, watch } from "vue";
-import { selectConfig } from "../common";
 import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
 
+export * from "./radio";
+export * from "./multiple";
 export * from "./list";
 export * from "./listSelect";
-export * from "./radio";
 export * from "./pagination";
 export * from "./listLoad";
 /**********

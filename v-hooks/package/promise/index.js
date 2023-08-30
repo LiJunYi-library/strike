@@ -43,7 +43,6 @@ function useAsync(fun, options = {}) {
     const bool = await config?.verify?.(...arg);
     if (bool === true) return;
     const rest = fun(...arg);
-    // console.log(rest);
     if (rest instanceof Promise) {
       loading.value = true;
       rest
@@ -62,7 +61,6 @@ function useAsync(fun, options = {}) {
           config?.finally?.(loading);
         })
         ?.about?.(() => {
-          console.log("about", ...arg);
           loading.value = false;
         });
     }
@@ -88,6 +86,7 @@ function nextTaskHoc(options = {}) {
             .then((result) => {
               if (config.prvePromise !== promise) {
                 if (config.aboutCb) config.aboutCb(result);
+                reject("about");
                 return;
               }
               // console.log("nextTask-----------------then", result);
@@ -96,6 +95,7 @@ function nextTaskHoc(options = {}) {
             .catch((error) => {
               if (config.prvePromise !== promise) {
                 if (config.aboutCb) config.aboutCb(error);
+                reject("about");
                 return;
               }
               // console.log("nextTask-----------------catch", error);

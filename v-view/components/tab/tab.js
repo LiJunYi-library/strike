@@ -71,6 +71,7 @@ const Active = defineComponent({
 
     return () => {
       console.log("render RTab Active");
+      if (!listHook.select) return null;
       return (
         <div
           style={{
@@ -136,7 +137,12 @@ RTab = defineComponent({
             class="r-tab-scroll"
             ref={(el) => (htmls.scrollHtml = el)}
           >
-            <RLoading loadingHook={listHook} loadingClass="r-tab-list" slots={context.slots}>
+            <RLoading
+              skelectonCount={props.skelectonCount}
+              loadingHook={listHook}
+              loadingClass="r-tab-list"
+              slots={context.slots}
+            >
               <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
                 {renderList(listHook.list, (item, index) => {
                   return (

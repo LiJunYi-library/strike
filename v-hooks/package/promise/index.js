@@ -86,7 +86,6 @@ function nextTaskHoc(options = {}) {
             .then((result) => {
               if (config.prvePromise !== promise) {
                 if (config.aboutCb) config.aboutCb(result);
-                reject("about");
                 return;
               }
               // console.log("nextTask-----------------then", result);
@@ -95,7 +94,6 @@ function nextTaskHoc(options = {}) {
             .catch((error) => {
               if (config.prvePromise !== promise) {
                 if (config.aboutCb) config.aboutCb(error);
-                reject("about");
                 return;
               }
               // console.log("nextTask-----------------catch", error);

@@ -5,12 +5,13 @@
 
   .r-tab-scroll {
     max-width: 100%;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
 
     &::-webkit-scrollbar {
       display: none;
     }
-  
+
     &::-webkit-scrollbar-track {
       background: transparent;
     }

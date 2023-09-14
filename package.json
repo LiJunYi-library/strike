@@ -61,8 +61,12 @@
     "@rainbow_ljy/v-hooks": "workspace:^",
     "@rainbow_ljy/v-view": "workspace:^",
     "core-js": "^3.30.1",
+    "echarts": "^5.4.3",
     "element-plus": "^2.3.8",
-    "vue": "3.2.40",
+    "js-cookie": "^3.0.5",
+    "pinia": "^2.1.6",
+    "vue": "3.3.0",
+    "vue-demi": "^0.14.6",
     "vue-router": "^4.1.6",
     "vuex": "^4.1.0"
   }

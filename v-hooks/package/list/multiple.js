@@ -103,6 +103,9 @@ function useMultiple(props = {}) {
     updateListToResolveValue,
     invertSelect,
     allSelect,
+    selectOfValue,
+    labelOfValue,
+    indexOfValue,
   };
 
   params.proxy = reactive(params);
@@ -181,6 +184,18 @@ function useMultiple(props = {}) {
     argument.select = filterForValue(argument.list, argument.value);
     argument.label = argument.select.map((el) => formatterLabel(el));
     argument.index = argument.list.reduce(reduceIndex(argument.select), []);
+  }
+
+  function selectOfValue(val) {
+    return filterForValue(argument.list, val);
+  }
+
+  function labelOfValue(val) {
+    return selectOfValue(val).map((el) => formatterLabel(el));
+  }
+
+  function indexOfValue(val) {
+    return argument.list.reduce(reduceIndex(selectOfValue(val)), []);
   }
 
   function updateLabel(val) {

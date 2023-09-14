@@ -21,6 +21,8 @@ function getPaginationProps(options = {}) {
     currentPage: 1,
     pageSize: 10,
     total: 0,
+    prop: undefined,
+    order: undefined,
     fetchCb: () => undefined,
     formatterList(hooks) {
       const { data } = hooks;
@@ -218,6 +220,7 @@ function useAsyncPaginationSelect(props = {}) {
 
   const asyncHooks = usePromise(config.fetchCb, {
     then: (data) => {
+      debugger;
       paginationSelect.updateList(data);
     },
     ...config,
@@ -283,9 +286,11 @@ function useFetchPagination(props = {}) {
   const pageSize = ref(config.pageSize);
   const list = ref(config.list);
   const total = ref(config.total);
+  const prop = ref(config.prop);
+  const order = ref(config.order);
 
-  const selectHooks = useSelect({ ...props, list: config.list });
-  const asyncHooks = usePromise(config.fetchCb, { ...config });
+  const selectHooks = config.selectHooks || useSelect({ ...props, list: config.list });
+  const asyncHooks = config.asyncHooks || usePromise(config.fetchCb, { ...config });
 
   const params = {
     ...selectHooks,
@@ -294,10 +299,14 @@ function useFetchPagination(props = {}) {
     pageSize,
     list,
     total,
+    prop,
+    order,
     fetchBegin,
     fetch,
     updatePage,
     updatePageSize,
+    updateProp,
+    updateOrder,
   };
   const proxy = reactive(params);
   params.proxy = proxy;
@@ -317,18 +326,20 @@ function useFetchPagination(props = {}) {
     pageSize.value = config.pageSize;
     total.value = config.total;
     list.value = config.list;
-    return asyncHooks.fetchBegin(...arg).then(() => {
+    return asyncHooks.fetchBegin(...arg).then((res) => {
       total.value = config.formatterTotal(proxy);
       list.value = config.formatterList(proxy);
       selectHooks.updateListAndReset(list.value);
+      return res;
     });
   }
 
   function fetch(...arg) {
-    return asyncHooks.fetch(...arg).then(() => {
+    return asyncHooks.fetch(...arg).then((res) => {
       total.value = config.formatterTotal(proxy);
       list.value = config.formatterList(proxy);
       selectHooks.updateListAndReset(list.value);
+      return res;
     });
   }
 
@@ -336,6 +347,12 @@ function useFetchPagination(props = {}) {
     if (!config.serverPaging) return;
     await mergeEvent();
     return fetch();
+  }
+
+  async function serverBeginPaging() {
+    if (!config.serverPaging) return;
+    await mergeEvent();
+    return fetchBegin();
   }
 
   async function updatePage(p) {
@@ -346,6 +363,16 @@ function useFetchPagination(props = {}) {
   async function updatePageSize(size) {
     pageSize.value = size;
     serverPaging();
+  }
+
+  async function updateProp(p) {
+    prop.value = p;
+    serverBeginPaging()
+  }
+
+  async function updateOrder(o) {
+    order.value = o;
+    serverBeginPaging()
   }
 
   return params;

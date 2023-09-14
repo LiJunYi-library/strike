@@ -285,8 +285,6 @@ export const TableHoc = (option = {}) => {
 
                   return context?.slots?.empty?.() || config.renderEmpty(props, context, VM);
                 },
-                // append: () =>{
-                // },
               }}
             </ElTable>
             {h(ElPagination, {

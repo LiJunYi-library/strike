@@ -1,1 +1,3 @@
-export declare function Select(config?: any): any;
+import { DefineComponent } from "vue";
+export declare const Select: DefineComponent<any>;
+export declare function SelectHoc(config?: any): Select;

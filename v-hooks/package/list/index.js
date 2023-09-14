@@ -3,6 +3,7 @@ import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promi
 
 export * from "./radio";
 export * from "./multiple";
+export * from "./select";
 export * from "./list";
 export * from "./listSelect";
 export * from "./pagination";

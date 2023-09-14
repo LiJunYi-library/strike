@@ -1,4 +1,4 @@
-import { defineComponent, h, computed, renderSlot } from "vue";
+import { defineComponent, h, computed, renderSlot, reactive } from "vue";
 import {
   ElTable,
   ElEmpty,
@@ -15,6 +15,14 @@ const defaultProps = {
   //////
   calcHeight: Number,
   calcMaxHeight: Number,
+  ascendingKey: {
+    type: Boolean,
+    default: "ascending",
+  },
+  descendingKey: {
+    type: Boolean,
+    default: "descending",
+  },
 };
 
 const loadingProps = {
@@ -85,6 +93,8 @@ export const PaginationTableHoc = (option = {}) => {
     props: {},
     class: "",
     emits: [],
+    tableAttrs: {},
+    paginationAttrs: {},
     inheritAttrs: false,
     ...option,
   };
@@ -100,6 +110,7 @@ export const PaginationTableHoc = (option = {}) => {
     emits: [
       "size-change",
       "page-change",
+      "sort-change",
       "current-change",
       "prev-click",
       "next-click",
@@ -109,6 +120,14 @@ export const PaginationTableHoc = (option = {}) => {
       ...config.emits,
     ],
     setup(props, context) {
+      const parseOrder = {};
+      parseOrder[props.ascendingKey] = "ascending";
+      parseOrder[props.descendingKey] = "descending";
+      const transformOrder = {
+        ascending: props.ascendingKey,
+        descending: props.descendingKey,
+      };
+
       const bool0 = (val) => val === 0 || val;
 
       const maxHeight = computed(() => {
@@ -124,6 +143,27 @@ export const PaginationTableHoc = (option = {}) => {
       // eslint-disable-next-line
       const { listHook } = props;
 
+      let elTable;
+
+      context.expose(elTable);
+
+      const defaultSort = (() => {
+        const mOrder = listHook.order ? parseOrder[listHook.order] : null;
+        return reactive({
+          prop: listHook.prop,
+          order: mOrder,
+        });
+      })();
+
+      let isElTableSort = false;
+      listHook.elTableSort = (prop, order, ...arg) => {
+        const mOrder = order ? parseOrder[order] : null;
+        isElTableSort = true;
+        listHook.prop = prop;
+        listHook.order = order;
+        elTable.sort(prop, mOrder, ...arg);
+      };
+
       return (VM, _cache) => {
         return (
           <div class={["lib-table", config.class]}>
@@ -133,11 +173,15 @@ export const PaginationTableHoc = (option = {}) => {
               </div>
             )}
             <ElTable
+              {...config.tableAttrs}
               {...props}
               {...context.attrs}
+              default-sort={defaultSort}
               maxHeight={maxHeight.value}
               height={height.value}
-              ref={"elTable"}
+              ref={(el) => {
+                elTable = el;
+              }}
               data={listHook.list}
               onSelect={(list, ...arg) => {
                 context.emit("select", list, ...arg);
@@ -149,8 +193,20 @@ export const PaginationTableHoc = (option = {}) => {
               }}
               onSelection-change={(list, ...arg) => {
                 context.emit("selection-change", list, ...arg);
-                console.log("selection-change", list, ...arg);
+                // console.log("selection-change", list, ...arg);
                 listHook?.updateSelect?.(list);
+              }}
+              onSort-change={({ column, prop, order }) => {
+                const mOrder = order ? transformOrder[order] : null;
+                // console.log(prop, mOrder);
+                if (isElTableSort) {
+                  isElTableSort = false;
+                  return;
+                }
+
+                listHook?.updateProp(prop);
+                listHook?.updateOrder(mOrder);
+                context.emit("sort-change", { column, prop, order: mOrder });
               }}
             >
               {{
@@ -174,6 +230,7 @@ export const PaginationTableHoc = (option = {}) => {
             {h(ElPagination, {
               inheritAttrs: false,
               layout: "total, sizes, prev, pager, next, jumper",
+              ...config.paginationAttrs,
               ...context.attrs,
               total: listHook.total,
               "current-page": listHook.currentPage,

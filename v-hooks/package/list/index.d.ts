@@ -9,6 +9,8 @@ export declare function useRadio(options: any): any;
 export declare function useAsyncRadio(options: any): any;
 export declare function useMultiple(options: any): any;
 export declare function useAsyncMultiple(options: any): any;
+export declare function useSelect(options: any): any;
+export declare function useAsyncSelect(options: any): any;
 
 export declare function usePagination(options: any): any;
 export declare function usePaginationSelect(options: any): any;

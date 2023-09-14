@@ -18,9 +18,9 @@ function useRadio(props = {}) {
       valueItem: undefined,
       labelItem: undefined,
     };
-    if (options.index >= 0) map.indexItem = options.list[options.index];
-    if (options.value) map.valueItem = options.list.find(findForValue(options.value));
-    if (options.label) map.labelItem = options.list.find(findForLabel(options.label));
+    if (options.index !== undefined) map.indexItem = options.list[options.index];
+    if (options.value !== undefined) map.valueItem = options.list.find(findForValue(options.value));
+    if (options.label !== undefined) map.labelItem = options.list.find(findForLabel(options.label));
     let item;
     if (!isChange) item = map[options.priority] || map.valueItem || map.labelItem;
     if (isChange) item = map[options.priority] || map.valueItem || map.indexItem || map.labelItem;
@@ -81,6 +81,9 @@ function useRadio(props = {}) {
     verifyValueInList,
     updateListAndReset,
     updateListToResolveValue,
+    selectOfValue,
+    labelOfValue,
+    indexOfValue,
   };
 
   params.proxy = reactive(params);
@@ -159,6 +162,18 @@ function useRadio(props = {}) {
     argument.select = argument.list.find?.(findForValue(val));
     argument.label = formatterLabel(argument.select);
     argument.index = findIndex(argument.list, argument.select);
+  }
+
+  function selectOfValue(val) {
+    return argument.list.find?.(findForValue(val));
+  }
+
+  function labelOfValue(val) {
+    return formatterLabel(selectOfValue(val));
+  }
+
+  function indexOfValue(val) {
+    return findIndex(argument.list, selectOfValue(val));
   }
 
   function updateLabel(val) {

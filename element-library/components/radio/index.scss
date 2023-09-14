@@ -1,0 +1,29 @@
+.lib-radio {
+  display: inline-flex;
+  align-items: baseline;
+  align-content: baseline;
+  .lib-radio-lable {
+    padding-right: 7px;
+    white-space: nowrap;
+  }
+}
+
+.lib-radio-nowrap {
+  display: flex;
+  flex-wrap: nowrap;
+  .el-radio-group {
+    display: flex;
+    flex-wrap: nowrap;
+
+    word-break: break-all;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+
+    // overflow: hidden;
+    // text-overflow: ellipsis;
+    // white-space: nowrap;
+  }
+}

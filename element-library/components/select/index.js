@@ -7,14 +7,14 @@ const SelectHoc = (options = {}) => {
     props: {},
     emits: [],
     className: "",
-    renderStart: (props) => props.lable && <div class="lib-select-lable">{props.lable}</div>,
+    renderStart: (props) => props.label && <div class="lib-select-label">{props.label}</div>,
     ...options,
   };
 
   return defineComponent({
     inheritAttrs: false,
     props: {
-      lable: String,
+      label: String,
       ...ElSelect.props,
       listHook: Object,
       ...config.props,

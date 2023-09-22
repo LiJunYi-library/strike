@@ -3,9 +3,9 @@ export const selectConfig = (options = {}) => {
     activeIndex: undefined,
     activeItem: undefined,
     activeValue: undefined,
-    activeLable: undefined,
+    activeLabel: undefined,
     modelValue: undefined,
-    modelLable: undefined,
+    modelLabel: undefined,
     modelItem: undefined,
     modelIndex: undefined,
     cancelSame: false, // 是否取消相同的
@@ -14,7 +14,7 @@ export const selectConfig = (options = {}) => {
     saveState: false, // 是否自动保存状态
     formatterChildren: (item) => item?.children,
     formatterValue: (item) => item?.value,
-    formatterLable: (item) => item?.lable,
+    formatterLabel: (item) => item?.label,
     priority: "valueItem", // 优先使用的 activeIndex ||   activeItem ||activeValue
     ...options,
     list: options.list || [],

@@ -8,13 +8,13 @@ const RadioHoc = (options = {}) => {
     emits: [],
     compunt: ElRadio,
     className: "",
-    renderStart: (props) => props.lable && <div class="lib-radio-lable">{props.lable}</div>,
+    renderStart: (props) => props.label && <div class="lib-radio-label">{props.label}</div>,
     ...options,
   };
   return defineComponent({
     inheritAttrs: false,
     props: {
-      lable: String,
+      label: String,
       radioType: { type: String, default: "ElRadio" },
       border: Boolean,
       ...RadioProps,

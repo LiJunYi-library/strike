@@ -85,7 +85,7 @@ function resolveRequestInit(options = {}) {
   }
 
   const urlParams = parseParams(options.urlParams);
-  
+
   if (options.url && urlParams !== "") {
     options.url = options.url + urlParams;
   }
@@ -214,7 +214,12 @@ function createHttpRequest(initprops = {}) {
 
 function useFetchHoc(request) {
   function context(...props) {
-    let config = getFetchProps(...props);
+    let config = {
+      begin: false,
+      loading: false,
+      error: false,
+      ...getFetchProps(...props),
+    };
     let controller = new AbortController();
     let pro;
 
@@ -234,6 +239,9 @@ function useFetchHoc(request) {
       awaitSend,
       nextSend,
       abort,
+      beginSend,
+      nextBeginSend,
+      awaitBeginSend,
     };
 
     params.proxy = reactive(params);
@@ -250,15 +258,36 @@ function useFetchHoc(request) {
       })
         .then((result) => {
           data.value = result;
+          return result;
         })
         .catch((err) => {
           errorData.value = err;
           error.value = true;
+          return Promise.reject(err)
         })
         .finally(() => {
           loading.value = false;
+          begin.value = false;
         });
       return pro;
+    }
+
+    function beginSend(...arg) {
+      begin.value = true;
+      return send(...arg);
+    }
+
+    async function nextBeginSend(...arg) {
+      await abort();
+      return beginSend(...arg);
+    }
+
+    function awaitBeginSend(...arg) {
+      if (loading.value === true) {
+        console.error("正在请求");
+        return;
+      }
+      return beginSend(...arg);
     }
 
     async function time0() {

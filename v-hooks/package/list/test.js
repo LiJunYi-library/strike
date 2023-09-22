@@ -51,7 +51,7 @@ export class Radio {
     const list = ref();
     const select = ref();
     const value = ref();
-    const lable = ref();
+    const label = ref();
     const index = ref();
 
     console.log(reactive({ select }));
@@ -63,7 +63,7 @@ export class Radio {
       list,
       select,
       value,
-      lable,
+      label,
       index,
     };
 
@@ -88,11 +88,11 @@ export const ListRadio = (options = {}) => {
     const map = {
       indexItem: undefined,
       valueItem: undefined,
-      lableItem: undefined,
+      labelItem: undefined,
     };
 
-    if (config.activeLable) {
-      map.lableItem = listArray?.find?.((el) => config.activeLable === config.formatterLable(el));
+    if (config.activeLabel) {
+      map.labelItem = listArray?.find?.((el) => config.activeLabel === config.formatterLabel(el));
     }
 
     if (config.activeIndex && config.activeIndex === 0) {
@@ -101,30 +101,30 @@ export const ListRadio = (options = {}) => {
 
     map.valueItem = listArray?.find?.(find(config.activeValue));
 
-    return map[config.priority] || map.indexItem || map.valueItem || map.lableItem;
+    return map[config.priority] || map.indexItem || map.valueItem || map.labelItem;
   })();
   const value = config.activeValue || config.formatterValue(item);
   const index = config.activeIndex || listArray?.findIndex?.(find(value));
-  const lable = config.activeLable || config.formatterLable(item);
-  // console.log('init', item, value, index, lable);
+  const label = config.activeLabel || config.formatterLabel(item);
+  // console.log('init', item, value, index, label);
   const listData = ref(listArray);
   const activeItem = ref(item);
   const activeValue = ref(value);
-  const activeLable = ref(lable);
+  const activeLabel = ref(label);
   const activeIndex = ref(index);
 
   let store = {
     activeItem: null,
     activeIndex: null,
     activeValue: null,
-    activeLable: null,
+    activeLabel: null,
   };
 
   const save = () => {
     store = {
       activeItem: activeItem.value,
       activeValue: activeValue.value,
-      activeLable: activeLable.value,
+      activeLabel: activeLabel.value,
       activeIndex: activeIndex.value,
     };
     // console.log('save', store);
@@ -133,7 +133,7 @@ export const ListRadio = (options = {}) => {
   const restore = () => {
     activeItem.value = store.activeItem;
     activeValue.value = store.activeValue;
-    activeLable.value = store.activeLable;
+    activeLabel.value = store.activeLabel;
     activeIndex.value = store.activeIndex;
     // console.log('restore', store);
   };
@@ -145,13 +145,13 @@ export const ListRadio = (options = {}) => {
       activeItem.value = undefined;
       activeIndex.value = undefined;
       activeValue.value = undefined;
-      activeLable.value = undefined;
+      activeLabel.value = undefined;
       return;
     }
     activeItem.value = el;
     activeIndex.value = nth;
     activeValue.value = config.formatterValue(activeItem.value);
-    activeLable.value = config.formatterLable(activeItem.value);
+    activeLabel.value = config.formatterLabel(activeItem.value);
     // console.log('changeItem -store', store);
   };
 
@@ -159,7 +159,7 @@ export const ListRadio = (options = {}) => {
     activeValue.value = val;
     activeItem.value = listArray?.find?.(find(activeValue.value));
     activeIndex.value = listArray?.findIndex?.(find(activeValue.value));
-    activeLable.value = config.formatterLable(activeItem.value);
+    activeLabel.value = config.formatterLabel(activeItem.value);
   };
 
   const same = (val) => activeItem.value === val;
@@ -173,14 +173,14 @@ export const ListRadio = (options = {}) => {
   const reset = () => {
     activeItem.value = undefined;
     activeValue.value = undefined;
-    activeLable.value = undefined;
+    activeLabel.value = undefined;
     activeIndex.value = undefined;
   };
 
   return [
-    [activeValue, activeItem, activeIndex, activeLable, listData],
+    [activeValue, activeItem, activeIndex, activeLabel, listData],
     [changeItem, setValue, same, reset, save, restore, setData],
-    reactive({ activeValue, activeItem, activeIndex, activeLable, listData }),
+    reactive({ activeValue, activeItem, activeIndex, activeLabel, listData }),
     { changeItem, setValue, same, reset, save, restore, setData },
   ];
 };

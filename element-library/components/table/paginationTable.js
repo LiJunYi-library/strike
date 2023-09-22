@@ -16,12 +16,16 @@ const defaultProps = {
   calcHeight: Number,
   calcMaxHeight: Number,
   ascendingKey: {
-    type: Boolean,
+    type: String,
     default: "ascending",
   },
   descendingKey: {
-    type: Boolean,
+    type: String,
     default: "descending",
+  },
+  showPagination: {
+    type: Boolean,
+    default: true,
   },
 };
 
@@ -161,7 +165,7 @@ export const PaginationTableHoc = (option = {}) => {
         isElTableSort = true;
         listHook.prop = prop;
         listHook.order = order;
-        elTable.sort(prop, mOrder, ...arg);
+        elTable?.sort?.(prop, mOrder, ...arg);
       };
 
       return (VM, _cache) => {
@@ -227,45 +231,46 @@ export const PaginationTableHoc = (option = {}) => {
                 },
               }}
             </ElTable>
-            {h(ElPagination, {
-              inheritAttrs: false,
-              layout: "total, sizes, prev, pager, next, jumper",
-              ...config.paginationAttrs,
-              ...context.attrs,
-              total: listHook.total,
-              "current-page": listHook.currentPage,
-              "page-size": listHook.pageSize,
-              "onUpdate:current-page": (page, size) => {
-                // console.log("onUpdate:current-page", page, size);
-                listHook.updatePage(page);
-                //
-              },
-              "onUpdate:page-size": (size, page) => {
-                // console.log("onUpdate:page-size", page, size);
-                listHook.updatePageSize(size);
-                //
-              },
-              onSizeChange: (...v) => {
-                context.emit("size-change", ...v);
-                context.emit("page-change");
-                // console.log("onSizeChange", ...v);
-              },
-              onCurrentChange: (...v) => {
-                context.emit("current-change", ...v);
-                context.emit("page-change");
-                // console.log("onCurrentChange", ...v);
-              },
-              onPrevClick: (...v) => {
-                context.emit("prev-click", ...v);
-                context.emit("page-change");
-                // console.log("onPrevClick", ...v);
-              },
-              onNextClick: (...v) => {
-                context.emit("next-click", ...v);
-                context.emit("page-change");
-                // console.log("onNextClick", ...v);
-              },
-            })}
+            {props.showPagination &&
+              h(ElPagination, {
+                inheritAttrs: false,
+                layout: "total, sizes, prev, pager, next, jumper",
+                ...config.paginationAttrs,
+                ...context.attrs,
+                total: listHook.total,
+                "current-page": listHook.currentPage,
+                "page-size": listHook.pageSize,
+                "onUpdate:current-page": (page, size) => {
+                  // console.log("onUpdate:current-page", page, size);
+                  listHook.updatePage(page);
+                  //
+                },
+                "onUpdate:page-size": (size, page) => {
+                  // console.log("onUpdate:page-size", page, size);
+                  listHook.updatePageSize(size);
+                  //
+                },
+                onSizeChange: (...v) => {
+                  context.emit("size-change", ...v);
+                  context.emit("page-change");
+                  // console.log("onSizeChange", ...v);
+                },
+                onCurrentChange: (...v) => {
+                  context.emit("current-change", ...v);
+                  context.emit("page-change");
+                  // console.log("onCurrentChange", ...v);
+                },
+                onPrevClick: (...v) => {
+                  context.emit("prev-click", ...v);
+                  context.emit("page-change");
+                  // console.log("onPrevClick", ...v);
+                },
+                onNextClick: (...v) => {
+                  context.emit("next-click", ...v);
+                  context.emit("page-change");
+                  // console.log("onNextClick", ...v);
+                },
+              })}
           </div>
         );
       };

@@ -1,0 +1,1 @@
+export declare function useTreeRadio(options: any): any;

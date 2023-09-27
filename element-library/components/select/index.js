@@ -1,6 +1,6 @@
 import { ElSelect } from "element-plus";
 import { defineComponent, renderList, renderSlot } from "vue";
-import './index.scss'
+import "./index.scss";
 
 const SelectHoc = (options = {}) => {
   const config = {
@@ -38,18 +38,19 @@ const SelectHoc = (options = {}) => {
               modelValue={listHook.value}
               onUpdate:modelValue={(val) => listHook.updateValue(val)}
             >
-              {renderList(listHook.list, (item, index) => {
-                return (
-                  <ElSelect.Option
-                    key={index}
-                    disabled={listHook.formatterDisabled(item)}
-                    label={listHook.formatterLabel(item)}
-                    value={listHook.formatterValue(item)}
-                  >
-                    {renderSlot(context.slots, "default", { item, index })}
-                  </ElSelect.Option>
-                );
-              })}
+              {context?.slots?.content?.(listHook) ??
+                renderList(listHook.list, (item, index) => {
+                  return (
+                    <ElSelect.Option
+                      key={index}
+                      disabled={listHook.formatterDisabled(item)}
+                      label={listHook.formatterLabel(item)}
+                      value={listHook.formatterValue(item)}
+                    >
+                      {renderSlot(context.slots, "default", { item, index })}
+                    </ElSelect.Option>
+                  );
+                })}
             </ElSelect>
           </div>
         );

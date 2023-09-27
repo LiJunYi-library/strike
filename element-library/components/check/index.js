@@ -1,23 +1,21 @@
-import { ElRadioGroup, ElRadio, RadioProps, ElRadioButton } from "element-plus";
+import { ElCheckbox, ElCheckboxGroup, ElCheckboxButton } from "element-plus";
 import { defineComponent, renderList, renderSlot } from "vue";
 import "./index.scss";
 
-const RadioHoc = (options = {}) => {
+const CheckHoc = (options = {}) => {
   const config = {
     props: {},
     emits: [],
-    compunt: ElRadio,
+    compunt: ElCheckbox,
     className: "",
-    renderStart: (props) => props.label && <div class="lib-radio-label">{props.label}</div>,
+    renderStart: (props) => props.label && <div class="lib-check-label">{props.label}</div>,
     ...options,
   };
   return defineComponent({
     inheritAttrs: false,
     props: {
       label: String,
-      radioType: { type: String, default: "ElRadio" },
       border: Boolean,
-      ...RadioProps,
       listHook: Object,
       nowrap: Boolean,
       className: String,
@@ -27,16 +25,15 @@ const RadioHoc = (options = {}) => {
     setup(props, context) {
       // eslint-disable-next-line
       const { listHook } = props;
-      // console.log("listHook.isMultiple", listHook.isMultiple);
-      ElRadioGroup.inheritAttrs = false;
+
       function renderContent() {
         if (listHook?.begin === false && listHook?.loading === false && !listHook.list.length) {
           return renderSlot(context.slots, "empty");
         }
         return (
-          <ElRadioGroup
-            {...props}
+          <ElCheckboxGroup
             {...context.attrs}
+            inheritAttrs={false}
             loading={listHook.loading}
             modelValue={listHook.value}
             onUpdate:modelValue={(val) => listHook.updateValue(val)}
@@ -56,18 +53,17 @@ const RadioHoc = (options = {}) => {
                   </config.compunt>
                 );
               })}
-          </ElRadioGroup>
+          </ElCheckboxGroup>
         );
       }
       return (vm) => {
         return (
           <div
             class={[
-              "lib-radio",
+              "lib-check",
               config.className,
               props.className,
-              props.nowrap && "lib-radio-nowrap",
-              config.compunt === ElRadioButton && "lib-radio-button",
+              props.nowrap && "lib-check-nowrap",
             ]}
           >
             {renderSlot(context.slots, "start", {}, () =>
@@ -81,8 +77,8 @@ const RadioHoc = (options = {}) => {
   });
 };
 
-const Radio = RadioHoc();
+const Check = CheckHoc();
 
-const RadioButton = RadioHoc({ compunt: ElRadioButton });
+const CheckButton = CheckHoc({ compunt: ElCheckboxButton });
 
-export { Radio, RadioButton, RadioHoc };
+export { Check, CheckButton, CheckHoc };

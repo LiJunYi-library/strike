@@ -3,6 +3,7 @@ export * from "./package/tree";
 export * from "./package/promise";
 export * from "./package/fetch"
 export * from "./package/domain-login"
+export * from "./package/event"
 
 export declare function useDebounced(cb: any, delay = 500): (...arg: any) => void;
 

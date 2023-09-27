@@ -203,7 +203,7 @@ function useRadio(props = {}) {
 
   function resolveValue() {
     if (verifyValueInList()) {
-      updateValue(argument.value);
+      argument.updateValue(argument.value);
     } else {
       reset();
     }
@@ -211,12 +211,12 @@ function useRadio(props = {}) {
 
   function updateListToResolveValue(l) {
     argument.list = l;
-    resolveValue();
+    argument.resolveValue();
   }
 
   function updateListAndReset(li) {
     argument.list = li;
-    reset();
+    argument.reset();
   }
 
   function resolveList(l) {

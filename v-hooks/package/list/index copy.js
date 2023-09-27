@@ -1,5 +1,4 @@
 import { ref, reactive, computed, watch } from "vue";
-import { selectConfig } from "../common";
 import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
 import { useSelect } from "./select";
 

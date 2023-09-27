@@ -1,7 +1,6 @@
 import { onBeforeUnmount } from "vue";
 
-export function useEventListener(element = document, type = "clcik", listener, options) {
-
+export function useEventListener(element, type = "click", listener, options) {
   const fun = (...arg) => {
     if (listener) listener(...arg);
   };
@@ -11,7 +10,12 @@ export function useEventListener(element = document, type = "clcik", listener, o
   onBeforeUnmount(() => {
     element.removeEventListener(type, fun, options);
   });
-
 }
 
+useEventListener.doc = (...arg) => {
+  useEventListener(document, ...arg);
+};
 
+useEventListener.docClick = (...arg) => {
+  useEventListener(document, "click", ...arg);
+};

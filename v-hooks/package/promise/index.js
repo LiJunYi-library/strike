@@ -163,7 +163,7 @@ function waitTaskHoc(options = {}) {
   };
 }
 
-export function usePromise(fun, options = {}) {
+function usePromise(fun, options = {}) {
   const queue = [];
   const defQueue = [];
 

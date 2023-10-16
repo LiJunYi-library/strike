@@ -1,5 +1,5 @@
 import { ref, reactive, unref, onBeforeUnmount } from "vue";
-
+export * from "./promise";
 export {
   getPromiseConfig,
   useAsync,

@@ -1,82 +1,142 @@
 import { ref, reactive } from "vue";
+import { getPromiseConfig } from "./";
 
-class Abort_controller {
-  constructor(props = {}) {
-    Object.assign(this, props);
-  }
+export function useFuture(fun, options = {}) {
+  const queue = [];
+  const defQueue = [];
 
-  signal = {
-    about: () => undefined,
-    onAbout: () => {
-      this.onAbout();
-    },
-  };
-
-  about() {
-    this.signal.about();
-  }
-
-  onAbout() {}
-}
-
-function ppppppp(fun) {
-  let controller = new Abort_controller();
-  const data = ref({});
+  const config = getPromiseConfig(options);
+  const data = ref(config.data);
   const begin = ref(config.begin);
   const errorData = ref(config.errorData);
   const loading = ref(config.loading);
   const error = ref(config.error);
 
-  controller.onAbout = () => {
-    loading.value = false;
+  function create(params, task = [], promiseConfig = {}) {
+    if (params instanceof Function) {
+      const send = (...arg) => {
+        const pro = params(...arg);
+        const newPromise = new Promise((resolve, reject) => {
+          promiseConfig?.before?.();
+          if (pro instanceof Promise) {
+            pro
+              .then((result) => {
+                if (newPromise.abouted) return;
+                promiseConfig?.then?.(result);
+                resolve(result);
+              })
+              .catch((err) => {
+                if (newPromise.abouted) return;
+                promiseConfig?.catch?.(err);
+                reject(err);
+              })
+              .finally(() => {
+                const index = task.findIndex((ele) => ele === newPromise);
+                if (index >= 0) task.splice(index, 1);
+                if (newPromise.abouted) return;
+                promiseConfig?.finally?.();
+              });
+          } else {
+            promiseConfig?.then?.(pro);
+            resolve(pro);
+          }
+        });
+        newPromise.abouted = false;
+        task.push(newPromise);
+        return newPromise;
+      };
+      return send;
+    }
+  }
+
+  const createPromise = (params) => create(params, defQueue);
+
+  const send = create(fun, queue, {
+    before: () => {
+      loading.value = true;
+    },
+    then: (result) => {
+      data.value = config.formatterData(result);
+      loading.value = false;
+      error.value = false;
+      config.then(result);
+    },
+    catch: (err) => {
+      errorData.value = config.formatterErrorData(err);
+      error.value = true;
+      loading.value = false;
+      config.catch(err);
+    },
+    finally: () => {
+      config.finally();
+    },
+  });
+
+  function about() {
+    queue.forEach((el) => {
+      el.abouted = true;
+    });
+    defQueue.forEach((el) => {
+      el.abouted = true;
+    });
+  }
+
+  async function beginSend(...args) {
+    begin.value = true;
+    try {
+      return await send(...args);
+    } finally {
+      begin.value = false;
+    }
+  }
+
+  function nextSend(...args) {
+    about();
+    return send(...args);
+  }
+
+  function nextBeginSend(...args) {
+    about();
+    return beginSend(...args);
+  }
+
+  function awaitSend(...args) {
+    if (loading.value === true) return;
+    return send(...args);
+  }
+
+  function awaitBeginSend(...args) {
+    if (loading.value === true) return;
+    return awaitSend(...args);
+  }
+
+  const params = {
+    data,
+    begin,
+    loading,
+    error,
+    errorData,
+    send,
+    beginSend,
+    nextSend,
+    nextBeginSend,
+    awaitSend,
+    awaitBeginSend,
+    createPromise,
+    about,
   };
 
-  function send(...arg) {
-    loading.value = true;
-    error.value = false;
-    controller = new Abort_controller();
+  params.proxy = reactive(params);
 
-    usePromise({
-      signal: controller.signal,
-    })
-      .then((result) => {
-        data.value = result;
-      })
-      .catch((err) => {
-        errorData.value = err;
-        error.value = true;
-      })
-      .finally(() => {
-        loading.value = false;
-      });
-  }
+  return params;
 }
 
-function usePromise(fun, options) {
-  const config = {
-    signal: {},
-    ...options,
+export function useNextFuture(...arg) {
+  const future = useFuture(...arg);
+  const play = async (...parms) => {
+    const res = await future.nextSend(...parms);
+    return res;
   };
-
-  const method = (...arg) => {
-    const newPro = new Promise((resolve, reject) => {
-      config.signal.about = () => {
-        config?.signal?.onAbout?.();
-        reject();
-      };
-      const result = fun(...arg);
-      if (result instanceof Promise) {
-        result
-          .then((res) => {
-            resolve(res);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      }
-    });
-    return newPro;
-  };
-
-  return method;
+  Object.assign(play, future);
+  return play;
 }

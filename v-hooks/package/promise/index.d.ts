@@ -62,3 +62,6 @@ export declare function useInterceptPromiseApply(config?: any): any;
 /**
  *
  */
+
+export declare function useFuture(fun: any, config?: any): any;
+export declare function useNextFuture(fun: any, config?: any): any;

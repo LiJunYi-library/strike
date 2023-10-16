@@ -17,3 +17,18 @@ export interface UseEventListener {
 }
 
 export declare const useEventListener: UseEventListener;
+
+
+// interface UseIntersectionObserver{
+//   (
+//     element: HTMLElement | Document,
+//     type: string,
+//     listener: EventListenerOrEventListenerObject,
+//     options?: boolean | AddEventListenerOptions | undefined
+//   ): void;
+//   ob(
+//     element: HTMLElement,
+//     intersectionCb: ,
+//     options?: boolean | AddEventListenerOptions | undefined
+//   ): void;
+// }

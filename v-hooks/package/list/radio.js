@@ -191,7 +191,12 @@ function useRadio(props = {}) {
   }
 
   function updateSelect(val) {
-    argument.select = val;
+    if (typeof val === "function") {
+      argument.select = argument.list.find(val);
+    } else {
+      argument.select = val;
+    }
+
     argument.index = findIndex(argument.list, argument.select);
     argument.value = formatterValue(argument.select);
     argument.label = formatterLabel(argument.select);

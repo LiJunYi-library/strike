@@ -1,4 +1,6 @@
 import { ref, reactive } from "vue";
+import { createOverload } from "@rainbow_ljy/rainbow-js";
+import "./fetch.js";
 
 export { createHttpRequest, useFetchHoc, createHttpFetch };
 
@@ -51,7 +53,7 @@ function getFetchProps(...args) {
   let options = {};
   let propertys = ["url", "method", "body", "contentType", "headers"];
   if (args && args.length === 1 && typeof args[0] === "object") {
-    options = { options, ...args[0] };
+    options = Object.assign(options, args[0]);
   } else {
     propertys.forEach((key, index) => {
       if (args[index] !== undefined) options[key] = args[index];
@@ -263,7 +265,7 @@ function useFetchHoc(request) {
         .catch((err) => {
           errorData.value = err;
           error.value = true;
-          return Promise.reject(err)
+          return Promise.reject(err);
         })
         .finally(() => {
           loading.value = false;
@@ -325,8 +327,20 @@ function useFetchHoc(request) {
 
 function createHttpFetch(request) {
   return {};
-}
+  const get = request.create({ method: "get", contentType: "" });
+  const post = request.create({ method: "post", contentType: "application/json" });
+  const form = request.create((config) => {
+    const formData = new FormData();
+    const body = config.body;
+    for (const key in body) {
+      if (body.hasOwnProperty(key)) {
+        formData.append(key, body[key]);
+      }
+    }
+    config.body = formData;
+    config.method = "post";
+    return config;
+  });
 
-const get = (...arg) => mFetch(...arg).send();
-const nextGet = (...arg) => mFetch(...arg).nextSend();
-const awaitGet = (...arg) => mFetch(...arg).awaitSend();
+  return { get, post, form };
+}

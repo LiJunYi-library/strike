@@ -124,13 +124,17 @@ export const TableColumnText = TableColumnHoc({
 export const TableColumnLink = TableColumnHoc({
   renderDefault({ props, context, vm, cellValue }, arg) {
     const attrs = objectFilter(context.attrs, /link_/g);
+    const href = attrs?.href || arg.row?.[attrs?.url] || cellValue;
     return (
       <ElLink
         onClick={(event) => {
           event.stopPropagation();
           context.emit("click", cellValue, arg);
         }}
+        target="blank"
+        type="primary"
         {...attrs}
+        href={href}
       >
         {{
           icon: (...aeg) => context.slots?.icon?.(arg),

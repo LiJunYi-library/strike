@@ -145,6 +145,7 @@ RTab = defineComponent({
             >
               <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
                 {renderList(listHook.list, (item, index) => {
+                  if (context?.slots?.item) return context?.slots?.item({ index, item });
                   return (
                     <div
                       class={["r-tab-item", listHook.same(item) && "r-tab-item-same"]}

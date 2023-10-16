@@ -81,14 +81,31 @@ export function useFuture(fun, options = {}) {
     });
   }
 
-  async function beginSend(...args) {
-    begin.value = true;
-    try {
-      return await send(...args);
-    } finally {
+
+
+  const beginSend = create(fun, queue, {
+    before: () => {
+      begin.value = true;
+      loading.value = true;
+    },
+    then: (result) => {
+      data.value = config.formatterData(result);
+      loading.value = false;
+      error.value = false;
       begin.value = false;
-    }
-  }
+      config.then(result);
+    },
+    catch: (err) => {
+      errorData.value = config.formatterErrorData(err);
+      error.value = true;
+      loading.value = false;
+      begin.value = false;
+      config.catch(err);
+    },
+    finally: () => {
+      config.finally();
+    },
+  });
 
   function nextSend(...args) {
     about();
@@ -124,6 +141,10 @@ export function useFuture(fun, options = {}) {
     awaitBeginSend,
     createPromise,
     about,
+    run:nextSend,
+    runBegin:nextBeginSend,
+    fetchBegin:nextBeginSend,
+    fetch:nextSend
   };
 
   params.proxy = reactive(params);

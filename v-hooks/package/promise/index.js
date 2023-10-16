@@ -163,75 +163,153 @@ function waitTaskHoc(options = {}) {
   };
 }
 
-function usePromise(fun, options = {}) {
-  const config = getPromiseConfig(options);
+export function usePromise(fun, options = {}) {
+  const queue = [];
+  const defQueue = [];
 
+  const config = getPromiseConfig(options);
   const data = ref(config.data);
   const begin = ref(config.begin);
   const errorData = ref(config.errorData);
   const loading = ref(config.loading);
   const error = ref(config.error);
-  const nextTaskConfig = {
-    prvePromise: undefined,
-  };
-  const waitTaskConfig = {
-    prvePromise: undefined,
-    loading: false,
-  };
 
-  const next = nextTaskHoc(nextTaskConfig);
-
-  const wait = waitTaskHoc(waitTaskConfig);
-
-  const run = (...arg) => {
-    loading.value = true;
-    error.value = false;
-    return new Promise((resolve, reject) => {
-      const res = fun({ nextTask: next, waitTask: wait }, ...arg);
-
-      const invoker = (result) => {
-        data.value = config.formatterData(result);
-        loading.value = false;
-        error.value = false;
-        // console.log("-----------------then", result);
-        resolve(result);
-        config.then(result);
+  function create(params, task = [], promiseConfig = {}) {
+    if (params instanceof Function) {
+      const send = (...arg) => {
+        const pro = params(...arg);
+        const newPromise = new Promise((resolve, reject) => {
+          promiseConfig?.before?.();
+          if (pro instanceof Promise) {
+            pro
+              .then((result) => {
+                if (newPromise.abouted) return;
+                promiseConfig?.then?.(result);
+                resolve(result);
+              })
+              .catch((err) => {
+                if (newPromise.abouted) return;
+                promiseConfig?.catch?.(err);
+                reject(err);
+              })
+              .finally(() => {
+                const index = task.findIndex((ele) => ele === newPromise);
+                if (index >= 0) task.splice(index, 1);
+                if (newPromise.abouted) return;
+                promiseConfig?.finally?.();
+              });
+          } else {
+            promiseConfig?.then?.(pro);
+            resolve(pro);
+          }
+        });
+        newPromise.abouted = false;
+        task.push(newPromise);
+        return newPromise;
       };
-      // console.log(">>>>>", res);
-      if (res instanceof Promise) {
-        res
-          .then(invoker)
-          .catch((err) => {
-            errorData.value = config.formatterErrorData(err);
-            error.value = true;
-            loading.value = false;
-            reject(err);
-            config.catch(err);
-          })
-          .finally(() => {
-            config.finally();
-          });
-      } else {
-        invoker(res);
-      }
-    });
-  };
+      return send;
+    }
+  }
 
-  const runBegin = (...arg) => {
-    begin.value = true;
-    const res = run(...arg).finally(() => {
+  const createPromise = (params) => create(params, defQueue);
+
+  const send = create(fun, queue, {
+    before: () => {
+      loading.value = true;
+    },
+    then: (result) => {
+      data.value = config.formatterData(result);
+      loading.value = false;
+      error.value = false;
+      config.then(result);
+    },
+    catch: (err) => {
+      errorData.value = config.formatterErrorData(err);
+      error.value = true;
+      loading.value = false;
+      config.catch(err);
+    },
+    finally: () => {
+      config.finally();
+    },
+  });
+
+  function about() {
+    queue.forEach((el) => {
+      el.abouted = true;
+    });
+    defQueue.forEach((el) => {
+      el.abouted = true;
+    });
+  }
+
+  const beginSend = create(fun, queue, {
+    before: () => {
+      begin.value = true;
+      loading.value = true;
+    },
+    then: (result) => {
+      data.value = config.formatterData(result);
+      loading.value = false;
+      error.value = false;
       begin.value = false;
-    });
-    return res;
+      config.then(result);
+    },
+    catch: (err) => {
+      errorData.value = config.formatterErrorData(err);
+      error.value = true;
+      loading.value = false;
+      begin.value = false;
+      config.catch(err);
+    },
+    finally: () => {
+      config.finally();
+    },
+  });
+
+  function nextSend(...args) {
+    about();
+    return send(...args);
+  }
+
+  function nextBeginSend(...args) {
+    about();
+    return beginSend(...args);
+  }
+
+  function awaitSend(...args) {
+    if (loading.value === true) return;
+    return send(...args);
+  }
+
+  function awaitBeginSend(...args) {
+    if (loading.value === true) return;
+    return awaitSend(...args);
+  }
+
+  const params = {
+    data,
+    begin,
+    loading,
+    error,
+    errorData,
+    send,
+    beginSend,
+    nextSend,
+    nextBeginSend,
+    awaitSend,
+    awaitBeginSend,
+    createPromise,
+    about,
+    run: nextSend,
+    runBegin: nextBeginSend,
+    fetchBegin: nextBeginSend,
+    fetch: nextSend,
   };
 
-  const fetchBegin = runBegin;
+  params.proxy = reactive(params);
 
-  const fetch = run;
-
-  const arguments_ = { data, begin, loading, error, errorData, run, runBegin, fetch, fetchBegin };
-  arguments_.proxy = reactive(arguments_);
-  return arguments_;
+  return params;
 }
 
 // export function usePromise(fun, options = {}) {

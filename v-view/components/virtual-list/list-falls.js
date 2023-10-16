@@ -75,6 +75,12 @@ class ItemAdapter {
   scrollTop = 0;
   uuId = 0;
 
+  intersectingTimer = undefined;
+  intersectingTimerType= 'setTimeout'; //'setTimeout' 'setInterval'
+  intersectingtime = 0;
+  intersected = false;
+ 
+
   constructor(props) {
     Object.assign(this, props);
     this.isRenderCache = this.isRender;
@@ -149,6 +155,7 @@ class Adapter {
   winWidth = window.innerWidth;
   sapceHorizontal = 10;
   itemThreshold = 0.2;
+  itemIntersectingtime = undefined;
 
   get itemWidth() {
     return (
@@ -241,6 +248,7 @@ class Adapter {
         data,
         index,
         parent: this,
+        intersectingtime: this.itemIntersectingtime,
         scrollTop: this.scrollTop,
         width: this.itemWidth,
         height: this.avgHeight,
@@ -278,6 +286,7 @@ RVirtualListFalls = defineComponent({
     listHook: { type: Object, default: () => ({ proxy: {} }) },
     list: { type: Array, default: () => [] },
     itemThreshold: { type: Number, default: 0.2 },
+    itemIntersectingtime:Number,
     columnNum: { type: Number, default: 2 },
     skelectonCount: { type: Number, default: 4 },
     avgHeight: { type: Number, default: 210 },
@@ -321,6 +330,7 @@ RVirtualListFalls = defineComponent({
       avgHeight,
       space,
       itemThreshold,
+      itemIntersectingtime:props.itemIntersectingtime,
       sapceHorizontal,
       ID,
       array: list,
@@ -562,14 +572,35 @@ RVirtualListItem = defineComponent({
       newMutationObserver();
     }
 
+
+    function handleIntersection(entries) {
+      if(!itemAdapter.intersectingtime ){
+        context.emit("intersection", itemAdapter, entries);
+        return;
+      }
+
+      if( itemAdapter.intersected )  return;
+      itemAdapter.intersected = true;
+      context.emit("intersection", itemAdapter, entries);
+      if( itemAdapter.intersectingTimerType === 'setTimeout'){
+        itemAdapter.intersectingTimer = setTimeout(()=>{
+          itemAdapter.intersected = false;
+        },itemAdapter.intersectingtime )
+      }
+    }
+
     try {
       intersectionObserver = new IntersectionObserver(([entries]) => {
+        itemAdapter.isIntersecting = entries.isIntersecting
+        if(  !itemAdapter.isIntersecting ){
+         if(itemAdapter.intersectingTimerType === 'setInterval' ) clearInterval(itemAdapter.intersectingTimer )
+        }
         if (entries.isIntersecting) {
-          if (!itemAdapter.isIntersecting) {
+          if (!itemAdapter.isFirsIntersecting) {
             context.emit("firstIntersection", itemAdapter, entries);
-            itemAdapter.isIntersecting = true;
+            itemAdapter.isFirsIntersecting = true;
           }
-          context.emit("intersection", itemAdapter, entries);
+          handleIntersection( entries )
         }
       }, options);
     } catch (error) {}

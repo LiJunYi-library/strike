@@ -5,3 +5,5 @@ export * from "./virtual-list/list";
 export * from "./virtual-list/list-falls";
 export * from './icon'
 export * from './loading'
+export * from './scroll'
+export * from './layout'

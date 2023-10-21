@@ -4,7 +4,6 @@ import {
   defineComponent,
   render,
   resolveComponent,
-  VNode,
   h,
   ConcreteComponent,
   reactive,
@@ -66,14 +65,10 @@ export function DialogHoc(options = {}) {
       return (
         <div>
           {props.cancelText && (
-            <ElButton onClick={() => config.onCancel(_arguments)}>
-              {props.cancelText}
-            </ElButton>
+            <ElButton onClick={() => config.onCancel(_arguments)}>{props.cancelText}</ElButton>
           )}
           {props.confirmText && (
-            <ElButton onClick={() => config.onConfirm(_arguments)}>
-              {props.confirmText}
-            </ElButton>
+            <ElButton onClick={() => config.onConfirm(_arguments)}>{props.confirmText}</ElButton>
           )}
         </div>
       );

@@ -1,0 +1,17 @@
+.r-scroll {
+  position: relative;
+  overflow: auto;
+  max-height: 100vh;
+}
+
+.r-scroll-sticky {
+  position: sticky;
+  z-index: 5;
+  // transition: 0.1s;
+}
+
+.r-scroll-flotage {
+  position: sticky;
+  z-index: 4;
+  // transition: 0.1s;
+}

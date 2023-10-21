@@ -74,9 +74,8 @@ RViewPage = defineComponent({
     }
 
     return (vm) => {
-      console.log("render RViewPage");
       return (
-        <div class="r-view-page">
+        <div class="r-view-page animate__animated animate__bounce">
           <div class="r-view-page-scroll" ref={(el) => (scrollHtml = el)}>
             <div class="r-view-page-list" ref={(el) => (parentHtml = el)}>
               {renderList(listHook.list, (item, index) => {

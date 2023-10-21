@@ -60,6 +60,7 @@
     "@rainbow_ljy/rainbow-view": "workspace:^",
     "@rainbow_ljy/v-hooks": "workspace:^",
     "@rainbow_ljy/v-view": "workspace:^",
+    "animate.css": "^4.1.1",
     "core-js": "^3.30.1",
     "echarts": "^5.4.3",
     "element-plus": "^2.3.8",

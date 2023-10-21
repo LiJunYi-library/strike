@@ -13,4 +13,8 @@
   width: var(--page-width);
   min-height: 400px;
   background: orange;
+  display: none;
+}
+.r-view-page-item-same {
+  display: block;
 }

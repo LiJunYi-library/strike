@@ -1,5 +1,5 @@
 import { defineComponent, renderSlot, onBeforeUnmount, ref, inject } from "vue";
-import { ScrollController } from "./";
+import { ScrollController, useScrollController } from "./";
 
 export const RScrollFlotage = defineComponent({
   props: {
@@ -7,7 +7,6 @@ export const RScrollFlotage = defineComponent({
     flotageTop: { type: Number, default: 0 },
   },
   setup(props, context) {
-    const RScrollContext = inject("RScrollContext") || {};
     const height = props.top;
     const maxHeight = props.flotageTop;
     const top = ref(height);
@@ -15,10 +14,11 @@ export const RScrollFlotage = defineComponent({
     let prveTop = 0;
     let isDispatch = true;
 
-    const scrollController = new ScrollController({
+    const scrollController = useScrollController({
       onScroll(event, sTop) {
+        const { scrollTop, space } = event;
         // console.log("onScroll", event, sTop);
-        const space = sTop - prveTop;
+        // const space = sTop - prveTop;
         tY = tY - space;
         if (tY < height) tY = height;
         if (tY > maxHeight) tY = maxHeight;
@@ -44,29 +44,6 @@ export const RScrollFlotage = defineComponent({
     onBeforeUnmount(() => {
       scrollController.destroy();
     });
-
-    // onMounted(() => {
-    //   RScrollContext.element.addEventListener("scroll", (event) => {
-    //     const sTop = RScrollContext.element.scrollTop;
-    //     const space = sTop - prveTop;
-    //     tY = tY - space;
-    //     if (tY < -height) tY = -height;
-    //     if (tY > 0) tY = 0;
-
-    //     if (tY === -height || tY === 0) {
-    //       if (isDispatch === false) console.log("dispatch 666 flotage", tY);
-    //       isDispatch = true;
-    //     }
-
-    //     if (-height < tY && tY < 0) {
-    //       isDispatch = false;
-    //       console.log("dispatch  flotage", tY);
-    //     }
-
-    //     prveTop = sTop;
-    //     top.value = tY;
-    //   });
-    // });
 
     return (vm) => {
       return (

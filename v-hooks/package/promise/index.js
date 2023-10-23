@@ -234,15 +234,6 @@ function usePromise(fun, options = {}) {
     },
   });
 
-  function about() {
-    queue.forEach((el) => {
-      el.abouted = true;
-    });
-    defQueue.forEach((el) => {
-      el.abouted = true;
-    });
-  }
-
   const beginSend = create(fun, queue, {
     before: () => {
       begin.value = true;
@@ -266,6 +257,15 @@ function usePromise(fun, options = {}) {
       config.finally();
     },
   });
+
+  function about() {
+    queue.forEach((el) => {
+      el.abouted = true;
+    });
+    defQueue.forEach((el) => {
+      el.abouted = true;
+    });
+  }
 
   function nextSend(...args) {
     about();

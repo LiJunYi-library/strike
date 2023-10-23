@@ -2,16 +2,61 @@
   position: relative;
   overflow: auto;
   max-height: 100vh;
+  overflow-x: hidden;
 }
 
 .r-scroll-sticky {
   position: sticky;
-  z-index: 5;
+  z-index: 11;
   // transition: 0.1s;
 }
 
 .r-scroll-flotage {
   position: sticky;
-  z-index: 4;
+  z-index: 11;
   // transition: 0.1s;
+}
+
+.r-scroll-fold {
+  position: relative;
+  width: 100%;
+  left: 0;
+  top: 0;
+  z-index: 12;
+}
+
+.r-scroll-list {
+  .list-finished,
+  .list-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+  }
+
+  .list-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 286px;
+  }
+
+  .list-error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 286px;
+    color: red;
+  }
+  .r-list-skelecton {
+    height: 140px;
+    background: url("./skelecton.png");
+    background-size: cover;
+  }
+}
+
+.r-scroll-list-bottom {
+  min-height: 1px;
 }

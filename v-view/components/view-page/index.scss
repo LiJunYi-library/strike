@@ -1,20 +1,20 @@
 .r-view-page {
   --page-width: 100vw;
-}
-.r-view-page-scroll {
   width: var(--page-width);
-  overflow: hidden;
 }
+
 .r-view-page-list {
   display: inline-flex;
   flex-wrap: nowrap;
 }
+.r-view-page-list-transition {
+  transition: 0.25s;
+}
 .r-view-page-item {
   width: var(--page-width);
   min-height: 400px;
-  background: orange;
-  display: none;
+  background: rgb(252, 252, 0);
 }
 .r-view-page-item-same {
-  display: block;
+  z-index: 5;
 }

@@ -35,9 +35,7 @@ function getListLoadProps(options) {
 
 function useListLoad(props = {}) {
   const config = getListLoadProps(props);
-  const asyncHooks = usePromise(config.fetchCb, {
-    ...config,
-  });
+  const asyncHooks = usePromise(config.fetchCB, { ...config });
 
   const list = ref(config.list);
   const currentPage = ref(config.currentPage);
@@ -93,6 +91,5 @@ function useListLoad(props = {}) {
       config.fetchConcatCB(proxy);
     });
   }
-
   return arguments_;
 }

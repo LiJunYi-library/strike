@@ -4,7 +4,7 @@ import {
   computed,
   onMounted,
   onBeforeUnmount,
-  ref,
+  inject,
   reactive,
   provide,
 } from "vue";
@@ -12,47 +12,111 @@ import "./index.scss";
 import { arrayRemove } from "@rainbow_ljy/rainbow-js";
 
 export class ScrollController {
-  static scrollControllerList = [];
   onScroll = () => 0;
   onFlotage = () => 0;
+  events = [];
+  elements = [];
+  currentElement = undefined;
+  otherElements = [];
   constructor(obj = {}) {
     Object.assign(this, obj);
-    ScrollController.scrollControllerList.push(this);
   }
 
-  dispatchFlotage(...arg) {
-    ScrollController.scrollControllerList.forEach((element) => {
+  addEvent(eventFun) {
+    this.events.push(eventFun);
+  }
+
+  removeEvent(eventFun) {
+    arrayRemove(this.events, eventFun);
+  }
+
+  dispatchScroll(...arg) {
+    this.events.forEach((fun) => {
+      fun(...arg);
+    });
+  }
+
+  addElement(ele) {
+    this.elements.push(ele);
+  }
+
+  removeElement(ele) {
+    arrayRemove(this.elements, ele);
+  }
+}
+
+export function useScrollController(props = {}) {
+  const RScrollContext = inject("RScrollContext") || {};
+  const controller = reactive({
+    onScroll: () => undefined,
+    onFlotage: () => undefined,
+    ...props,
+    destroy,
+    dispatchFlotage,
+  });
+
+  RScrollContext?.children?.push?.(controller);
+
+  function dispatchFlotage(...arg) {
+    RScrollContext.children.forEach((element) => {
       element.onFlotage(...arg);
     });
   }
 
-  destroy() {
-    arrayRemove(ScrollController.scrollControllerList, this);
+  function destroy() {
+    arrayRemove(RScrollContext?.children, this);
   }
+
+  return controller;
 }
 
 export const RScroll = defineComponent({
-  props: {},
+  props: {
+    scrollController: Object,
+  },
   setup(props, context) {
+    const { scrollController: SC } = props;
     const RScrollContext = reactive({
       element: null,
+      otherElement: [],
+      children: [],
+      isHandActuated: false,
     });
     provide("RScrollContext", RScrollContext);
+    let prveTop = 0;
+    let scrollTop = 0;
+    if (SC) SC.addElement(RScrollContext);
 
     function onScroll(event) {
-      const sTop = RScrollContext.element.scrollTop;
-      event.scrollTop = sTop;
-      ScrollController.scrollControllerList.forEach((el) => {
-        el.onScroll(event, sTop);
+      if (RScrollContext.isHandActuated) {
+        RScrollContext.isHandActuated = false;
+        return;
+      }
+      // console.log("-------------onScroll");
+      if (SC) SC.currentElement = RScrollContext;
+      if (SC) SC.otherElements = SC.elements.filter((el) => el !== SC.currentElement);
+      scrollTop = RScrollContext.element.scrollTop;
+      const space = scrollTop - prveTop;
+      event.space = space;
+      event.scrollTop = scrollTop;
+
+      RScrollContext.children.forEach((el) => {
+        el.onScroll(event, scrollTop);
       });
+
+      if (SC) SC.dispatchScroll(event);
+      context.emit("scrollChange", scrollTop);
+      prveTop = scrollTop;
     }
 
-    onMounted(() => {
-      RScrollContext.element.addEventListener("scroll", onScroll);
-    });
+    RScrollContext.scrollTo = (top) => {
+      RScrollContext.isHandActuated = true;
+      RScrollContext.element.scrollTop = top;
+      prveTop = top;
+    };
 
     onBeforeUnmount(() => {
-      RScrollContext.element.removeEventListener("scroll", onScroll);
+      if (SC) SC.removeElement(RScrollContext);
     });
 
     return (vm) => {
@@ -62,6 +126,7 @@ export const RScroll = defineComponent({
             RScrollContext.element = el;
           }}
           class="r-scroll"
+          onScroll={onScroll}
         >
           {renderSlot(context.slots, "default")}
         </div>
@@ -72,3 +137,5 @@ export const RScroll = defineComponent({
 
 export * from "./flotage";
 export * from "./sticky";
+export * from "./fold";
+export * from "./list";

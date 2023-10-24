@@ -1,0 +1,94 @@
+.r-dropdown {
+  position: relative;
+  transform: translateX(0px);
+  display: inline-flex;
+  margin-left: 100px;
+}
+
+.r-dropdown-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .r-dropdown-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .r-dropdown-icon {
+    display: block;
+    transition: 0.2s;
+  }
+
+  .rote {
+    transform: rotate(180deg);
+  }
+
+  .iconfont {
+    display: block;
+  }
+}
+.r-dropdown-label {
+  height: 18px;
+  font-size: 13px;
+  font-family: PingFangSC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #111111;
+  line-height: 18px;
+}
+
+.r-dropdown-text-act {
+  color: #9b6343;
+  .r-dropdown-label {
+    color: #9b6343;
+  }
+}
+
+.r-dropdown-popup {
+  animation-duration: 0.2s;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.r-dropdown-popup-content {
+  animation-duration: 0.2s;
+}
+
+.r-dropdown-select-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3列，每列宽度相等 */
+  grid-gap: 8px; /* 列间距 */
+  padding: 16px 12px;
+  box-sizing: border-box;
+  background: #f4f4fb;
+  border-radius: 0px 0px 12px 12px;
+  max-height: 300px;
+  overflow: scroll;
+}
+
+.r-dropdown-select-list-item {
+  height: 36px;
+  line-height: 36px;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: PingFangSC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #111111;
+}
+
+.r-dropdown-select-list-item-act {
+  font-size: 13px;
+  font-family: PingFangSC-Medium, PingFang SC;
+  font-weight: 500;
+  color: #111111;
+  background: #eed9cd;
+  border-radius: 3px;
+}

@@ -7,3 +7,4 @@ export * from "./icon";
 export * from './loading'
 export * from './scroll'
 export * from './layout'
+export * from './dropdown'

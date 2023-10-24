@@ -5,13 +5,15 @@ export const RScrollFold = defineComponent({
   props: {
     top: { type: Number, default: 0 },
     scrollController: Object,
+    minHeight: { type: Number, default: 0 },
   },
   setup(props, context) {
+    console.log(props.minHeight);
     const top = ref(props.top);
     const node = {
       el: undefined,
       sTop: 0,
-      minHeight: 50,
+      minHeight: props.minHeight,
       get clientHeight() {
         return this.el.offsetHeight - this.sTop;
       },

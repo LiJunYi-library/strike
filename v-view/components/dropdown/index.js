@@ -102,6 +102,7 @@ export const RDropdown = defineComponent({
     }
 
     function documentClick(event) {
+      if (look.value === false) return;
       closed();
     }
 

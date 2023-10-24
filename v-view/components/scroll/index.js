@@ -85,7 +85,6 @@ export const RScroll = defineComponent({
     provide("RScrollContext", RScrollContext);
     let prveTop = 0;
     let scrollTop = 0;
-    if (SC) SC.addElement(RScrollContext);
 
     function onScroll(event) {
       if (RScrollContext.isHandActuated) {
@@ -115,12 +114,11 @@ export const RScroll = defineComponent({
       prveTop = top;
     };
 
-    function setCanScroll(bool = true) {
+    RScrollContext.setCanScroll = (bool = true) => {
       RScrollContext.element.setAttribute("data-scroll", bool);
-    }
+    };
 
-    RScrollContext.setCanScroll = setCanScroll;
-
+    if (SC) SC.addElement(RScrollContext);
     onBeforeUnmount(() => {
       if (SC) SC.removeElement(RScrollContext);
     });

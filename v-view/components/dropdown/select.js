@@ -28,7 +28,7 @@ export const RDropdownSelect = defineComponent({
     }
     return () => {
       return (
-        <RDropdown>
+        <RDropdown {...context.attrs}>
           {{
             content: (ctx) => (
               <div class={["r-dropdown-text", listHook.label && "r-dropdown-text-act"]}>

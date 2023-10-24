@@ -16,6 +16,7 @@ export const RDropdown = defineComponent({
   props: {
     label: { type: [String, Number], default: "" },
     defaultLabel: [String, Number],
+    scrollController: Object,
   },
   setup(props, context) {
     const visible = ref(false);
@@ -33,6 +34,7 @@ export const RDropdown = defineComponent({
       open,
       closed,
       close,
+      prveClosed,
       visible,
       look,
       show,
@@ -40,12 +42,17 @@ export const RDropdown = defineComponent({
     });
 
     function open() {
-      if (prveDropdownPopup) prveDropdownPopup.closed();
+      if (prveDropdownPopup) prveDropdownPopup.prveClosed();
       look.value = true;
       visible.value = true;
       show.value = true;
       unShow.value = false;
       prveDropdownPopup = ctx;
+      if (props.scrollController) {
+        props.scrollController.elements.forEach((el) => {
+          el.setCanScroll(false);
+        });
+      }
     }
 
     function closed() {
@@ -57,14 +64,30 @@ export const RDropdown = defineComponent({
       outTimer = setTimeout(() => {
         visible.value = false;
       }, duration);
+      if (props.scrollController) {
+        props.scrollController.elements.forEach((el) => {
+          el.setCanScroll(true);
+        });
+      }
+    }
+
+    function prveClosed() {
+      console.log("prveClosed");
+      look.value = false;
+      show.value = false;
+      unShow.value = true;
+      prveDropdownPopup = undefined;
+      outTimer = setTimeout(() => {
+        visible.value = false;
+      }, duration);
     }
 
     function close() {
-      prveDropdownPopup = undefined;
       look.value = false;
       show.value = false;
       unShow.value = true;
       visible.value = false;
+      prveDropdownPopup = undefined;
     }
 
     function onClick(event) {

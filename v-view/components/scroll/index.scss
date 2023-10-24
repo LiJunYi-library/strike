@@ -5,6 +5,11 @@
   overflow-x: hidden;
 }
 
+.r-scroll[data-scroll="false"] {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 .r-scroll-sticky {
   position: sticky;
   z-index: 11;

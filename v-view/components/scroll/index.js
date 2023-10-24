@@ -115,6 +115,12 @@ export const RScroll = defineComponent({
       prveTop = top;
     };
 
+    function setCanScroll(bool = true) {
+      RScrollContext.element.setAttribute("data-scroll", bool);
+    }
+
+    RScrollContext.setCanScroll = setCanScroll;
+
     onBeforeUnmount(() => {
       if (SC) SC.removeElement(RScrollContext);
     });

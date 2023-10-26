@@ -17,6 +17,10 @@ export const RDropdown = defineComponent({
     label: { type: [String, Number], default: "" },
     defaultLabel: [String, Number],
     scrollController: Object,
+    stopPropagation:{ type: Boolean, default:true},
+    lableClass: [String, Number],
+    popTop: [String, Number],
+    popLeft: [String, Number],
   },
   setup(props, context) {
     const visible = ref(false);
@@ -47,6 +51,7 @@ export const RDropdown = defineComponent({
       visible.value = true;
       show.value = true;
       unShow.value = false;
+      context.emit('open') 
       prveDropdownPopup = ctx;
       if (props.scrollController) {
         props.scrollController.elements.forEach((el) => {
@@ -61,6 +66,7 @@ export const RDropdown = defineComponent({
       show.value = false;
       unShow.value = true;
       prveDropdownPopup = undefined;
+      context.emit('close') 
       outTimer = setTimeout(() => {
         visible.value = false;
       }, duration);
@@ -77,6 +83,7 @@ export const RDropdown = defineComponent({
       show.value = false;
       unShow.value = true;
       prveDropdownPopup = undefined;
+      context.emit('close') 
       outTimer = setTimeout(() => {
         visible.value = false;
       }, duration);
@@ -88,11 +95,12 @@ export const RDropdown = defineComponent({
       unShow.value = true;
       visible.value = false;
       prveDropdownPopup = undefined;
+
     }
 
     function onClick(event) {
       console.log("onClick");
-      event.stopPropagation();
+      if(props.stopPropagation)   event.stopPropagation();
       if (bool) return;
       bool = true;
       visible.value ? closed() : open();
@@ -113,11 +121,13 @@ export const RDropdown = defineComponent({
     });
 
     const getTop = () => {
+      if( props.popTop) return props.popTop
       if (!dropdownHtml) return 0;
       return dropdownHtml.offsetHeight + "px";
     };
     //   document.body.getBoundingClientRect
     const getLeft = () => {
+      if( props.popLeft) return props.popLeft
       if (!dropdownHtml) return 0;
       const offset = dropdownHtml.getBoundingClientRect();
       return -offset.left + "px";
@@ -163,7 +173,7 @@ export const RDropdown = defineComponent({
           class="r-dropdown"
           ref={(el) => (dropdownHtml = el)}
         >
-          <div class="r-dropdown-content" onClick={onClick}>
+          <div class={["r-dropdown-content",props.lableClass]} onClick={onClick}>
             {renderSlot(context.slots, "content", ctx, () => [
               <div class="r-dropdown-text">
                 {renderSlot(context.slots, "label", ctx, () => [

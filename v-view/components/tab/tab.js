@@ -134,6 +134,9 @@ RTab = defineComponent({
             onTouchmove={(event) => {
               event.stopPropagation();
             }}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
             class="r-tab-scroll"
             ref={(el) => (htmls.scrollHtml = el)}
           >
@@ -151,7 +154,7 @@ RTab = defineComponent({
                       class={["r-tab-item", listHook.same(item) && "r-tab-item-same"]}
                       ref={(el) => (htmls.itemsHtml[index] = el)}
                       key={index}
-                      onClick={() => {
+                      onClick={(event) => {
                         if (listHook.same(item)) return;
                         listHook.onSelect(item, index);
                         context.emit("change", item, index);

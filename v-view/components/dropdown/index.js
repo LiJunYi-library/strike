@@ -112,16 +112,16 @@ export const RDropdown = defineComponent({
       document.removeEventListener("click", documentClick);
     });
 
-    const top = computed(() => {
+    const getTop = () => {
       if (!dropdownHtml) return 0;
       return dropdownHtml.offsetHeight + "px";
-    });
+    };
     //   document.body.getBoundingClientRect
-    const left = computed(() => {
+    const getLeft = () => {
       if (!dropdownHtml) return 0;
       const offset = dropdownHtml.getBoundingClientRect();
       return -offset.left + "px";
-    });
+    };
 
     // onScroll={(e) => {
     //     e.stopPropagation();
@@ -183,8 +183,8 @@ export const RDropdown = defineComponent({
               onClick={popupClick}
               onTouchstart={popupTouchstart}
               style={{
-                left: left.value,
-                top: top.value,
+                left: getLeft(),
+                top: getTop(),
                 zIndex: look.value ? 2001 : 2000,
               }}
               class={[

@@ -42,11 +42,11 @@ export const RDropdownSelect = defineComponent({
                 </span>
               </div>
             ),
-            ...context.slots,
+            // ...context.slots,
             default: ({ closed }) => (
               <div class="r-dropdown-select-list">
                 {renderList(listHook.list, (item, index) => {
-                  return renderSlot(context.slots, "item", { item, index }, () => [
+                  return renderSlot(context.slots, "default", { item, index }, () => [
                     <div
                       onClick={() => onClick(item, index, closed)}
                       class={[
@@ -55,7 +55,9 @@ export const RDropdownSelect = defineComponent({
                       ]}
                       key={index}
                     >
-                      {listHook.formatterLabel(item, index)}
+                      {renderSlot(context.slots, "item", { item, index }, () => [
+                        listHook.formatterLabel(item, index),
+                      ])}
                     </div>,
                   ]);
                 })}

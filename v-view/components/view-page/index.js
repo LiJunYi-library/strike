@@ -48,7 +48,7 @@ const Context = defineComponent({
               ref={(el) => (itemsHtml[index] = el)}
               key={index}
             >
-              {renderSlot(RViewPageContext.slots, "item", { item, index })}
+               {renderSlot(RViewPageContext.slots, "item", { item, index })}
             </div>
           );
         });

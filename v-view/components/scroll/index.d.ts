@@ -14,4 +14,5 @@ export class ScrollController {
   onScroll: void;
   onFlotage: void;
   events: any[];
+  scrollAllTop:(top:number) => void;
 }

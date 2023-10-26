@@ -22,9 +22,9 @@ export class ScrollController {
     Object.assign(this, obj);
   }
 
-  scrollAllTop() {
+  scrollAllTop(top) {
     this.elements.forEach((ctx) => {
-      ctx.element.scrollTop = 0;
+      ctx.element.scrollTop = top;
     });
   }
 

@@ -22,9 +22,9 @@ export const RScrollFold = defineComponent({
       },
       get clipHeight() {},
     };
+    let isDispatch = true;
 
     let tY = 0;
-    let isDispatch = true;
     let min = -100;
     let max = -50;
     let showHeight = 150;
@@ -74,41 +74,83 @@ export const RScrollFold = defineComponent({
       //   console.log("showHeight",showHeight);
       top.value = tY;
     }
+    //   if (scrollTop > height && space > 0) return;
+    //   tY = tY - space;
+    //   if (tY > 0) tY = 0;
+    //   if (tY < -height) tY = -height;
+    //   top.value = tY;
+
+    function dispatchScroll(scrollTop, space) {
+      console.log("正在 滚动", space);
+      props.scrollController.otherElements.forEach((ele) => {
+        ele.scrollAdd(space);
+      });
+    }
+
+    //  10 10
+    //  20 30
+    //  40 35
+
+    function onerScroll(scrollTop, space) {
+      let mSpace = space;
+      let mSTop = node.sTop;
+      node.sTop = node.sTop + mSpace;
+      if (node.sTop > node.maxTop) {
+        node.sTop = node.maxTop;
+        mSpace = node.sTop - mSTop;
+      }
+      if (node.sTop < 0) {
+        node.sTop = 0;
+        mSpace = node.sTop - mSTop;
+      }
+      console.log("space", space);
+      console.log("mSpace", mSpace);
+      top.value = -node.sTop;
+      if (node.sTop === 0 || node.sTop === node.maxTop) {
+        if (isDispatch === false) dispatchScroll(scrollTop, mSpace);
+        isDispatch = true;
+      }
+
+      if (node.sTop > 0 && node.sTop < node.maxTop) {
+        isDispatch = false;
+        dispatchScroll(scrollTop, mSpace);
+      }
+    }
 
     function scroll(scrollTop, space) {
-      //   if (scrollTop > height && space > 0) return;
-      //   tY = tY - space;
-      //   if (tY > 0) tY = 0;
-      //   if (tY < -height) tY = -height;
-      //   top.value = tY;
-
       if (space > 0) {
-        node.sTop = node.sTop + space;
-        if (node.sTop > node.maxTop) node.sTop = node.maxTop;
-        if (node.sTop < 0) node.sTop = 0;
-        top.value = -node.sTop;
-
-        // console.log(node.sTop, props.scrollController.otherElements);
-        props.scrollController.otherElements.forEach((ele) => {
-          //   console.log(ele.element.scrollTop);
-          if (ele.element.scrollTop < node.maxTop) {
-            ele.scrollTo(node.sTop);
-          }
-        });
+        onerScroll(scrollTop, space);
       }
-
       if (space < 0 && scrollTop < node.maxTop) {
-        node.sTop = node.sTop + space;
-        if (node.sTop > node.maxTop) node.sTop = node.maxTop;
-        if (node.sTop < 0) node.sTop = 0;
-        top.value = -node.sTop;
-        props.scrollController.otherElements.forEach((ele) => {
-          if (ele.element.scrollTop < node.maxTop) {
-            ele.scrollTo(node.sTop);
-          }
-        });
+        onerScroll(scrollTop, space);
       }
 
+      // if (space > 0) {
+      //   node.sTop = node.sTop + space;
+      //   if (node.sTop > node.maxTop) node.sTop = node.maxTop;
+      //   if (node.sTop < 0) node.sTop = 0;
+      //   top.value = -node.sTop;
+      //   console.log("正在 滚动");
+      //   // console.log(node.sTop, props.scrollController.otherElements);
+      //   props.scrollController.otherElements.forEach((ele) => {
+      //     //   console.log(ele.element.scrollTop);
+      //     if (ele.element.scrollTop < node.maxTop) {
+      //       ele.scrollTo(node.sTop);
+      //     }
+      //   });
+      // }
+      // if (space < 0 && scrollTop < node.maxTop) {
+      //   console.log("正在 向下 滚动");
+      //   node.sTop = node.sTop + space;
+      //   if (node.sTop > node.maxTop) node.sTop = node.maxTop;
+      //   if (node.sTop < 0) node.sTop = 0;
+      //   top.value = -node.sTop;
+      //   props.scrollController.otherElements.forEach((ele) => {
+      //     if (ele.element.scrollTop < node.maxTop) {
+      //       ele.scrollTo(node.sTop);
+      //     }
+      //   });
+      // }
       //   if (space > 0) {
       //     // if( )
       //     // if (tY > 0) tY = 0;
@@ -119,7 +161,6 @@ export const RScrollFold = defineComponent({
       //     //   ele.scrollTo(100);
       //     // });
       //   }
-
       //   if (space < 0 && scrollTop < 100) {
       //     tY = tY - space;
       //     if (tY > 0) tY = 0;
@@ -127,7 +168,6 @@ export const RScrollFold = defineComponent({
       //     top.value = tY;
       //     return;
       //   }
-
       //   if (space < 0) {
       //     tY = tY - space;
       //     if (tY > max) tY = max;

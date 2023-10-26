@@ -22,6 +22,12 @@ export class ScrollController {
     Object.assign(this, obj);
   }
 
+  scrollAllTop() {
+    this.elements.forEach((ctx) => {
+      ctx.element.scrollTop = 0;
+    });
+  }
+
   addEvent(eventFun) {
     this.events.push(eventFun);
   }
@@ -112,6 +118,14 @@ export const RScroll = defineComponent({
       RScrollContext.isHandActuated = true;
       RScrollContext.element.scrollTop = top;
       prveTop = top;
+    };
+
+    RScrollContext.scrollAdd = (space) => {
+      RScrollContext.isHandActuated = true;
+      let st = RScrollContext.element.scrollTop + space;
+      if (st < 0) st = 0;
+      RScrollContext.element.scrollTop = st;
+      prveTop = st;
     };
 
     RScrollContext.setCanScroll = (bool = true) => {

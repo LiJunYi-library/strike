@@ -1,11 +1,17 @@
 .r-view-page {
   --page-width: 100vw;
   width: var(--page-width);
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .r-view-page-list {
   display: inline-flex;
   flex-wrap: nowrap;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 .r-view-page-list-transition {
   transition: 0.25s;

@@ -18,7 +18,7 @@ export const RDropdown = defineComponent({
     defaultLabel: [String, Number],
     scrollController: Object,
     stopPropagation:{ type: Boolean, default:true},
-    lableClass: [String, Number],
+    labelClass: [String, Number],
     popTop: [String, Number],
     popLeft: [String, Number],
   },
@@ -69,6 +69,7 @@ export const RDropdown = defineComponent({
       context.emit('close') 
       outTimer = setTimeout(() => {
         visible.value = false;
+        context.emit('closed') 
       }, duration);
       if (props.scrollController) {
         props.scrollController.elements.forEach((el) => {
@@ -86,6 +87,7 @@ export const RDropdown = defineComponent({
       context.emit('close') 
       outTimer = setTimeout(() => {
         visible.value = false;
+        context.emit('closed') 
       }, duration);
     }
 
@@ -99,6 +101,7 @@ export const RDropdown = defineComponent({
     }
 
     function onClick(event) {
+      context.emit('labelClick') 
       console.log("onClick");
       if(props.stopPropagation)   event.stopPropagation();
       if (bool) return;
@@ -173,7 +176,7 @@ export const RDropdown = defineComponent({
           class="r-dropdown"
           ref={(el) => (dropdownHtml = el)}
         >
-          <div class={["r-dropdown-content",props.lableClass]} onClick={onClick}>
+          <div class={["r-dropdown-content",props.labelClass]} onClick={onClick}>
             {renderSlot(context.slots, "content", ctx, () => [
               <div class="r-dropdown-text">
                 {renderSlot(context.slots, "label", ctx, () => [

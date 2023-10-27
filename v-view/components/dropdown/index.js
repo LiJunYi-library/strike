@@ -154,6 +154,7 @@ export const RDropdown = defineComponent({
 
     function popupClick(event) {
       event.stopPropagation();
+      closed();//  ios部分机型会出错
     }
 
     function popupContentClick(event) {
@@ -162,7 +163,7 @@ export const RDropdown = defineComponent({
 
     function popupTouchstart(event) {
       event.stopPropagation();
-      closed();
+      // closed();   ios部分机型会出错
     }
 
     function popupContentTouchstart(event) {

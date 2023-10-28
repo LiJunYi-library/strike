@@ -3,6 +3,7 @@
   overflow: auto;
   max-height: 100vh;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   &::-webkit-scrollbar {
     display: none;
   }
@@ -41,10 +42,10 @@
     align-items: center;
     height: 40px;
     font-size: 14px;
-      font-family: PingFangSC-Regular, PingFang SC;
-      font-weight: 400;
-      color: #666666;
-      // background: red;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: #666666;
+    // background: red;
   }
 
   .list-empty {

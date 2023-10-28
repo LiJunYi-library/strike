@@ -101,6 +101,10 @@ export const RScroll = defineComponent({
       if (SC) SC.currentElement = RScrollContext;
       if (SC) SC.otherElements = SC.elements.filter((el) => el !== SC.currentElement);
       scrollTop = RScrollContext.element.scrollTop;
+      const maxTop = RScrollContext.element.scrollHeight - RScrollContext.element.offsetHeight;
+      if (scrollTop < 0) scrollTop = 0;
+      if (scrollTop > maxTop) scrollTop = maxTop;
+
       const space = scrollTop - prveTop;
       event.space = space;
       event.scrollTop = scrollTop;

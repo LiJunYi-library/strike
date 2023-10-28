@@ -84,6 +84,7 @@ function useRadio(props = {}) {
     selectOfValue,
     labelOfValue,
     indexOfValue,
+    someValue,
   };
 
   params.proxy = reactive(params);
@@ -162,6 +163,10 @@ function useRadio(props = {}) {
     argument.select = argument.list.find?.(findForValue(val));
     argument.label = formatterLabel(argument.select);
     argument.index = findIndex(argument.list, argument.select);
+  }
+
+  function someValue(val) {
+    return argument.list.some(findForValue(val));
   }
 
   function selectOfValue(val) {

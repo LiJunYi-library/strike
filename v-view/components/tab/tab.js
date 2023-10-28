@@ -92,6 +92,7 @@ const Active = defineComponent({
 
 RTab = defineComponent({
   props: {
+    clickStop: Boolean,
     listHook: Object,
     skelectonCount: {
       type: Number,
@@ -134,9 +135,6 @@ RTab = defineComponent({
             onTouchmove={(event) => {
               event.stopPropagation();
             }}
-            onClick={(event) => {
-              event.stopPropagation();
-            }}
             class="r-tab-scroll"
             ref={(el) => (htmls.scrollHtml = el)}
           >
@@ -155,6 +153,7 @@ RTab = defineComponent({
                       ref={(el) => (htmls.itemsHtml[index] = el)}
                       key={index}
                       onClick={(event) => {
+                        if (props.clickStop) event.stopPropagation();
                         if (listHook.same(item)) return;
                         listHook.onSelect(item, index);
                         context.emit("change", item, index);

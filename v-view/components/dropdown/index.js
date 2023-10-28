@@ -7,6 +7,7 @@ import {
   ref,
   reactive,
   provide,
+  Teleport,
 } from "vue";
 import "./index.scss";
 
@@ -17,10 +18,12 @@ export const RDropdown = defineComponent({
     label: { type: [String, Number], default: "" },
     defaultLabel: [String, Number],
     scrollController: Object,
-    stopPropagation:{ type: Boolean, default:true},
+    stopPropagation: { type: Boolean, default: true },
     labelClass: [String, Number],
-    popTop: [String, Number],
-    popLeft: [String, Number],
+    popTop: [String, Number, Function],
+    popLeft: [String, Number, Function],
+    teleport: [String, Number, HTMLElement],
+    teleportDisabled: { type: Boolean, default: true },
   },
   setup(props, context) {
     const visible = ref(false);
@@ -51,7 +54,7 @@ export const RDropdown = defineComponent({
       visible.value = true;
       show.value = true;
       unShow.value = false;
-      context.emit('open') 
+      context.emit("open");
       prveDropdownPopup = ctx;
       if (props.scrollController) {
         props.scrollController.elements.forEach((el) => {
@@ -66,10 +69,10 @@ export const RDropdown = defineComponent({
       show.value = false;
       unShow.value = true;
       prveDropdownPopup = undefined;
-      context.emit('close') 
+      context.emit("close");
       outTimer = setTimeout(() => {
         visible.value = false;
-        context.emit('closed') 
+        context.emit("closed");
       }, duration);
       if (props.scrollController) {
         props.scrollController.elements.forEach((el) => {
@@ -84,10 +87,10 @@ export const RDropdown = defineComponent({
       show.value = false;
       unShow.value = true;
       prveDropdownPopup = undefined;
-      context.emit('close') 
+      context.emit("close");
       outTimer = setTimeout(() => {
         visible.value = false;
-        context.emit('closed') 
+        context.emit("closed");
       }, duration);
     }
 
@@ -97,13 +100,12 @@ export const RDropdown = defineComponent({
       unShow.value = true;
       visible.value = false;
       prveDropdownPopup = undefined;
-
     }
 
     function onClick(event) {
-      context.emit('labelClick') 
+      context.emit("labelClick");
       console.log("onClick");
-      if(props.stopPropagation)   event.stopPropagation();
+      if (props.stopPropagation) event.stopPropagation();
       if (bool) return;
       bool = true;
       visible.value ? closed() : open();
@@ -124,37 +126,32 @@ export const RDropdown = defineComponent({
     });
 
     const getTop = () => {
-      if( props.popTop) return props.popTop
+      if (props.popTop) {
+        if (props.popTop instanceof Function) return props.popTop(dropdownHtml);
+      }
+
+      if (props.teleport === "body") {
+        const offset = dropdownHtml.getBoundingClientRect();
+        return offset.bottom + "px";
+      }
+
       if (!dropdownHtml) return 0;
+
       return dropdownHtml.offsetHeight + "px";
     };
     //   document.body.getBoundingClientRect
     const getLeft = () => {
-      if( props.popLeft) return props.popLeft
+      if (props.popLeft) {
+        return props.popLeft;
+      }
       if (!dropdownHtml) return 0;
       const offset = dropdownHtml.getBoundingClientRect();
       return -offset.left + "px";
     };
 
-    // onScroll={(e) => {
-    //     e.stopPropagation();
-    //     e.defaultPrevented();
-    //     console.log("onTouchstart");
-    //   }}
-    //   onTouchstart={(e) => {
-    //     e.stopPropagation();
-    //     console.log("onTouchstart");
-    //   }}
-    //   onTouchmove={(e) => {
-    //     e.stopPropagation();
-    //   }}
-    //   onTouchend={(e) => {
-    //     e.stopPropagation();
-    //   }}
-
     function popupClick(event) {
       event.stopPropagation();
-      closed();//  ios部分机型会出错
+      closed(); //  ios部分机型会出错
     }
 
     function popupContentClick(event) {
@@ -177,7 +174,7 @@ export const RDropdown = defineComponent({
           class="r-dropdown"
           ref={(el) => (dropdownHtml = el)}
         >
-          <div class={["r-dropdown-content",props.labelClass]} onClick={onClick}>
+          <div class={["r-dropdown-content", props.labelClass]} onClick={onClick}>
             {renderSlot(context.slots, "content", ctx, () => [
               <div class="r-dropdown-text">
                 {renderSlot(context.slots, "label", ctx, () => [
@@ -193,33 +190,35 @@ export const RDropdown = defineComponent({
           </div>
 
           {visible.value && (
-            <div
-              onClick={popupClick}
-              onTouchstart={popupTouchstart}
-              style={{
-                left: getLeft(),
-                top: getTop(),
-                zIndex: look.value ? 2001 : 2000,
-              }}
-              class={[
-                "r-dropdown-popup animate__animated ",
-                prveDropdownPopup && show.value && "animate__fadeIn",
-                prveDropdownPopup && unShow.value && "animate__fadeOut",
-              ]}
-            >
-              {/* prveDropdownPopup && */}
+            <Teleport to={props.teleport} disabled={props.teleportDisabled}>
               <div
-                onClick={popupContentClick}
-                onTouchstart={popupContentTouchstart}
+                onClick={popupClick}
+                onTouchstart={popupTouchstart}
+                style={{
+                  left: getLeft(),
+                  top: getTop(),
+                  zIndex: look.value ? 2001 : 2000,
+                }}
                 class={[
-                  "r-dropdown-popup-content animate__animated",
-                  show.value && "animate__slideInDown",
-                  unShow.value && "animate__slideOutUp",
+                  "r-dropdown-popup animate__animated ",
+                  prveDropdownPopup && show.value && "animate__fadeIn",
+                  prveDropdownPopup && unShow.value && "animate__fadeOut",
                 ]}
               >
-                {renderSlot(context.slots, "default", ctx)}
+                {/* prveDropdownPopup && */}
+                <div
+                  onClick={popupContentClick}
+                  onTouchstart={popupContentTouchstart}
+                  class={[
+                    "r-dropdown-popup-content animate__animated",
+                    show.value && "animate__slideInDown",
+                    unShow.value && "animate__slideOutUp",
+                  ]}
+                >
+                  {renderSlot(context.slots, "default", ctx)}
+                </div>
               </div>
-            </div>
+            </Teleport>
           )}
         </div>
       );

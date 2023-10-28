@@ -27,16 +27,32 @@ const Context = defineComponent({
     let actItemHtml = null;
     const RViewPageContext = inject("RViewPageContext") || {};
 
-    function getTranslateX() {
-      if (!containerHtml) return;
-      const width = containerHtml.offsetWidth;
-      const nth = listHook.index;
-      const x = nth * -width; // 反过来 nth * width - (listHook.list.length - 1) * width
-      return x;
-    }
+    const compatibility = {
+      className: "r-view-page-compatibility",
+      getTranslateX() {
+        return 0;
+      },
+    };
+
+    const normal = {
+      className: "r-view-page",
+      getTranslateX() {
+        if (!containerHtml) return;
+        const width = containerHtml.offsetWidth;
+        const nth = listHook.index;
+        const x = nth * -width; // 反过来 nth * width - (listHook.list.length - 1) * width
+        return x;
+      },
+    };
+
+    // const platform = navigator.platform;
+    // const abnormality = ["iPhone"];
+    // const opt = abnormality.some((el) => el === platform) ? compatibility : normal;
+
+    const opt = normal;
 
     onMounted(() => {
-      parentHtml.style.transform = `translateX(${getTranslateX()}px)`;
+      parentHtml.style.transform = `translateX(${opt.getTranslateX()}px)`;
     });
 
     function renderContent() {
@@ -48,7 +64,7 @@ const Context = defineComponent({
               ref={(el) => (itemsHtml[index] = el)}
               key={index}
             >
-               {renderSlot(RViewPageContext.slots, "item", { item, index })}
+              {renderSlot(RViewPageContext.slots, "item", { item, index })}
             </div>
           );
         });
@@ -71,11 +87,11 @@ const Context = defineComponent({
 
     return (vm) => {
       return (
-        <div class="r-view-page" ref={(el) => (containerHtml = el)}>
+        <div class={opt.className} ref={(el) => (containerHtml = el)}>
           <div
             ref={(el) => (parentHtml = el)}
             style={{
-              transform: `translateX(${getTranslateX()}px)`,
+              transform: `translateX(${opt.getTranslateX()}px)`,
             }}
             class={["r-view-page-list", parentHtml && "r-view-page-list-transition"]}
           >

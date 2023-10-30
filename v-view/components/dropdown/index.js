@@ -70,9 +70,12 @@ export const RDropdown = defineComponent({
       unShow.value = true;
       prveDropdownPopup = undefined;
       context.emit("close");
+      context.emit("currentClose");
+      console.log( 'currentClose' )
       outTimer = setTimeout(() => {
         visible.value = false;
         context.emit("closed");
+        context.emit("currentClosed");
       }, duration);
       if (props.scrollController) {
         props.scrollController.elements.forEach((el) => {
@@ -88,9 +91,11 @@ export const RDropdown = defineComponent({
       unShow.value = true;
       prveDropdownPopup = undefined;
       context.emit("close");
+      context.emit("prveClose");
       outTimer = setTimeout(() => {
         visible.value = false;
         context.emit("closed");
+        context.emit("prveClosed");
       }, duration);
     }
 

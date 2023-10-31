@@ -26,18 +26,22 @@ export const RScrollFlotage = defineComponent({
         event.flotageTop = tY;
         event.flotageHeight = height + tY;
         if (tY === height || tY === maxHeight) {
-          if (isDispatch === false) scrollController.dispatchFlotage(event, tY);
+          if (isDispatch === false) {
+            scrollController.dispatchFlotage(event, tY);
+            console.log("dispatch  flotage", tY, event.flotageHeight);
+          }
           isDispatch = true;
         }
 
         if (height < tY && tY < maxHeight) {
           isDispatch = false;
           scrollController.dispatchFlotage(event, tY);
-          // console.log("dispatch  flotage", tY);
+          console.log("dispatch  flotage", tY, event.flotageHeight);
         }
 
         prveTop = sTop;
         top.value = tY;
+        scrollController.top = top.value;
       },
     });
 
@@ -48,6 +52,9 @@ export const RScrollFlotage = defineComponent({
     return (vm) => {
       return (
         <div
+          ref={(el) => {
+            scrollController.el = el;
+          }}
           style={{
             top: top.value + "px",
           }}

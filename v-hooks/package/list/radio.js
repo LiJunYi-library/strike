@@ -99,6 +99,14 @@ function useRadio(props = {}) {
     store.index = params.proxy.index;
   }
 
+  function restore() {
+    params.proxy.list = [...store.list];
+    params.proxy.select = store.select;
+    params.proxy.value = store.value;
+    params.proxy.label = store.label;
+    params.proxy.index = store.index;
+  }
+
   function transformStore() {
     argument = store;
   }
@@ -110,14 +118,6 @@ function useRadio(props = {}) {
   function transform() {
     if (argument === params.proxy) return (argument = store);
     if (argument === store) return (argument = params.proxy);
-  }
-
-  function restore() {
-    params.proxy.list = [...store.list];
-    params.proxy.select = store.select;
-    params.proxy.value = store.value;
-    params.proxy.label = store.label;
-    params.proxy.index = store.index;
   }
 
   function same(item, i) {

@@ -160,4 +160,5 @@ export const RScroll = defineComponent({
 export * from "./flotage";
 export * from "./sticky";
 export * from "./fold";
+export * from "./fixed";
 export * from "./list";

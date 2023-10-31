@@ -26,6 +26,12 @@
   // transition: 0.1s;
 }
 
+.r-scroll-fixed {
+  position: fixed;
+  width: 100%;
+  z-index: 11;
+}
+
 .r-scroll-fold {
   position: relative;
   width: 100%;

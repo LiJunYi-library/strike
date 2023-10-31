@@ -8,11 +8,13 @@ export declare const RScrollFlotage: DefineComponent<any>;
 
 export declare const RScrollFold: DefineComponent<any>;
 
+export declare const RScrollFixed: DefineComponent<any>;
+
 export declare const RScrollList: DefineComponent<any>;
 
 export class ScrollController {
   onScroll: void;
   onFlotage: void;
   events: any[];
-  scrollAllTop:(top:number) => void;
+  scrollAllTop: (top: number) => void;
 }

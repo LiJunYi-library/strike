@@ -89,7 +89,7 @@ function useRadio(props = {}) {
 
   params.proxy = reactive(params);
 
-  let argument = params.proxy;
+  let context = params.proxy;
 
   function save() {
     store.list = [...params.proxy.list];
@@ -108,69 +108,95 @@ function useRadio(props = {}) {
   }
 
   function transformStore() {
-    argument = store;
+    context = store;
   }
 
   function transformParams() {
-    argument = params.proxy;
+    context = params.proxy;
   }
 
   function transform() {
-    if (argument === params.proxy) return (argument = store);
-    if (argument === store) return (argument = params.proxy);
+    if (context === params.proxy) return (context = store);
+    if (context === store) return (context = params.proxy);
   }
 
   function same(item, i) {
-    return argument.select === item;
+    return context.select === item;
   }
 
   function onSelect(item, i) {
     if (config.cancelSame && same(item, i)) {
-      argument.select = undefined;
-      argument.index = undefined;
-      argument.label = undefined;
-      argument.value = undefined;
-      config.onChange(argument);
+      context.select = undefined;
+      context.index = undefined;
+      context.label = undefined;
+      context.value = undefined;
+      config.onChange(context);
       return;
     }
     if (same(item, i)) return;
-    argument.select = item;
-    argument.index = i;
-    argument.label = formatterLabel(item);
-    argument.value = formatterValue(item);
-    config.onChange(argument);
+    context.select = item;
+    context.index = i;
+    context.label = formatterLabel(item);
+    context.value = formatterValue(item);
+    config.onChange(context);
   }
 
   function reset() {
-    argument.select = undefined;
-    argument.value = undefined;
-    argument.label = undefined;
-    argument.index = undefined;
+    context.select = undefined;
+    context.value = undefined;
+    context.label = undefined;
+    context.index = undefined;
   }
 
   function updateList(l) {
-    argument.list = l;
+    context.list = l;
     const arg = { ...config, list: l };
     const parms = resolveProps(arg);
-    argument.select = parms.select;
-    argument.value = parms.value;
-    argument.label = parms.label;
-    argument.index = parms.index;
+    context.select = parms.select;
+    context.value = parms.value;
+    context.label = parms.label;
+    context.index = parms.index;
   }
 
   function updateValue(val) {
-    argument.value = val;
-    argument.select = argument.list.find?.(findForValue(val));
-    argument.label = formatterLabel(argument.select);
-    argument.index = findIndex(argument.list, argument.select);
+    context.value = val;
+    context.select = context.list.find?.(findForValue(val));
+    context.label = formatterLabel(context.select);
+    context.index = findIndex(context.list, context.select);
+  }
+
+  function updateLabel(val) {
+    context.label = val;
+    context.select = context.list.find(findForLabel(context.label));
+    context.value = formatterValue(context.select);
+    context.index = findIndex(context.list, context.select);
+  }
+
+  function updateIndex(val) {
+    context.index = val;
+    context.select = context.list[val];
+    context.value = formatterValue(context.select);
+    context.label = formatterLabel(context.select);
+  }
+
+  function updateSelect(val) {
+    if (typeof val === "function") {
+      context.select = context.list.find(val);
+    } else {
+      context.select = val;
+    }
+
+    context.index = findIndex(context.list, context.select);
+    context.value = formatterValue(context.select);
+    context.label = formatterLabel(context.select);
   }
 
   function someValue(val) {
-    return argument.list.some(findForValue(val));
+    return context.list.some(findForValue(val));
   }
 
   function selectOfValue(val) {
-    return argument.list.find?.(findForValue(val));
+    return context.list.find?.(findForValue(val));
   }
 
   function labelOfValue(val) {
@@ -178,64 +204,41 @@ function useRadio(props = {}) {
   }
 
   function indexOfValue(val) {
-    return findIndex(argument.list, selectOfValue(val));
-  }
-
-  function updateLabel(val) {
-    argument.label = val;
-    argument.select = argument.list.find(findForLabel(argument.label));
-    argument.value = formatterValue(argument.select);
-    argument.index = findIndex(argument.list, argument.select);
-  }
-
-  function updateIndex(val) {
-    argument.index = val;
-    argument.select = argument.list[val];
-    argument.value = formatterValue(argument.select);
-    argument.label = formatterLabel(argument.select);
-  }
-
-  function updateSelect(val) {
-    if (typeof val === "function") {
-      argument.select = argument.list.find(val);
-    } else {
-      argument.select = val;
-    }
-
-    argument.index = findIndex(argument.list, argument.select);
-    argument.value = formatterValue(argument.select);
-    argument.label = formatterLabel(argument.select);
+    return findIndex(context.list, selectOfValue(val));
   }
 
   function verifyValueInList() {
-    return argument.list.some(findForValue(argument.value));
+    return context.list.some(findForValue(context.value));
   }
 
   function resolveValue() {
     if (verifyValueInList()) {
-      argument.updateValue(argument.value);
+      context.updateValue(context.value);
     } else {
       reset();
     }
   }
 
   function updateListToResolveValue(l) {
-    argument.list = l;
-    argument.resolveValue();
+    context.list = l;
+    list.value = l;
+    console.log("updateListToResolveValue", params);
+    console.log("updateListToResolveValue", context);
+    resolveValue();
   }
 
   function updateListAndReset(li) {
-    argument.list = li;
-    argument.reset();
+    context.list = li;
+    context.reset();
   }
 
   function resolveList(l) {
-    argument.list = l;
-    const parms = resolveProps(argument);
-    argument.select = parms.select;
-    argument.value = parms.value;
-    argument.label = parms.label;
-    argument.index = parms.index;
+    context.list = l;
+    const parms = resolveProps(context);
+    context.select = parms.select;
+    context.value = parms.value;
+    context.label = parms.label;
+    context.index = parms.index;
   }
 
   return params;

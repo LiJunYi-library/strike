@@ -4,10 +4,17 @@
   height: 100vh;
   position: fixed;
   left: 0;
-  top: 0;
+}
+
+.r-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  left: 0;
 }
 
 .r-popup-content {
-  background: white;
+  background: rgb(237, 237, 237);
   height: 200px;
 }

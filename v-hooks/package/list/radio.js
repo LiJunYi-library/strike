@@ -60,7 +60,7 @@ function useRadio(props = {}) {
     label,
     index,
     store,
-    transform,
+    transform, // 废弃
     transformStore,
     transformParams,
     save,
@@ -81,9 +81,12 @@ function useRadio(props = {}) {
     verifyValueInList,
     updateListAndReset,
     updateListToResolveValue,
-    selectOfValue,
-    labelOfValue,
-    indexOfValue,
+    getSelectOfValue,
+    selectOfValue: getSelectOfValue, // 废弃
+    getLabelOfValue,
+    labelOfValue: getLabelOfValue, // 废弃
+    getIndexOfValue,
+    indexOfValue: getIndexOfValue, // 废弃
     someValue,
   };
 
@@ -148,8 +151,10 @@ function useRadio(props = {}) {
     context.index = undefined;
   }
 
+  //  --  ///
   function updateList(l) {
     context.list = l;
+    list.value = l;
     const arg = { ...config, list: l };
     const parms = resolveProps(arg);
     context.select = parms.select;
@@ -190,21 +195,23 @@ function useRadio(props = {}) {
     context.value = formatterValue(context.select);
     context.label = formatterLabel(context.select);
   }
+  //  --  ///
 
-  function someValue(val) {
-    return context.list.some(findForValue(val));
-  }
-
-  function selectOfValue(val) {
+  function getSelectOfValue(val) {
     return context.list.find?.(findForValue(val));
   }
 
-  function labelOfValue(val) {
-    return formatterLabel(selectOfValue(val));
+  function getLabelOfValue(val) {
+    return formatterLabel(getSelectOfValue(val));
   }
 
-  function indexOfValue(val) {
-    return findIndex(context.list, selectOfValue(val));
+  function getIndexOfValue(val) {
+    return findIndex(context.list, getSelectOfValue(val));
+  }
+
+  // -- //
+  function someValue(val) {
+    return context.list.some(findForValue(val));
   }
 
   function verifyValueInList() {
@@ -212,7 +219,7 @@ function useRadio(props = {}) {
   }
 
   function resolveValue() {
-    if (verifyValueInList()) {
+    if (someValue(context.value)) {
       context.updateValue(context.value);
     } else {
       reset();
@@ -222,18 +229,18 @@ function useRadio(props = {}) {
   function updateListToResolveValue(l) {
     context.list = l;
     list.value = l;
-    console.log("updateListToResolveValue", params);
-    console.log("updateListToResolveValue", context);
     resolveValue();
   }
 
   function updateListAndReset(li) {
     context.list = li;
+    list.value = l;
     context.reset();
   }
 
   function resolveList(l) {
     context.list = l;
+    list.value = l;
     const parms = resolveProps(context);
     context.select = parms.select;
     context.value = parms.value;

@@ -12,6 +12,7 @@ import {
   isMemoSame,
   onBeforeUnmount,
   Teleport,
+  Transition,
 } from "vue";
 
 import { RILoading } from "../icon";
@@ -20,52 +21,46 @@ import "./index.scss";
 
 export const ROverlay = defineComponent({
   props: {
-    loadingClass: String,
-    skelectonClass: String,
     visible: { type: Boolean, default: false },
     closeOnClickOverlay: { type: Boolean, default: true },
+    teleport: [Object, String],
   },
   setup(props, context) {
-    console.log("props", props);
     const visible = ref(props.visible);
+
+    watch(
+      () => props.visible,
+      () => {
+        if (visible.value === props.visible) return;
+        visible.value = props.visible;
+      }
+    );
 
     function close() {
       visible.value = false;
-      //   context.emit("update:visible", false);
-      console.log("visible", visible);
+      context.emit("update:visible", false);
     }
 
-    function documentTouchstart(event) {
-      console.log("documentTouchstart");
-      close();
+    function open() {
+      visible.value = true;
+      context.emit("update:visible", true);
     }
 
-    console.log("ROverlay 创建");
+    context.expose({ visible, close, open });
 
-    document.addEventListener("touchstart", documentTouchstart);
-    onBeforeUnmount(() => {
-      document.removeEventListener("touchstart", documentTouchstart);
-    });
-
-    function onTouchstart(event) {
-      event.stopPropagation();
-    }
-
-    context.expose({ visible, close });
-    return () => {
-      console.log("visible", visible);
+    function renderContent() {
       return (
-        <Teleport to="body">
-          <div
-            v-show={visible.value}
-            onTouchstart={onTouchstart}
-            class={["r-overlay"]}
-            style={{ top: "200px" }}
-          >
+        <Transition name="overlay">
+          <div v-show={visible.value} class={["r-overlay"]}>
             {renderSlot(context.slots, "default")}
           </div>
-        </Teleport>
+        </Transition>
       );
+    }
+
+    return () => {
+      if (props.teleport) return <Teleport to={props.teleport}>{renderContent()}</Teleport>;
+      return renderContent();
     };
   },
 });

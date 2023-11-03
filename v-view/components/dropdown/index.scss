@@ -2,6 +2,8 @@
   position: relative;
   transform: translateX(0px);
   display: inline-flex;
+  background: yellow;
+  padding: 20px;
 }
 
 .r-dropdown-content {
@@ -71,7 +73,7 @@
   overflow: scroll;
 }
 
-.r-dropdown-select{
+.r-dropdown-select {
   padding: 16px 12px;
   background: #f4f4fb;
   border-radius: 0px 0px 12px 12px;

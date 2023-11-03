@@ -61,10 +61,13 @@ function useRadio(props = {}) {
     index,
     store,
     transform, // 废弃
-    transformStore,
-    transformParams,
+    transformStore: changeContextToStore, // 废弃
+    changeContextToStore,
+    transformParams: changeContextToProxy, // 废弃
+    changeContextToProxy,
     save,
     restore,
+    save_changeContextToStore,
     onSelect,
     same,
     reset,
@@ -76,7 +79,7 @@ function useRadio(props = {}) {
     updateIndex,
     updateLabel,
     updateSelect,
-    resolveList, // 废弃
+    resolveList,
     resolveValue,
     verifyValueInList,
     updateListAndReset,
@@ -110,12 +113,19 @@ function useRadio(props = {}) {
     params.proxy.index = store.index;
   }
 
-  function transformStore() {
+  function changeContextToStore() {
     context = store;
+    console.log("changeContextToProxy");
   }
 
-  function transformParams() {
+  function changeContextToProxy() {
     context = params.proxy;
+    console.log("changeContextToProxy");
+  }
+
+  function save_changeContextToStore() {
+    save();
+    changeContextToStore();
   }
 
   function transform() {
@@ -124,6 +134,8 @@ function useRadio(props = {}) {
   }
 
   function same(item, i) {
+    console.log("same", context.select, item);
+    console.log("same", context.select === item);
     return context.select === item;
   }
 
@@ -134,14 +146,16 @@ function useRadio(props = {}) {
       context.label = undefined;
       context.value = undefined;
       config.onChange(context);
-      return;
+      return false;
     }
-    if (same(item, i)) return;
+    if (same(item, i)) return true;
     context.select = item;
     context.index = i;
     context.label = formatterLabel(item);
     context.value = formatterValue(item);
     config.onChange(context);
+    console.log("onSelect", context);
+    return false;
   }
 
   function reset() {

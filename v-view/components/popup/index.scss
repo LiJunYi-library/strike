@@ -1,20 +1,67 @@
-.r-popup {
-  background: rgba(0, 0, 0, 0.5);
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  left: 0;
-}
-
 .r-overlay {
   background: rgba(0, 0, 0, 0.5);
   width: 100vw;
   height: 100vh;
   position: fixed;
   left: 0;
+  top: 50px;
+}
+
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: .3s;
+}
+
+.overlay-enter-from {
+  opacity: 0;
+}
+
+.overlay-enter-to {
+  opacity: 1;
+}
+
+.overlay-leave-from {
+  opacity: 1;
+}
+
+.overlay-leave-to {
+  opacity: 0;
+}
+
+.r-popup {
+  width: 100vw;
+  position: fixed;
+  left: 0;
+  overflow: hidden;
 }
 
 .r-popup-content {
-  background: rgb(237, 237, 237);
-  height: 200px;
+  width: 100vw;
+  left: 0;
+}
+
+.popVisible-enter-active,
+.popVisible-leave-active {
+  transition: .3s;
+}
+
+.popup-enter-active,
+.popup-leave-active {
+  transition: .3s;
+}
+
+.popup-enter-from {
+  transform: translateY(-100%);
+}
+
+.popup-enter-to {
+  transform: translateY(0);
+}
+
+.popup-leave-from {
+  transform: translateY(0);
+}
+
+.popup-leave-to {
+  transform: translateY(-100%);
 }

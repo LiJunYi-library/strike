@@ -7,15 +7,9 @@ import {
   ref,
   reactive,
   provide,
-  render,
-  h,
-  watch,
-  nextTick,
   Teleport,
 } from "vue";
 import "./index.scss";
-
-import { RPopup } from "../popup";
 
 let prveDropdownPopup;
 
@@ -30,78 +24,168 @@ export const RDropdown = defineComponent({
     popLeft: [String, Number, Function],
     teleport: [String, Number, HTMLElement],
     teleportDisabled: { type: Boolean, default: true },
-    visible: Object,
   },
   setup(props, context) {
-    let dropdownHtml;
-
     const visible = ref(false);
-    function onUpdateVisible(val) {
-      visible.value = val;
-      context.emit("update:visible", val);
-    }
-    watch(
-      () => props.visible,
-      () => {
-        if (visible.value === props.visible) return;
-        visible.value = props.visible;
+    const look = ref(false);
+    const show = ref(false);
+    const unShow = ref(false);
+
+    let dropdownHtml;
+    let duration = 250;
+    let bool = false;
+    let timer;
+    let outTimer;
+
+    const ctx = reactive({
+      open,
+      closed,
+      close,
+      prveClosed,
+      visible,
+      look,
+      show,
+      unShow,
+    });
+
+    function open() {
+      if (prveDropdownPopup) prveDropdownPopup.prveClosed();
+      look.value = true;
+      visible.value = true;
+      show.value = true;
+      unShow.value = false;
+      context.emit("open");
+      prveDropdownPopup = ctx;
+      if (props.scrollController) {
+        props.scrollController.elements.forEach((el) => {
+          el.setCanScroll(false);
+        });
       }
-    );
-
-    function setVisible(v) {
-      visible.value = v;
-      context.emit("update:visible", v);
     }
 
-    const ctx = reactive({ visible, setVisible });
+    function closed() {
+      console.log("closed");
+      look.value = false;
+      show.value = false;
+      unShow.value = true;
+      prveDropdownPopup = undefined;
+      context.emit("close");
+      context.emit("currentClose");
+      console.log( 'currentClose' )
+      outTimer = setTimeout(() => {
+        visible.value = false;
+        context.emit("closed");
+        context.emit("currentClosed");
+      }, duration);
+      if (props.scrollController) {
+        props.scrollController.elements.forEach((el) => {
+          el.setCanScroll(true);
+        });
+      }
+    }
+
+    function prveClosed() {
+      console.log("prveClosed");
+      look.value = false;
+      show.value = false;
+      unShow.value = true;
+      prveDropdownPopup = undefined;
+      context.emit("close");
+      context.emit("prveClose");
+      outTimer = setTimeout(() => {
+        visible.value = false;
+        context.emit("closed");
+        context.emit("prveClosed");
+      }, duration);
+    }
+
+    function close() {
+      look.value = false;
+      show.value = false;
+      unShow.value = true;
+      visible.value = false;
+      prveDropdownPopup = undefined;
+    }
 
     function onClick(event) {
-      visible.value = !visible.value;
-      context.emit("update:visible", visible.value);
-      console.log("dropdown onClick");
+      context.emit("labelClick");
+      console.log("onClick");
+      if (props.stopPropagation) event.stopPropagation();
+      if (bool) return;
+      bool = true;
+      visible.value ? closed() : open();
+      timer = setTimeout(() => {
+        bool = false;
+      }, duration);
     }
 
-    function onTouchstart(event) {
-      event.stopPropagation();
+    function documentClick(event) {
+      if (look.value === false) return;
+      closed();
     }
 
-    function getTop() {
+    document.addEventListener("click", documentClick);
+
+    onBeforeUnmount(() => {
+      document.removeEventListener("click", documentClick);
+    });
+
+    const getTop = () => {
       if (props.popTop) {
         if (props.popTop instanceof Function) return props.popTop(dropdownHtml);
       }
-      if (!dropdownHtml) return 0;
+
       if (props.teleport === "body") {
         const offset = dropdownHtml.getBoundingClientRect();
         return offset.bottom + "px";
       }
-      return dropdownHtml.offsetHeight + "px";
-    }
 
-    function getLeft() {
+      if (!dropdownHtml) return 0;
+
+      return dropdownHtml.offsetHeight + "px";
+    };
+    //   document.body.getBoundingClientRect
+    const getLeft = () => {
       if (props.popLeft) {
         return props.popLeft;
       }
       if (!dropdownHtml) return 0;
       const offset = dropdownHtml.getBoundingClientRect();
       return -offset.left + "px";
+    };
+
+    function popupClick(event) {
+      event.stopPropagation();
+      closed(); //  ios部分机型会出错
+    }
+
+    function popupContentClick(event) {
+      event.stopPropagation();
+    }
+
+    function popupTouchstart(event) {
+      event.stopPropagation();
+      // closed();   ios部分机型会出错
+    }
+
+    function popupContentTouchstart(event) {
+      event.stopPropagation();
     }
 
     return (vm) => {
       return (
         <div
+          style={{ zIndex: look.value ? 2001 : 2000 }}
           class="r-dropdown"
           ref={(el) => (dropdownHtml = el)}
-          onTouchstart={onTouchstart}
-          onClick={onClick}
-          style={{ zIndex: visible.value ? 2001 : 2000 }}
         >
-          <div class={["r-dropdown-content", props.labelClass]}>
+          <div class={["r-dropdown-content", props.labelClass]} onClick={onClick}>
             {renderSlot(context.slots, "content", ctx, () => [
               <div class="r-dropdown-text">
                 {renderSlot(context.slots, "label", ctx, () => [
                   <div class="r-dropdown-label"> {props.label} </div>,
                 ])}
-                <span class={["r-dropdown-icon", !visible.value && "rote"]}>
+                <span class={["r-dropdown-icon", !look.value && "rote"]}>
                   {renderSlot(context.slots, "icon", ctx, () => [
                     <i class={["iconfont"]}>&#xe887;</i>,
                   ])}
@@ -109,15 +193,38 @@ export const RDropdown = defineComponent({
               </div>,
             ])}
           </div>
-          <RPopup
-            {...context.attrs}
-            left={getLeft()}
-            top={getTop()}
-            visible={visible.value}
-            onUpdate:visible={onUpdateVisible}
-          >
-            {renderSlot(context.slots, "default", ctx)}
-          </RPopup>
+
+          {visible.value && (
+            <Teleport to={props.teleport} disabled={props.teleportDisabled}>
+              <div
+                onClick={popupClick}
+                onTouchstart={popupTouchstart}
+                style={{
+                  left: getLeft(),
+                  top: getTop(),
+                  zIndex: look.value ? 2001 : 2000,
+                }}
+                class={[
+                  "r-dropdown-popup animate__animated ",
+                  prveDropdownPopup && show.value && "animate__fadeIn",
+                  prveDropdownPopup && unShow.value && "animate__fadeOut",
+                ]}
+              >
+                {/* prveDropdownPopup && */}
+                <div
+                  onClick={popupContentClick}
+                  onTouchstart={popupContentTouchstart}
+                  class={[
+                    "r-dropdown-popup-content animate__animated",
+                    show.value && "animate__slideInDown",
+                    unShow.value && "animate__slideOutUp",
+                  ]}
+                >
+                  {renderSlot(context.slots, "default", ctx)}
+                </div>
+              </div>
+            </Teleport>
+          )}
         </div>
       );
     };

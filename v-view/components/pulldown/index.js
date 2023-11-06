@@ -1,6 +1,6 @@
 import { defineComponent, renderSlot, ref, reactive, watch } from "vue";
-
 import { RPopup } from "../popup";
+import "./index.scss";
 
 export const RPulldown = defineComponent({
   props: {
@@ -16,7 +16,7 @@ export const RPulldown = defineComponent({
     visible: Object,
   },
   setup(props, context) {
-    let dropdownHtml;
+    let pulldownHtml;
 
     const visible = ref(false);
     function onUpdateVisible(val) {
@@ -50,41 +50,41 @@ export const RPulldown = defineComponent({
 
     function getTop() {
       if (props.popTop) {
-        if (props.popTop instanceof Function) return props.popTop(dropdownHtml);
+        if (props.popTop instanceof Function) return props.popTop(pulldownHtml);
       }
-      if (!dropdownHtml) return 0;
+      if (!pulldownHtml) return 0;
       if (props.teleport === "body") {
-        const offset = dropdownHtml.getBoundingClientRect();
+        const offset = pulldownHtml.getBoundingClientRect();
         return offset.bottom + "px";
       }
-      return dropdownHtml.offsetHeight + "px";
+      return pulldownHtml.offsetHeight + "px";
     }
 
     function getLeft() {
       if (props.popLeft) {
         return props.popLeft;
       }
-      if (!dropdownHtml) return 0;
-      const offset = dropdownHtml.getBoundingClientRect();
+      if (!pulldownHtml) return 0;
+      const offset = pulldownHtml.getBoundingClientRect();
       return -offset.left + "px";
     }
 
     return (vm) => {
       return (
         <div
-          class="r-dropdown"
-          ref={(el) => (dropdownHtml = el)}
+          class="r-pulldown"
+          ref={(el) => (pulldownHtml = el)}
           onTouchstart={onTouchstart}
           onClick={onClick}
           style={{ zIndex: visible.value ? 2001 : 2000 }}
         >
-          <div class={["r-dropdown-content", props.labelClass]}>
+          <div class={["r-pulldown-content", props.labelClass]}>
             {renderSlot(context.slots, "content", ctx, () => [
-              <div class="r-dropdown-text">
+              <div class="r-pulldown-text">
                 {renderSlot(context.slots, "label", ctx, () => [
-                  <div class="r-dropdown-label"> {props.label} </div>,
+                  <div class="r-pulldown-label"> {props.label} </div>,
                 ])}
-                <span class={["r-dropdown-icon", !visible.value && "rote"]}>
+                <span class={["r-pulldown-icon", !visible.value && "rote"]}>
                   {renderSlot(context.slots, "icon", ctx, () => [
                     <i class={["iconfont"]}>&#xe887;</i>,
                   ])}
@@ -106,3 +106,5 @@ export const RPulldown = defineComponent({
     };
   },
 });
+
+export * from "./select";

@@ -5,7 +5,7 @@ export declare class Radio {
   constructor(params: any);
 }
 
-// export declare function useRadio(options: any): any;
+export declare function useRadio(options: any): any;
 export declare function useAsyncRadio(options: any): any;
 export declare function useMultiple(options: any): any;
 export declare function useAsyncMultiple(options: any): any;
@@ -25,7 +25,7 @@ export declare function useLazyList(options: any): any;
 export declare function useListSelect(options: any): any;
 export declare function useListLoad(options: any): any;
 
-export * from "./radio";
+// export * from "./radio";
 /*********
  *
  *

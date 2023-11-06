@@ -98,7 +98,7 @@ function useRadio(props = {}) {
   let context = params.proxy;
 
   function save() {
-    // store.list = [...params.proxy.list];
+    store.list = [...params.proxy.list];
     store.select = params.proxy.select;
     store.value = params.proxy.value;
     store.label = params.proxy.label;
@@ -106,7 +106,7 @@ function useRadio(props = {}) {
   }
 
   function restore() {
-    // params.proxy.list = [...store.list];
+    params.proxy.list = [...store.list];
     params.proxy.select = store.select;
     params.proxy.value = store.value;
     params.proxy.label = store.label;
@@ -165,7 +165,6 @@ function useRadio(props = {}) {
 
   //  --  ///
   function updateList(l) {
-    context.list = l;
     list.value = l;
     const arg = { ...config, list: l };
     const parms = resolveProps(arg);
@@ -177,40 +176,40 @@ function useRadio(props = {}) {
 
   function updateValue(val) {
     context.value = val;
-    context.select = context.list.find?.(findForValue(val));
+    context.select = list.value.find?.(findForValue(val));
     context.label = formatterLabel(context.select);
-    context.index = findIndex(context.list, context.select);
+    context.index = findIndex(list.value, context.select);
   }
 
   function updateLabel(val) {
     context.label = val;
-    context.select = context.list.find(findForLabel(context.label));
+    context.select = list.value.find(findForLabel(context.label));
     context.value = formatterValue(context.select);
-    context.index = findIndex(context.list, context.select);
+    context.index = findIndex(list.value, context.select);
   }
 
   function updateIndex(val) {
     context.index = val;
-    context.select = context.list[val];
+    context.select = list.value[val];
     context.value = formatterValue(context.select);
     context.label = formatterLabel(context.select);
   }
 
   function updateSelect(val) {
     if (typeof val === "function") {
-      context.select = context.list.find(val);
+      context.select = list.value.find(val);
     } else {
       context.select = val;
     }
 
-    context.index = findIndex(context.list, context.select);
+    context.index = findIndex(list.value, context.select);
     context.value = formatterValue(context.select);
     context.label = formatterLabel(context.select);
   }
   //  --  ///
 
   function getSelectOfValue(val) {
-    return context.list.find?.(findForValue(val));
+    return list.value.find?.(findForValue(val));
   }
 
   function getLabelOfValue(val) {
@@ -218,16 +217,16 @@ function useRadio(props = {}) {
   }
 
   function getIndexOfValue(val) {
-    return findIndex(context.list, getSelectOfValue(val));
+    return findIndex(list.value, getSelectOfValue(val));
   }
 
   // -- //
   function someValue(val) {
-    return context.list.some(findForValue(val));
+    return list.value.some(findForValue(val));
   }
 
   function verifyValueInList() {
-    return context.list.some(findForValue(context.value));
+    return list.value.some(findForValue(context.value));
   }
 
   function resolveValue() {
@@ -239,19 +238,16 @@ function useRadio(props = {}) {
   }
 
   function updateListToResolveValue(l) {
-    context.list = l;
     list.value = l;
     resolveValue();
   }
 
   function updateListAndReset(li) {
-    context.list = li;
-    list.value = l;
+    list.value = li;
     context.reset();
   }
 
   function resolveList(l) {
-    context.list = l;
     list.value = l;
     const parms = resolveProps(context);
     context.select = parms.select;

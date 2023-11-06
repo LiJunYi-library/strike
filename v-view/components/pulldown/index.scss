@@ -1,23 +1,21 @@
-.r-dropdown {
+.r-pulldown {
   position: relative;
   transform: translateX(0px);
   display: inline-flex;
-  // background: yellow;
-  // padding: 20px;
 }
 
-.r-dropdown-content {
+.r-pulldown-content {
   display: flex;
   justify-content: center;
   align-items: center;
 
-  .r-dropdown-text {
+  .r-pulldown-text {
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  .r-dropdown-icon {
+  .r-pulldown-icon {
     display: block;
     transform: rotate(180deg);
     transition: 0.2s;
@@ -32,7 +30,7 @@
     font-size: 12px;
   }
 }
-.r-dropdown-label {
+.r-pulldown-label {
   height: 18px;
   font-size: 13px;
   font-family: PingFangSC-Regular, PingFang SC;
@@ -41,14 +39,14 @@
   line-height: 18px;
 }
 
-.r-dropdown-text-act {
+.r-pulldown-text-act {
   color: #9b6343;
-  .r-dropdown-label {
+  .r-pulldown-label {
     color: #9b6343;
   }
 }
 
-.r-dropdown-popup {
+.r-pulldown-popup {
   animation-duration: 0.2s;
   position: fixed;
   left: 0;
@@ -59,11 +57,11 @@
   overflow: hidden;
 }
 
-.r-dropdown-popup-content {
+.r-pulldown-popup-content {
   animation-duration: 0.2s;
 }
 
-.r-dropdown-select-list {
+.r-pulldown-select-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 3列，每列宽度相等 */
   grid-gap: 8px; /* 列间距 */
@@ -73,13 +71,13 @@
   overflow: scroll;
 }
 
-.r-dropdown-select {
+.r-pulldown-select {
   padding: 16px 12px;
   background: #f4f4fb;
   border-radius: 0px 0px 12px 12px;
 }
 
-.r-dropdown-select-list-item {
+.r-pulldown-select-list-item {
   height: 36px;
   line-height: 36px;
   text-align: center;
@@ -91,7 +89,7 @@
   color: #111111;
 }
 
-.r-dropdown-select-list-item-act {
+.r-pulldown-select-list-item-act {
   font-size: 13px;
   font-family: PingFangSC-Medium, PingFang SC;
   font-weight: 500;

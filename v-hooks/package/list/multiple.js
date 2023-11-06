@@ -110,7 +110,7 @@ function useMultiple(props = {}) {
 
   params.proxy = reactive(params);
 
-  let argument = params.proxy;
+  let context = params.proxy;
 
   function save() {
     store.list = [...params.proxy.list];
@@ -129,65 +129,93 @@ function useMultiple(props = {}) {
   }
 
   function transformStore() {
-    argument = store;
+    context = store;
   }
 
   function transformParams() {
-    argument = params.proxy;
+    context = params.proxy;
   }
 
   function transform() {
-    if (argument === params.proxy) return (argument = store);
-    if (argument === store) return (argument = params.proxy);
+    if (context === params.proxy) return (context = store);
+    if (context === store) return (context = params.proxy);
   }
 
   function same(item, i) {
-    return argument.select.some((val) => val === item);
+    return context.select.some((val) => val === item);
   }
 
   function onSelect(item, i) {
     const val = formatterValue(item);
     const lab = formatterLabel(item);
     if (same(item)) {
-      argument.select = argument.select.filter((v) => v !== item);
-      argument.value = argument.select.map((v) => formatterValue(v));
-      argument.label = argument.select.map((v) => formatterLabel(v));
-      argument.index = argument.value.filter((v) => v !== i);
+      context.select = context.select.filter((v) => v !== item);
+      context.value = context.select.map((v) => formatterValue(v));
+      context.label = context.select.map((v) => formatterLabel(v));
+      context.index = context.value.filter((v) => v !== i);
     } else {
-      argument.select.push(item);
-      argument.value.push(val);
-      argument.label.push(lab);
-      argument.index.push(i);
+      context.select.push(item);
+      context.value.push(val);
+      context.label.push(lab);
+      context.index.push(i);
     }
   }
 
+  function invertSelect() { // 反选
+    context.select = context.list.filter((val) => !context.select.some((el) => el === val));
+    context.value = context.select.map((el) => formatterValue(el));
+    context.label = context.select.map((el) => formatterLabel(el));
+    context.index = context.list.reduce(reduceIndex(context.select), []);
+  }
+
+  function allSelect() { // 全选
+    context.select = [...context.list];
+    context.value = context.select.map((el) => formatterValue(el));
+    context.label = context.select.map((el) => formatterLabel(el));
+    context.index = context.list.map((el, nth) => nth);
+  }
+
   function reset() {
-    argument.select = [];
-    argument.value = [];
-    argument.label = [];
-    argument.index = [];
+    context.select = [];
+    context.value = [];
+    context.label = [];
+    context.index = [];
   }
 
   function updateList(li) {
-    argument.list = revArray(li);
+    context.list = revArray(li);
   }
 
   function updateSelect(val) {
-    argument.select = revArray(val);
-    argument.label = argument.select.map((el) => formatterLabel(el));
-    argument.value = argument.select.map((el) => formatterValue(el));
-    argument.index = argument.list.reduce(reduceIndex(argument.select), []);
+    context.select = revArray(val);
+    context.label = context.select.map((el) => formatterLabel(el));
+    context.value = context.select.map((el) => formatterValue(el));
+    context.index = context.list.reduce(reduceIndex(context.select), []);
   }
 
   function updateValue(val) {
-    argument.value = revArray(val);
-    argument.select = filterForValue(argument.list, argument.value);
-    argument.label = argument.select.map((el) => formatterLabel(el));
-    argument.index = argument.list.reduce(reduceIndex(argument.select), []);
+    context.value = revArray(val);
+    context.select = filterForValue(context.list, context.value);
+    context.label = context.select.map((el) => formatterLabel(el));
+    context.index = context.list.reduce(reduceIndex(context.select), []);
+  }
+
+  function updateLabel(val) {
+    context.label = revArray(val);
+    context.select = filterForLabel(context.list, context.label);
+    context.value = context.select.map((el) => formatterValue(el));
+    context.index = context.list.reduce(reduceIndex(context.select), []);
+  }
+
+  function updateIndex(val) {
+    context.index = revArray(val);
+    context.select = context.index.map((el) => context.list?.[el]);
+    context.value = context.select.map((el) => formatterValue(el));
+    context.label = context.select.map((el) => formatterLabel(el));
   }
 
   function selectOfValue(val) {
-    return filterForValue(argument.list, val);
+    return filterForValue(context.list, val);
   }
 
   function labelOfValue(val) {
@@ -195,26 +223,12 @@ function useMultiple(props = {}) {
   }
 
   function indexOfValue(val) {
-    return argument.list.reduce(reduceIndex(selectOfValue(val)), []);
-  }
-
-  function updateLabel(val) {
-    argument.label = revArray(val);
-    argument.select = filterForLabel(argument.list, argument.label);
-    argument.value = argument.select.map((el) => formatterValue(el));
-    argument.index = argument.list.reduce(reduceIndex(argument.select), []);
-  }
-
-  function updateIndex(val) {
-    argument.index = revArray(val);
-    argument.select = argument.index.map((el) => argument.list?.[el]);
-    argument.value = argument.select.map((el) => formatterValue(el));
-    argument.label = argument.select.map((el) => formatterLabel(el));
+    return context.list.reduce(reduceIndex(selectOfValue(val)), []);
   }
 
   function findValueArr() {
-    return argument.list
-      .reduce(reduceItemForValue(argument.select), [])
+    return context.list
+      .reduce(reduceItemForValue(context.select), [])
       .map((el) => formatterValue(el));
   }
 
@@ -231,8 +245,8 @@ function useMultiple(props = {}) {
     }
   }
 
-  function updateListToResolveValue(l) {
-    argument.list = l;
+  function updateListToResolveValue(li) {
+    context.list = li;
     resolveValue();
   }
 
@@ -241,19 +255,7 @@ function useMultiple(props = {}) {
     reset();
   }
 
-  function invertSelect() {
-    argument.select = argument.list.filter((val) => !argument.select.some((el) => el === val));
-    argument.value = argument.select.map((el) => formatterValue(el));
-    argument.label = argument.select.map((el) => formatterLabel(el));
-    argument.index = argument.list.reduce(reduceIndex(argument.select), []);
-  }
 
-  function allSelect() {
-    argument.select = [...argument.list];
-    argument.value = argument.select.map((el) => formatterValue(el));
-    argument.label = argument.select.map((el) => formatterLabel(el));
-    argument.index = argument.list.map((el, nth) => nth);
-  }
 
   return params;
 }

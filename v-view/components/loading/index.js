@@ -129,8 +129,17 @@ export const directiveLoading = {
   install(app, options) {
     app.directive("loadings", {
       created(el, binding, vnode, prevVnode) {
-        console.log("binding", binding);
-        render(<RLoadings loadingHook={binding.value} parentHtml={el} />, el);
+        el.__loadingHook = binding.value;
+        // console.log("loadings", [el]);
+        render(
+          <RLoadings
+            key="loadings"
+            promiseHook={el.__promiseHook}
+            loadingHook={el.__loadingHook}
+            parentHtml={el}
+          />,
+          el
+        );
       },
     });
   },
@@ -138,10 +147,19 @@ export const directiveLoading = {
 
 export const directivepromise = {
   install(app, options) {
-    app.directive("loadings", {
+    app.directive("promise", {
       created(el, binding, vnode, prevVnode) {
-        console.log("binding", binding);
-        render(<RLoadings promiseHook={binding.value} parentHtml={el} />, el);
+        el.__promiseHook = binding.value;
+        // console.log("promise", [el]);
+        render(
+          <RLoadings
+            key="promise"
+            promiseHook={el.__promiseHook}
+            loadingHook={el.__loadingHook}
+            parentHtml={el}
+          />,
+          el
+        );
       },
     });
   },

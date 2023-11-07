@@ -161,18 +161,20 @@ function useMultiple(props = {}) {
     }
   }
 
-  function invertSelect() { // 反选
-    context.select = context.list.filter((val) => !context.select.some((el) => el === val));
+  function invertSelect() {
+    // 反选
+    context.select = list.value.filter((val) => !context.select.some((el) => el === val));
     context.value = context.select.map((el) => formatterValue(el));
     context.label = context.select.map((el) => formatterLabel(el));
-    context.index = context.list.reduce(reduceIndex(context.select), []);
+    context.index = list.value.reduce(reduceIndex(context.select), []);
   }
 
-  function allSelect() { // 全选
-    context.select = [...context.list];
+  function allSelect() {
+    // 全选
+    context.select = [...list.value];
     context.value = context.select.map((el) => formatterValue(el));
     context.label = context.select.map((el) => formatterLabel(el));
-    context.index = context.list.map((el, nth) => nth);
+    context.index = list.value.map((el, nth) => nth);
   }
 
   function reset() {
@@ -183,39 +185,39 @@ function useMultiple(props = {}) {
   }
 
   function updateList(li) {
-    context.list = revArray(li);
+    list.value = revArray(li);
   }
 
   function updateSelect(val) {
     context.select = revArray(val);
     context.label = context.select.map((el) => formatterLabel(el));
     context.value = context.select.map((el) => formatterValue(el));
-    context.index = context.list.reduce(reduceIndex(context.select), []);
+    context.index = list.value.reduce(reduceIndex(context.select), []);
   }
 
   function updateValue(val) {
     context.value = revArray(val);
-    context.select = filterForValue(context.list, context.value);
+    context.select = filterForValue(list.value, context.value);
     context.label = context.select.map((el) => formatterLabel(el));
-    context.index = context.list.reduce(reduceIndex(context.select), []);
+    context.index = list.value.reduce(reduceIndex(context.select), []);
   }
 
   function updateLabel(val) {
     context.label = revArray(val);
-    context.select = filterForLabel(context.list, context.label);
+    context.select = filterForLabel(list.value, context.label);
     context.value = context.select.map((el) => formatterValue(el));
-    context.index = context.list.reduce(reduceIndex(context.select), []);
+    context.index = list.value.reduce(reduceIndex(context.select), []);
   }
 
   function updateIndex(val) {
     context.index = revArray(val);
-    context.select = context.index.map((el) => context.list?.[el]);
+    context.select = context.index.map((el) => list.value?.[el]);
     context.value = context.select.map((el) => formatterValue(el));
     context.label = context.select.map((el) => formatterLabel(el));
   }
 
   function selectOfValue(val) {
-    return filterForValue(context.list, val);
+    return filterForValue(list.value, val);
   }
 
   function labelOfValue(val) {
@@ -223,11 +225,11 @@ function useMultiple(props = {}) {
   }
 
   function indexOfValue(val) {
-    return context.list.reduce(reduceIndex(selectOfValue(val)), []);
+    return list.value.reduce(reduceIndex(selectOfValue(val)), []);
   }
 
   function findValueArr() {
-    return context.list
+    return list.value
       .reduce(reduceItemForValue(context.select), [])
       .map((el) => formatterValue(el));
   }
@@ -246,7 +248,7 @@ function useMultiple(props = {}) {
   }
 
   function updateListToResolveValue(li) {
-    context.list = li;
+    list.value = li;
     resolveValue();
   }
 
@@ -255,22 +257,8 @@ function useMultiple(props = {}) {
     reset();
   }
 
-
-
   return params;
 }
-
-// const arrR = [
-//   { label: "label1", value: 1 },
-//   { label: "label2", value: 2 },
-//   { label: "label3", value: 3 },
-//   { label: "label4", value: 4 },
-//   { label: "label5", value: 5 },
-// ];
-// const hook = useMultiple({
-//   list: arrR,
-//   label: ["label1", "label5"],
-// });
 
 function useAsyncMultiple(props = {}) {
   const config = {
@@ -278,16 +266,40 @@ function useAsyncMultiple(props = {}) {
     ...props,
   };
 
-  const multipleHooks = useMultiple(config);
-
-  const asyncHooks = usePromise(config.fetchCb, {
+  const finished = ref(false);
+  const multipleHook = useMultiple(config);
+  const asyncHook = usePromise(config.fetchCb, {
+    before: () => {
+      finished.value = false;
+    },
     then: (data) => {
-      multipleHooks.updateListToResolveValue(data);
+      multipleHook.updateListToResolveValue(data);
+      finished.value = true;
     },
     ...config,
   });
 
-  const params = { ...multipleHooks, ...asyncHooks };
+  function beginSend(...arg) {
+    multipleHook.list.value = [];
+    return asyncHook.beginSend(...arg);
+  }
+  function nextBeginSend(...arg) {
+    multipleHook.list.value = [];
+    return asyncHook.nextBeginSend(...arg);
+  }
+  function awaitBeginSend(...arg) {
+    multipleHook.list.value = [];
+    return asyncHook.awaitBeginSend(...arg);
+  }
+
+  const params = {
+    ...multipleHook,
+    ...asyncHook,
+    finished,
+    beginSend,
+    nextBeginSend,
+    awaitBeginSend,
+  };
   params.proxy = reactive(params);
   return params;
 }

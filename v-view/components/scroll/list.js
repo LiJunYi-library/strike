@@ -81,12 +81,12 @@ export const RScrollList = defineComponent({
     function renderLoading(props, context) {
       if (!listHook.loading) return null;
       if (!props.loadingText) return null;
-      return (
+      return renderSlot(context.slots, "loading", listHook, () => [
         <div class={"list-loading"}>
           <RILoading class="r-loadings-icon" />
           <div class={["r-loadings-text"]}>{props.loadingText}</div>
-        </div>
-      );
+        </div>,
+      ]);
     }
 
     function renderfinished() {

@@ -1,3 +1,43 @@
+.r-c-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.r-c-overlay-loading {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.r-c-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.r-c-error-text {
+  color: red;
+}
+
+.r-c-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.r-c-empty-img {
+  width: 100px;
+}
+
+/*******************************/
+
 .r-loading-skelecton-item {
   display: inline-flex;
   justify-content: center;

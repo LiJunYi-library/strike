@@ -1,7 +1,9 @@
 import { ref, reactive, unref, onBeforeUnmount } from "vue";
-export * from "./promise";
+
 export { getPromiseConfig, usePromise };
+export * from "./promise";
 export * from "./async";
+export * from "./loading";
 
 /**
  *
@@ -78,6 +80,7 @@ function usePromise(fun, options = {}) {
   const send = create(fun, queue, {
     before: () => {
       loading.value = true;
+      config?.before?.();
     },
     then: (result) => {
       data.value = config.formatterData(result);
@@ -100,6 +103,7 @@ function usePromise(fun, options = {}) {
     before: () => {
       begin.value = true;
       loading.value = true;
+      config?.before?.();
     },
     then: (result) => {
       data.value = config.formatterData(result);

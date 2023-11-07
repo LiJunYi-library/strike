@@ -113,7 +113,7 @@ function useMultiple(props = {}) {
   let context = params.proxy;
 
   function save() {
-    store.list = [...params.proxy.list];
+    // store.list = [...params.proxy.list];
     store.select = [...params.proxy.select];
     store.value = [...params.proxy.value];
     store.label = [...params.proxy.label];
@@ -121,7 +121,7 @@ function useMultiple(props = {}) {
   }
 
   function restore() {
-    params.proxy.list = [...store.list];
+    // params.proxy.list = [...store.list];
     params.proxy.select = [...store.select];
     params.proxy.value = [...store.value];
     params.proxy.label = [...store.label];

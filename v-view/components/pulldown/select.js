@@ -1,19 +1,18 @@
 import { defineComponent, renderSlot, renderList } from "vue";
 
 import { RPulldown } from "./index";
+import { RListSelect, RListSelectProps } from "../list";
 
 export const RPulldownSelect = defineComponent({
   props: {
-    listHook: Object,
     label: { type: [String, Number], default: "" },
-    v_loadings: [Object, Array],
+    ...RListSelectProps,
   },
   setup(props, context) {
     // eslint-disable-next-line
     const listHook = props.listHook;
 
-    function onClick(item, index, popCtx) {
-      if (listHook.onSelect(item, index)) return;
+    function onChange(item, index, popCtx) {
       context.emit("change", listHook.value);
       popCtx.setVisible(false);
     }
@@ -34,27 +33,11 @@ export const RPulldownSelect = defineComponent({
                 </span>
               </div>
             ),
-            // ...context.slots,
             default: (popCtx) => (
-              <div class="r-pulldown-select" v-loadings={props.v_loadings}>
-                <div class="r-pulldown-select-list">
-                  {renderList(listHook.list, (item, index) => {
-                    return renderSlot(context.slots, "default", { item, index }, () => [
-                      <div
-                        onClick={() => onClick(item, index, popCtx)}
-                        class={[
-                          "r-pulldown-select-list-item",
-                          listHook.same(item, index) && "r-pulldown-select-list-item-act",
-                        ]}
-                        key={index}
-                      >
-                        {renderSlot(context.slots, "item", { item, index }, () => [
-                          listHook.formatterLabel(item, index),
-                        ])}
-                      </div>,
-                    ]);
-                  })}
-                </div>
+              <div class={"r-pulldown-list-select"}>
+                <RListSelect {...props} onChange={(item, index) => onChange(item, index, popCtx)}>
+                  {{ ...context.slots }}
+                </RListSelect>
               </div>
             ),
           }}
@@ -63,3 +46,24 @@ export const RPulldownSelect = defineComponent({
     };
   },
 });
+
+// <div class="r-pulldown-select" v-loadings={props.v_loadings}>
+// <div class="r-pulldown-select-list">
+//   {renderList(listHook.list, (item, index) => {
+//     return renderSlot(context.slots, "default", { item, index }, () => [
+//       <div
+//         onClick={() => onClick(item, index, popCtx)}
+//         class={[
+//           "r-pulldown-select-list-item",
+//           listHook.same(item, index) && "r-pulldown-select-list-item-act",
+//         ]}
+//         key={index}
+//       >
+//         {renderSlot(context.slots, "item", { item, index }, () => [
+//           listHook.formatterLabel(item, index),
+//         ])}
+//       </div>,
+//     ]);
+//   })}
+// </div>
+// </div>

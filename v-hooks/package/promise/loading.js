@@ -1,3 +1,5 @@
+import { computed, reactive } from "vue";
+
 export function useLoading(props) {
   const { loadingHook, promiseHook } = props;
 
@@ -35,5 +37,5 @@ export function useLoading(props) {
 
   const loading = computed(() => lHooks.value.some((el) => el?.loading === true));
 
-  return { loading, error, begin };
+  return reactive({ loading, error, begin });
 }

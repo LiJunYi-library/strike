@@ -264,21 +264,42 @@ function useRadio(props = {}) {
 }
 
 function useAsyncRadio(props = {}) {
-  const config = {
-    fetchCb: () => undefined,
-    ...props,
-  };
+  const config = { fetchCb: () => undefined, ...props };
 
+  const finished = ref(false);
   const radioHooks = useRadio(config);
-
   const asyncHooks = usePromise(config.fetchCb, {
+    ...config,
+    before: () => {
+      finished.value = false;
+    },
     then: (data) => {
       radioHooks.updateListToResolveValue(data);
+      finished.value = true;
     },
-    ...config,
   });
 
-  const params = { ...radioHooks, ...asyncHooks };
+  function beginSend(...arg) {
+    radioHooks.list.value = [];
+    return asyncHooks.beginSend(...arg);
+  }
+  function nextBeginSend(...arg) {
+    radioHooks.list.value = [];
+    return asyncHooks.nextBeginSend(...arg);
+  }
+  function awaitBeginSend(...arg) {
+    radioHooks.list.value = [];
+    return asyncHooks.awaitBeginSend(...arg);
+  }
+
+  const params = {
+    ...radioHooks,
+    ...asyncHooks,
+    finished,
+    beginSend,
+    nextBeginSend,
+    awaitBeginSend,
+  };
   params.proxy = reactive(params);
   return params;
 }

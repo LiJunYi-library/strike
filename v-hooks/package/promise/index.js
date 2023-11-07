@@ -150,7 +150,7 @@ function usePromise(fun, options = {}) {
 
   function awaitBeginSend(...args) {
     if (loading.value === true) return;
-    return awaitSend(...args);
+    return beginSend(...args);
   }
 
   const params = {

@@ -11,12 +11,17 @@ import {
   withMemo,
   isMemoSame,
 } from "vue";
+import { useLoading } from "@rainbow_ljy/v-hooks";
 
 import { RILoading } from "../icon";
 
 import "./index.scss";
 
 export const loadingProps = {
+  skelectonCount: {
+    type: Number,
+    default: 5,
+  },
   finishedText: {
     type: [Number, String],
     default: "没有更多了",
@@ -40,14 +45,29 @@ export const loadingProps = {
   },
 
   listHook: Object,
+
+  loadingHook: [Object, Array],
 };
 
-export function useLoadingHoc(listHook, props, context) {
+export function useLoadingHoc(listHook, props, context, configs = {}) {
+  const loadHook = useLoading({ ...props, promiseHook: listHook });
+
+  function setRelative(bool = true) {
+    if (!configs.parentHtml) return;
+    configs.parentHtml.setAttribute("data-relative", bool);
+  }
+
+  function setParentHtml(html) {
+    configs.parentHtml = html;
+    configs?.parentHtml?.setAttribute?.("data-relative", loadHook.loading);
+  }
+
   function renderLoading() {
-    if (!listHook.loading) return null;
+    if (!loadHook.loading) return null;
     if (!props.loadingText) return null;
+    setRelative(loadHook.loading);
     return renderSlot(context.slots, "loading", listHook, () => [
-      <div class={"r-c-loading r-loading"}>
+      <div class={["r-c-loading r-loading"]}>
         <RILoading class="r-c-loading-icon r-loading-icon" />
         <div class={["r-c-loading-text r-loading-text"]}>{props.loadingText}</div>
       </div>,
@@ -55,7 +75,7 @@ export function useLoadingHoc(listHook, props, context) {
   }
 
   function renderfinished() {
-    if (listHook.loading) return null;
+    if (loadHook.loading) return null;
     if (!listHook.finished) return null;
     if (!listHook.list || !listHook.list.length) return null;
     if (!props.finishedText) return null;
@@ -65,7 +85,7 @@ export function useLoadingHoc(listHook, props, context) {
   }
 
   function renderEmpty() {
-    if (listHook.loading) return null;
+    if (loadHook.loading) return null;
     if (!listHook.finished) return null;
     if (listHook?.list?.length) return null;
     if (!props.emptyText && !props.emptySrc) return null;
@@ -73,11 +93,7 @@ export function useLoadingHoc(listHook, props, context) {
       <div class="r-c-empty r-empty">
         {renderSlot(context.slots, "emptyImg", listHook, () => [
           props.emptySrc && (
-            <img
-              class={"r-c-empty-img r-empty-img"}
-              fit="contain"
-              src={props.emptySrc}
-            />
+            <img class={"r-c-empty-img r-empty-img"} fit="contain" src={props.emptySrc} />
           ),
         ])}
         {props.emptyText && <div class={"r-c-empty-text r-empty-text"}>{props.emptyText}</div>}
@@ -86,7 +102,7 @@ export function useLoadingHoc(listHook, props, context) {
   }
 
   function renderError() {
-    if (listHook.loading) return null;
+    if (loadHook.loading) return null;
     if (!listHook.error) return null;
     return renderSlot(context.slots, "error", listHook, () => [
       <div class="r-c-error r-error" onClick={() => context.emit("errorClick")}>
@@ -95,11 +111,40 @@ export function useLoadingHoc(listHook, props, context) {
     ]);
   }
 
+  function renderBegin() {
+    if (!loadHook.begin) return null;
+    return (
+      <div class="r-c-begin r-begin">
+        {renderSlot(context.slots, "begin", listHook, () => [
+          <div
+            class="r-c-skelectons r-skelectons"
+            style={{ padding: `0 ${props.sapceHorizontal}px` }}
+          >
+            {renderList(props.skelectonCount, (item, index) => {
+              return renderSlot(context.slots, "skelecton", { item, index }, () => [
+                <div class="r-c-skelectons-item r-skelectons-item"> </div>,
+              ]);
+            })}
+          </div>,
+        ])}
+      </div>
+    );
+  }
+
+  function renderContent(vNode) {
+    if (loadHook.begin) return null;
+    return vNode;
+  }
+
   return {
+    renderContent,
+    renderBegin,
     renderLoading,
     renderfinished,
     renderEmpty,
     renderError,
+    setRelative,
+    setParentHtml,
   };
 }
 

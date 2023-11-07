@@ -1,5 +1,4 @@
-
-
 import { DefineComponent } from "vue";
 
-export declare const RList: DefineComponent<any>;
+export declare const RListSelect: DefineComponent<any>;
+export declare const RListSelectProps: any;

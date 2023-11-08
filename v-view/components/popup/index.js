@@ -25,8 +25,8 @@ export const RPopup = defineComponent({
   props: {
     visible: Object,
     closeOnClickOverlay: { type: Boolean, default: true },
-    left: { type: [Number, String], default: "" },
-    top: { type: [Number, String], default: "" },
+    left: { type: [Number, String], default: "0" },
+    top: { type: [Number, String], default: "0" },
   },
   emits: ["beforeOpen", "open", "close", "update:visible", "opened", "closed"],
   setup(props, context) {

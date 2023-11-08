@@ -4,12 +4,11 @@
   height: 100vh;
   position: fixed;
   left: 0;
-  top: 50px;
 }
 
 .overlay-enter-active,
 .overlay-leave-active {
-  transition: .3s;
+  transition: 0.3s;
 }
 
 .overlay-enter-from {
@@ -28,6 +27,8 @@
   opacity: 0;
 }
 
+/******************/
+
 .r-popup {
   width: 100vw;
   position: fixed;
@@ -42,12 +43,12 @@
 
 .popVisible-enter-active,
 .popVisible-leave-active {
-  transition: .3s;
+  transition: 0.3s;
 }
 
 .popup-enter-active,
 .popup-leave-active {
-  transition: .3s;
+  transition: 0.3s;
 }
 
 .popup-enter-from {

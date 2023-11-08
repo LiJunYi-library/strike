@@ -46,6 +46,12 @@ export class ScrollController {
     this.elements.push(ele);
   }
 
+  setCanScroll(bool) {
+    this.elements.forEach((el) => {
+      el.setCanScroll(bool);
+    });
+  }
+
   removeElement(ele) {
     arrayRemove(this.elements, ele);
   }

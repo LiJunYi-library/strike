@@ -132,6 +132,7 @@ export function useLoadingHoc(listHook, props, context, configs = {}) {
   }
 
   function renderContent(vNode) {
+    if (loadHook.loading) return null;
     if (loadHook.begin) return null;
     return vNode;
   }

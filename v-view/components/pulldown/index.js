@@ -6,7 +6,6 @@ export const RPulldown = defineComponent({
   props: {
     label: { type: [String, Number], default: "" },
     defaultLabel: [String, Number],
-    scrollController: Object,
     stopPropagation: { type: Boolean, default: true },
     labelClass: [String, Number],
     popTop: [String, Number, Function],
@@ -93,9 +92,11 @@ export const RPulldown = defineComponent({
             ])}
           </div>
           <RPopup
+            {...props}
             {...context.attrs}
             left={getLeft()}
             top={getTop()}
+            position="top"
             visible={visible.value}
             onUpdate:visible={onUpdateVisible}
           >

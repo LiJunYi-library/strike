@@ -15,37 +15,51 @@ import {
   reactive,
   Transition,
 } from "vue";
-import { RILoading } from "../icon";
 import "./index.scss";
 import { ROverlay } from "./overlay";
+
+export * from "./overlay";
 
 let prvePopup;
 
 export const RPopup = defineComponent({
   props: {
     visible: Object,
+    scrollController: Object,
+    teleport: [Object, String],
+    lazy: { type: Boolean, default: true },
+    destroy: { type: Boolean, default: false },
+    cache: { type: Boolean, default: true },
     closeOnClickOverlay: { type: Boolean, default: true },
-    left: { type: [Number, String], default: "0" },
-    top: { type: [Number, String], default: "0" },
+    closeOnClickEmpty: { type: Boolean, default: true },
+    left: { type: [Number, String], default: "" },
+    right: { type: [Number, String], default: "" },
+    top: { type: [Number, String], default: "" },
+    bottom: { type: [Number, String], default: "" },
+    position: { type: String, default: "bottom" }, // center top bottom right left
   },
   emits: ["beforeOpen", "open", "close", "update:visible", "opened", "closed"],
   setup(props, context) {
+    let lock = false;
+    // eslint-disable-next-line
+    let isRender = props.visible;
+    const teleport = ref(resolveTeleport());
     const visible = ref(props.visible);
     watch(
       () => props.visible,
       () => {
         if (visible.value === props.visible) return;
-        visible.value = props.visible;
-        if (visible.value) open();
-        else close();
+        teleport.value = resolveTeleport();
+        isRender = true;
+        trigger();
       }
     );
 
-    const ctx = { visible, close, open, emitClose, emitOpen };
+    const ctx = { visible, close, open, emitClose, emitOpen, trigger, emitTrigger };
 
     const overlay = reactive({
       el: undefined,
-      visible: false,
+      visible: props.visible,
       onUpdateVisible(val) {
         overlay.visible = val;
       },
@@ -53,6 +67,7 @@ export const RPopup = defineComponent({
         event.stopPropagation();
       },
       onClick(event) {
+        // console.log("overlay-onClick");
         event.stopPropagation();
         if (props.closeOnClickOverlay) emitClose();
       },
@@ -68,23 +83,46 @@ export const RPopup = defineComponent({
       },
     });
 
+    function resolveTeleport() {
+      if (typeof props.teleport === "object") return props.teleport;
+      return document.querySelector(props.teleport);
+    }
+
+    function trigger() {
+      // console.log("trigger");
+      if (!visible.value) open();
+      else close();
+    }
+
+    function emitTrigger() {
+      // console.log("emitTrigger");
+      if (visible.value) emitOpen();
+      else emitClose();
+    }
+
     function open() {
-      console.log("before open");
+      if (visible.value) return;
+      // console.log("before open");
       context.emit("beforeOpen");
       if (prvePopup) prvePopup.emitClose();
-      console.log("open");
+      // console.log("open");
       context.emit("open");
       prvePopup = ctx;
+      lock = true;
+      isRender = true;
       overlay.visible = true;
       visible.value = true;
+      props?.scrollController?.setCanScroll?.(false);
     }
 
     function close() {
+      if (!visible.value) return;
       overlay.visible = false;
       visible.value = false;
       prvePopup = undefined;
-      console.log("close");
+      // console.log("close");
       context.emit("close");
+      props?.scrollController?.setCanScroll?.(true);
     }
 
     function emitClose() {
@@ -100,6 +138,7 @@ export const RPopup = defineComponent({
     context.expose(ctx);
 
     function documentTouchstart(event) {
+      if (!props.closeOnClickEmpty) return;
       if (!visible.value) return;
       // console.log("documentTouchstart");
       emitClose();
@@ -110,45 +149,102 @@ export const RPopup = defineComponent({
     });
 
     function onAfterEnter(params) {
-      console.log("opened");
+      // console.log("opened");
       context.emit("opened");
+      lock = false;
     }
 
     function onAfterLeave(params) {
       context.emit("closed");
+      if (props.destroy) content?.el?.remove();
+    }
+
+    function renderContent(cStyle) {
+      if (!visible.value && !isRender && props.lazy) return null;
+      if (!visible.value && !props.cache) return null;
+      return (
+        <div
+          v-show={visible.value}
+          onTouchstart={content.onTouchstart}
+          onClick={content.onClick}
+          class={["r-popup-content", `r-popup-content-${props.position}`]}
+        >
+          {renderSlot(context.slots, "default")}
+        </div>
+      );
     }
 
     return () => {
+      const style = {
+        left: props.left,
+        right: props.right,
+        top: props.top,
+        bottom: props.bottom,
+      };
+      const cStyle = { ...style, zIndex: visible.value ? 2001 : 2000 };
       return [
         <ROverlay
-          style={{ left: props.left, top: props.top }}
+          style={style}
           ref={(el) => (overlay.el = el)}
           onTouchstart={overlay.onTouchstart}
           onClick={overlay.onClick}
+          teleport={props.teleport}
           visible={overlay.visible}
           onUpdate:visible={overlay.onUpdateVisible}
+          lazy={props.lazy}
+          cache={props.cache}
+          destroy={props.destroy}
         ></ROverlay>,
-        <Transition name="popVisible" onAfterLeave={onAfterLeave} onAfterEnter={onAfterEnter}>
-          <div
-            v-show={visible.value}
-            class={["r-popup"]}
-            style={{ left: props.left, top: props.top, zIndex: visible.value ? 2001 : 2000 }}
-          >
-            <Transition name="popup">
-              {visible.value && (
-                <div
-                  ref={(el) => (content.el = el)}
-                  onTouchstart={content.onTouchstart}
-                  onClick={content.onClick}
-                  class={["r-popup-content"]}
-                >
-                  {renderSlot(context.slots, "default")}
-                </div>
-              )}
-            </Transition>
-          </div>
-        </Transition>,
+        <Teleport to={teleport.value} disabled={!teleport.value}>
+          <Transition name="popVisible" onAfterLeave={onAfterLeave} onAfterEnter={onAfterEnter}>
+            <div
+              ref={(el) => (content.el = el)}
+              v-show={visible.value}
+              class={["r-popup", `r-popup-${props.position}`]}
+              style={cStyle}
+            >
+              <Transition name={"popup-" + props.position}>{renderContent(cStyle)}</Transition>{" "}
+            </div>
+          </Transition>
+        </Teleport>,
       ];
     };
   },
 });
+
+export function useRPopup(node) {
+  const div = document.createElement("div");
+  if (node instanceof Function) {
+    return new Promise((resolve, reject) => {
+      node(resolve, reject);
+    });
+  }
+  render(node, div);
+
+  nextTick(() => {
+    node.component.exposed.open();
+  });
+}
+
+useRPopup.create = (node) => {
+  const vNode = node;
+  const div = document.createElement("div");
+  render(node, div);
+  function show() {
+    vNode.component.exposed.open();
+  }
+
+  function trigger() {
+    vNode.component.exposed.trigger();
+  }
+
+  return { show, trigger };
+};
+
+useRPopup.asyncCreate = (node) => {
+  const obj = {};
+  onMounted(() => {
+    Object.assign(obj, useRPopup.create(node));
+  });
+  return obj;
+};

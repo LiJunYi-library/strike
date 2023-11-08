@@ -3,7 +3,9 @@
   width: 100vw;
   height: 100vh;
   position: fixed;
+  z-index: 1999;
   left: 0;
+  top: 0;
 }
 
 .overlay-enter-active,
@@ -30,39 +32,145 @@
 /******************/
 
 .r-popup {
-  width: 100vw;
   position: fixed;
-  left: 0;
   overflow: hidden;
 }
 
-.r-popup-content {
-  width: 100vw;
+.r-popup-center {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.r-popup-top {
   left: 0;
+  top: 0;
+}
+
+.r-popup-bottom {
+  left: 0;
+  bottom: 0;
+}
+
+.r-popup-left {
+  left: 0;
+  top: 0;
+}
+
+.r-popup-right {
+  top: 0;
+  right: 0;
+}
+
+.r-popup-content {
+  background: white;
+}
+
+.r-popup-content-top {
+  width: 100vw;
+}
+.r-popup-content-bottom {
+  width: 100vw;
+}
+
+.r-popup-content-left {
+  height: 100vh;
+}
+.r-popup-content-right {
+  height: 100vh;
 }
 
 .popVisible-enter-active,
-.popVisible-leave-active {
+.popVisible-leave-active,
+.popup-top-enter-active,
+.popup-top-leave-active,
+.popup-bottom-enter-active,
+.popup-bottom-leave-active,
+.popup-right-enter-active,
+.popup-right-leave-active,
+.popup-left-enter-active,
+.popup-left-leave-active,
+.popup-center-enter-active,
+.popup-center-leave-active {
   transition: 0.3s;
 }
 
-.popup-enter-active,
-.popup-leave-active {
-  transition: 0.3s;
-}
-
-.popup-enter-from {
+.popup-top-enter-from {
   transform: translateY(-100%);
 }
 
-.popup-enter-to {
+.popup-top-enter-to {
   transform: translateY(0);
 }
 
-.popup-leave-from {
+.popup-top-leave-from {
   transform: translateY(0);
 }
 
-.popup-leave-to {
+.popup-top-leave-to {
   transform: translateY(-100%);
+}
+
+.popup-bottom-enter-from {
+  transform: translateY(100%);
+}
+
+.popup-bottom-enter-to {
+  transform: translateY(0);
+}
+
+.popup-bottom-leave-from {
+  transform: translateY(0);
+}
+
+.popup-bottom-leave-to {
+  transform: translateY(100%);
+}
+
+.popup-left-enter-from {
+  transform: translateX(-100%);
+}
+
+.popup-left-enter-to {
+  transform: translateX(0);
+}
+
+.popup-left-leave-from {
+  transform: translateX(0);
+}
+
+.popup-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.popup-right-enter-from {
+  transform: translateX(100%);
+}
+
+.popup-right-enter-to {
+  transform: translateX(0);
+}
+
+.popup-right-leave-from {
+  transform: translateX(0);
+}
+
+.popup-right-leave-to {
+  transform: translateX(100%);
+}
+
+.popup-center-enter-from {
+  opacity: 0;
+}
+
+.popup-center-enter-to {
+  opacity: 1;
+}
+
+.popup-center-leave-from {
+  opacity: 1;
+}
+
+.popup-center-leave-to {
+  opacity: 0;
 }

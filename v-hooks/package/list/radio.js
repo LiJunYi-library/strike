@@ -238,9 +238,9 @@ function useRadio(props = {}) {
     }
   }
 
-  function updateListToResolveValue(l) {
-    list.value = l;
-    context.list = l;
+  function updateListToResolveValue(li) {
+    list.value = li;
+    context.list = li;
     resolveValue();
   }
 
@@ -250,8 +250,8 @@ function useRadio(props = {}) {
     context.reset();
   }
 
-  function resolveList(l) {
-    list.value = l;
+  function resolveList(li) {
+    list.value = li;
     context.list = li;
     const parms = resolveProps(context);
     context.select = parms.select;

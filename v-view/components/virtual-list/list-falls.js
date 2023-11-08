@@ -76,10 +76,9 @@ class ItemAdapter {
   uuId = 0;
 
   intersectingTimer = undefined;
-  intersectingTimerType= 'setTimeout'; //'setTimeout' 'setInterval'
+  intersectingTimerType = "setTimeout"; //'setTimeout' 'setInterval'
   intersectingtime = 0;
   intersected = false;
- 
 
   constructor(props) {
     Object.assign(this, props);
@@ -132,7 +131,10 @@ class ItemAdapter {
     this.scrollTop = scrollTop;
     // if (this.parent.ID === 2) console.log("onScroll", this.parent);
     // console.log("onScroll small", scrollTop);
-    this.isRender = this.getIsRender(scrollTop - 500, scrollTop + window.innerHeight + 500);
+    this.isRender = this.getIsRender(
+      scrollTop - this.parent.recycleSize,
+      scrollTop + window.innerHeight + this.parent.recycleSize
+    );
     if (this.isRender !== this.isRenderCache) {
       this.dispatchRender();
       this.isRenderCache = this.isRender;
@@ -146,7 +148,7 @@ class Adapter {
   list = [];
   columnNum = 2;
   columns = [];
-
+  recycleSize = (window.innerHeight || 500) * 3;
   space = 10;
   scrollTop = 0;
   avgHeight = 0;
@@ -267,8 +269,8 @@ class Adapter {
     item.left = minCol.left;
     minCol.height = minCol.height + item.height;
     item.isRender = item.getIsRender(
-      item.scrollTop - 500,
-      item.scrollTop + window.innerHeight + 500
+      item.scrollTop - this.recycleSize,
+      item.scrollTop + window.innerHeight + this.recycleSize
     );
   }
 
@@ -286,7 +288,7 @@ RVirtualListFalls = defineComponent({
     listHook: { type: Object, default: () => ({ proxy: {} }) },
     list: { type: Array, default: () => [] },
     itemThreshold: { type: Number, default: 0.2 },
-    itemIntersectingtime:Number,
+    itemIntersectingtime: Number,
     columnNum: { type: Number, default: 2 },
     skelectonCount: { type: Number, default: 4 },
     avgHeight: { type: Number, default: 210 },
@@ -330,7 +332,7 @@ RVirtualListFalls = defineComponent({
       avgHeight,
       space,
       itemThreshold,
-      itemIntersectingtime:props.itemIntersectingtime,
+      itemIntersectingtime: props.itemIntersectingtime,
       sapceHorizontal,
       ID,
       array: list,
@@ -572,35 +574,35 @@ RVirtualListItem = defineComponent({
       newMutationObserver();
     }
 
-
     function handleIntersection(entries) {
-      if(!itemAdapter.intersectingtime ){
+      if (!itemAdapter.intersectingtime) {
         context.emit("intersection", itemAdapter, entries);
         return;
       }
 
-      if( itemAdapter.intersected )  return;
+      if (itemAdapter.intersected) return;
       itemAdapter.intersected = true;
       context.emit("intersection", itemAdapter, entries);
-      if( itemAdapter.intersectingTimerType === 'setTimeout'){
-        itemAdapter.intersectingTimer = setTimeout(()=>{
+      if (itemAdapter.intersectingTimerType === "setTimeout") {
+        itemAdapter.intersectingTimer = setTimeout(() => {
           itemAdapter.intersected = false;
-        },itemAdapter.intersectingtime )
+        }, itemAdapter.intersectingtime);
       }
     }
 
     try {
       intersectionObserver = new IntersectionObserver(([entries]) => {
-        itemAdapter.isIntersecting = entries.isIntersecting
-        if(  !itemAdapter.isIntersecting ){
-         if(itemAdapter.intersectingTimerType === 'setInterval' ) clearInterval(itemAdapter.intersectingTimer )
+        itemAdapter.isIntersecting = entries.isIntersecting;
+        if (!itemAdapter.isIntersecting) {
+          if (itemAdapter.intersectingTimerType === "setInterval")
+            clearInterval(itemAdapter.intersectingTimer);
         }
         if (entries.isIntersecting) {
           if (!itemAdapter.isFirsIntersecting) {
             context.emit("firstIntersection", itemAdapter, entries);
             itemAdapter.isFirsIntersecting = true;
           }
-          handleIntersection( entries )
+          handleIntersection(entries);
         }
       }, options);
     } catch (error) {}

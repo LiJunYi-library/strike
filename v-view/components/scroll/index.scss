@@ -84,3 +84,27 @@
 .r-scroll-list-bottom {
   min-height: 1px;
 }
+
+.r-scroll-virtual-list {
+  .r-loading {
+    display: flex;
+    flex-direction: row;
+    min-height: 50px;
+  }
+  .r-finished{
+    display: flex;
+    flex-direction: row;
+    min-height: 50px;
+  }
+}
+
+.r-scroll-virtual-list-content {
+  position: relative;
+}
+
+.r-scroll-virtual-list-item {
+  position: absolute;
+  left: 0;
+  overflow: hidden;
+  background: wheat;
+}

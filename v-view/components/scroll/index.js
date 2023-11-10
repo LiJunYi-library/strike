@@ -62,9 +62,11 @@ export function useScrollController(props = {}) {
   const controller = reactive({
     onScroll: () => undefined,
     onFlotage: () => undefined,
+    onResize: () => undefined,
     ...props,
     destroy,
     dispatchFlotage,
+    context: RScrollContext,
   });
 
   RScrollContext?.children?.push?.(controller);
@@ -90,6 +92,7 @@ export const RScroll = defineComponent({
     const { scrollController: SC } = props;
     const RScrollContext = reactive({
       element: null,
+      contentElement: null,
       otherElement: [],
       children: [],
       isHandActuated: false,
@@ -97,6 +100,11 @@ export const RScroll = defineComponent({
     provide("RScrollContext", RScrollContext);
     let prveTop = 0;
     let scrollTop = 0;
+    const resizeObserver = new ResizeObserver(([entries]) => {
+      RScrollContext.children.forEach((el) => {
+        el.onResize(entries, RScrollContext.element.scrollTop);
+      });
+    });
 
     function onScroll(event) {
       if (RScrollContext.isHandActuated) {
@@ -145,18 +153,26 @@ export const RScroll = defineComponent({
     if (SC) SC.addElement(RScrollContext);
     onBeforeUnmount(() => {
       if (SC) SC.removeElement(RScrollContext);
+      resizeObserver?.disconnect?.();
     });
+
+    onMounted(() => {
+      // console.log("r-scroll onMounted");
+      resizeObserver?.observe?.(RScrollContext.contentElement);
+    });
+
+    function onRef(el) {
+      RScrollContext.element = el;
+    }
+
+    function onContentRef(el) {
+      RScrollContext.contentElement = el;
+    }
 
     return (vm) => {
       return (
-        <div
-          ref={(el) => {
-            RScrollContext.element = el;
-          }}
-          class="r-scroll"
-          onScroll={onScroll}
-        >
-          {renderSlot(context.slots, "default")}
+        <div ref={onRef} class="r-scroll" onScroll={onScroll}>
+          <div ref={onContentRef}>{renderSlot(context.slots, "default")}</div>
         </div>
       );
     };
@@ -168,3 +184,4 @@ export * from "./sticky";
 export * from "./fold";
 export * from "./fixed";
 export * from "./list";
+export * from "./virtual-list";

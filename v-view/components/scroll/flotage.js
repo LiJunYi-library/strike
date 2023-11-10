@@ -28,7 +28,7 @@ export const RScrollFlotage = defineComponent({
         if (tY === height || tY === maxHeight) {
           if (isDispatch === false) {
             scrollController.dispatchFlotage(event, tY);
-            console.log("dispatch  flotage", tY, event.flotageHeight);
+            // console.log("dispatch  flotage", tY, event.flotageHeight);
           }
           isDispatch = true;
         }
@@ -36,7 +36,7 @@ export const RScrollFlotage = defineComponent({
         if (height < tY && tY < maxHeight) {
           isDispatch = false;
           scrollController.dispatchFlotage(event, tY);
-          console.log("dispatch  flotage", tY, event.flotageHeight);
+          // console.log("dispatch  flotage", tY, event.flotageHeight);
         }
 
         prveTop = sTop;

@@ -12,6 +12,8 @@ export declare const RScrollFixed: DefineComponent<any>;
 
 export declare const RScrollList: DefineComponent<any>;
 
+export declare const RScrollVirtualList: DefineComponent<any>;
+
 export class ScrollController {
   onScroll: void;
   onFlotage: void;

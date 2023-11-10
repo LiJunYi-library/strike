@@ -154,8 +154,7 @@ RTab = defineComponent({
                       key={index}
                       onClick={(event) => {
                         if (props.clickStop) event.stopPropagation();
-                        if (listHook.same(item)) return;
-                        listHook.onSelect(item, index);
+                        if (listHook.onSelect(item, index)) return;
                         context.emit("change", item, index);
                       }}
                     >

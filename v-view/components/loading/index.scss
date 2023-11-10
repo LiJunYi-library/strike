@@ -23,7 +23,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  min-height: 250px;
 }
 
 .r-c-error-text {
@@ -35,11 +35,28 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  min-height: 250px;
 }
 
 .r-c-empty-img {
   width: 100px;
+}
+
+.r-c-finished {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.r-c-begin-skelectons {
+  display: grid;
+}
+
+.r-c-begin-skelecton {
+  background-image: url("./skelecton.png");
+  background-size: 100% 100%;
 }
 
 /*******************************/

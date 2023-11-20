@@ -158,6 +158,7 @@ export const RScrollVirtualList = defineComponent({
 
     const observerBottom = new IntersectionObserver(([entries]) => {
       if (entries.isIntersecting && isobserver) {
+        // if (listHook.error) return null;
         context.emit("scrollEnd");
         console.log("scrollEnd");
       }
@@ -183,6 +184,7 @@ export const RScrollVirtualList = defineComponent({
     return (vm) => {
       return (
         <div class="r-scroll-virtual-list">
+          {renderSlot(context.slots, "header")}
           <div
             class="r-scroll-virtual-list-content"
             style={{ height: offsetH.value + "px" }}

@@ -24,7 +24,7 @@ let prvePopup;
 
 export const RPopup = defineComponent({
   props: {
-    visible: Object,
+    visible: Boolean,
     scrollController: Object,
     teleport: [Object, String],
     lazy: { type: Boolean, default: true },

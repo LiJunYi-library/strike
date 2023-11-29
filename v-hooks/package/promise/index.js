@@ -167,10 +167,10 @@ function usePromise(fun, options = {}) {
     awaitBeginSend,
     createPromise,
     about,
-    run: nextSend,
-    runBegin: nextBeginSend,
-    fetchBegin: nextBeginSend,
-    fetch: nextSend,
+    run: nextSend, // 废弃
+    runBegin: nextBeginSend, // 废弃
+    fetchBegin: nextBeginSend, // 废弃
+    fetch: nextSend, // 废弃
   };
 
   params.proxy = reactive(params);

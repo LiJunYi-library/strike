@@ -86,11 +86,8 @@ function useMultiple(props = {}) {
     formatterDisabled,
     save,
     restore,
-    transformStore: changeContextToStore,
-    changeContextToStore,
-    transformParams: changeContextToProxy,
-    changeContextToProxy,
-    save_changeContextToStore,
+    transformStore,
+    transformParams,
     transform,
     same,
     onSelect,
@@ -131,17 +128,12 @@ function useMultiple(props = {}) {
     params.proxy.index = [...store.index];
   }
 
-  function changeContextToStore() {
+  function transformStore() {
     context = store;
   }
 
-  function changeContextToProxy() {
+  function transformParams() {
     context = params.proxy;
-  }
-
-  function save_changeContextToStore() {
-    save();
-    changeContextToStore();
   }
 
   function transform() {
@@ -168,15 +160,17 @@ function useMultiple(props = {}) {
       context.index.push(i);
     }
   }
-  // 反选
+
   function invertSelect() {
+    // 反选
     context.select = list.value.filter((val) => !context.select.some((el) => el === val));
     context.value = context.select.map((el) => formatterValue(el));
     context.label = context.select.map((el) => formatterLabel(el));
     context.index = list.value.reduce(reduceIndex(context.select), []);
   }
-  // 全选
+
   function allSelect() {
+    // 全选
     context.select = [...list.value];
     context.value = context.select.map((el) => formatterValue(el));
     context.label = context.select.map((el) => formatterLabel(el));
@@ -221,7 +215,7 @@ function useMultiple(props = {}) {
     context.value = context.select.map((el) => formatterValue(el));
     context.label = context.select.map((el) => formatterLabel(el));
   }
-  //  --  //
+
   function selectOfValue(val) {
     return filterForValue(list.value, val);
   }
@@ -233,7 +227,7 @@ function useMultiple(props = {}) {
   function indexOfValue(val) {
     return list.value.reduce(reduceIndex(selectOfValue(val)), []);
   }
-  //  --  //
+
   function findValueArr() {
     return list.value
       .reduce(reduceItemForValue(context.select), [])
@@ -254,7 +248,7 @@ function useMultiple(props = {}) {
   }
 
   function updateListToResolveValue(li) {
-    updateList(li);
+    list.value = li;
     resolveValue();
   }
 

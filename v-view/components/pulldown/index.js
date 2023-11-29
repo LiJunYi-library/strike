@@ -12,7 +12,7 @@ export const RPulldown = defineComponent({
     popLeft: [String, Number, Function],
     teleport: [String, Number, HTMLElement],
     teleportDisabled: { type: Boolean, default: true },
-    visible: Object,
+    visible: Boolean,
   },
   setup(props, context) {
     let pulldownHtml;

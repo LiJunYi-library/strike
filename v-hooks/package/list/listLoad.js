@@ -1,7 +1,8 @@
-import { ref, reactive, computed } from "vue";
+import { ref, reactive } from "vue";
 import { usePromise } from "../promise";
+import { useProxy } from "../../other";
 
-export { useListLoad, getListLoadProps };
+export { useListLoad, getListLoadProps, useAsyncListLoad };
 
 function getListLoadProps(options) {
   const config = {
@@ -55,7 +56,9 @@ function useListLoad(props = {}) {
     fetchBegin,
     fetchConcat,
   };
+
   const proxy = reactive(arguments_);
+
   arguments_.proxy = proxy;
 
   function fetchBegin(...arg) {
@@ -91,5 +94,62 @@ function useListLoad(props = {}) {
       config.fetchConcatCB(proxy);
     });
   }
+
   return arguments_;
+}
+
+function useAsyncListLoad(props = {}) {
+  const config = getListLoadProps(props);
+  const asyncHooks = usePromise(config.fetchCb, { ...config });
+
+  const list = ref(config.list);
+  const currentPage = ref(config.currentPage);
+  const pageSize = ref(config.pageSize);
+  const total = ref(0);
+  const finished = ref(false);
+  const listData = ref([]);
+
+  const params = useProxy({
+    ...asyncHooks,
+    list,
+    listData,
+    currentPage,
+    pageSize,
+    finished,
+    total,
+    nextBeginSend,
+    awaitConcatSend,
+  });
+
+  function nextBeginSend(...arg) {
+    list.value = [];
+    listData.value = [];
+    currentPage.value = 1;
+    finished.value = false;
+    total.value = 0;
+    config.beforeBegin(params.proxy);
+    return asyncHooks.nextBeginSend(...arg).then((res) => {
+      listData.value = config.setList(res, params.proxy);
+      list.value = listData.value;
+      currentPage.value = currentPage.value + 1;
+      total.value = config.setTotal(res, params.proxy);
+      finished.value = config.setFinished(res, params.proxy);
+      config.fetchBeginCB(params.proxy);
+    });
+  }
+
+  function awaitConcatSend(...arg) {
+    if (finished.value === true) return;
+    if (asyncHooks.loading.value === true) return;
+    return asyncHooks.awaitSend(...arg).then((res) => {
+      listData.value = config.setList(res, params.proxy);
+      list.value = list.value.concat(listData.value);
+      currentPage.value = currentPage.value + 1;
+      total.value = config.setTotal(res, params.proxy);
+      finished.value = config.setFinished(res, params.proxy);
+      config.fetchConcatCB(params.proxy);
+    });
+  }
+
+  return params;
 }

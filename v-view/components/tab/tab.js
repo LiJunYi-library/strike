@@ -125,19 +125,7 @@ RTab = defineComponent({
       console.log("render RTab>>");
       return (
         <div class="r-tab">
-          <div
-            onTouchend={(event) => {
-              event.stopPropagation();
-            }}
-            onTouchstart={(event) => {
-              event.stopPropagation();
-            }}
-            onTouchmove={(event) => {
-              event.stopPropagation();
-            }}
-            class="r-tab-scroll"
-            ref={(el) => (htmls.scrollHtml = el)}
-          >
+          <div class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
             <RLoading
               skelectonCount={props.skelectonCount}
               loadingHook={listHook}

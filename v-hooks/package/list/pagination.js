@@ -44,7 +44,7 @@ function getPaginationProps(options = {}) {
 
   return config;
 }
-
+// 静态分页 不是远程分页
 function usePagination(props = {}) {
   const config = getPaginationProps(props);
   function paging(options = config) {
@@ -172,7 +172,7 @@ function usePagination(props = {}) {
 
   return params;
 }
-
+// 静态分页 远程获取数据 不是远程分页
 function useAsyncPagination(props = {}) {
   const config = { fetchCb: () => undefined, ...props };
 
@@ -189,7 +189,7 @@ function useAsyncPagination(props = {}) {
   params.proxy = reactive(params);
   return params;
 }
-
+// 静态分页 可选择 不是远程分页
 function usePaginationSelect(props = {}) {
   // eslint-disable-next-line
   var selectHooks;
@@ -212,7 +212,7 @@ function usePaginationSelect(props = {}) {
 
   return params;
 }
-
+// 静态分页 远程获取数据 可选择 不是远程分页
 function useAsyncPaginationSelect(props = {}) {
   const config = { fetchCb: () => undefined, ...props };
 
@@ -279,6 +279,7 @@ function useAsyncListPagination(props = {}) {
   return params;
 }
 
+// 远程分页
 function useFetchPagination(props = {}) {
   const config = getPaginationProps(props);
 
@@ -301,14 +302,18 @@ function useFetchPagination(props = {}) {
     total,
     prop,
     order,
-    fetchBegin,
-    fetch,
+    nextBeginSend,
+    nextSend,
     updatePage,
     updatePageSize,
     updateProp,
     updateOrder,
+    fetchBegin: nextBeginSend,
+    fetch: nextSend,
   };
+
   const proxy = reactive(params);
+
   params.proxy = proxy;
 
   const time0 = () => {
@@ -321,12 +326,12 @@ function useFetchPagination(props = {}) {
 
   const mergeEvent = nextTaskHoc()(time0);
 
-  function fetchBegin(...arg) {
+  function nextBeginSend(...arg) {
     currentPage.value = config.currentPage;
     pageSize.value = config.pageSize;
     total.value = config.total;
     list.value = config.list;
-    return asyncHooks.fetchBegin(...arg).then((res) => {
+    return asyncHooks.nextBeginSend(...arg).then((res) => {
       total.value = config.formatterTotal(proxy);
       list.value = config.formatterList(proxy);
       selectHooks.updateListAndReset(list.value);
@@ -334,8 +339,8 @@ function useFetchPagination(props = {}) {
     });
   }
 
-  function fetch(...arg) {
-    return asyncHooks.fetch(...arg).then((res) => {
+  function nextSend(...arg) {
+    return asyncHooks.nextSend(...arg).then((res) => {
       total.value = config.formatterTotal(proxy);
       list.value = config.formatterList(proxy);
       selectHooks.updateListAndReset(list.value);
@@ -346,13 +351,13 @@ function useFetchPagination(props = {}) {
   async function serverPaging() {
     if (!config.serverPaging) return;
     await mergeEvent();
-    return fetch();
+    return nextSend();
   }
 
   async function serverBeginPaging() {
     if (!config.serverPaging) return;
     await mergeEvent();
-    return fetchBegin();
+    return nextBeginSend();
   }
 
   async function updatePage(p) {
@@ -367,12 +372,12 @@ function useFetchPagination(props = {}) {
 
   async function updateProp(p) {
     prop.value = p;
-    serverBeginPaging()
+    serverBeginPaging();
   }
 
   async function updateOrder(o) {
     order.value = o;
-    serverBeginPaging()
+    serverBeginPaging();
   }
 
   return params;

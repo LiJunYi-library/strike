@@ -68,6 +68,7 @@ function useRadio(props = {}) {
     save,
     restore,
     save_changeContextToStore,
+    restore_changeContextToProxy,
     onSelect,
     same,
     reset,
@@ -128,6 +129,12 @@ function useRadio(props = {}) {
     changeContextToStore();
   }
 
+  function restore_changeContextToProxy() {
+    restore();
+    changeContextToProxy();
+  }
+
+
   function transform() {
     if (context === params.proxy) return (context = store);
     if (context === store) return (context = params.proxy);
@@ -138,6 +145,7 @@ function useRadio(props = {}) {
   }
 
   function onSelect(item, i) {
+    if (!config.Validator(context)) return;
     if (config.cancelSame && same(item, i)) {
       context.select = undefined;
       context.index = undefined;
@@ -163,7 +171,7 @@ function useRadio(props = {}) {
     context.index = undefined;
   }
 
-  //  --  ///
+  //  --  //
   function updateList(l) {
     list.value = l;
     context.list = l;
@@ -296,10 +304,15 @@ function useAsyncRadio(props = {}) {
     ...radioHooks,
     ...asyncHooks,
     finished,
+    fetchBegin:nextBeginSend,
     beginSend,
     nextBeginSend,
     awaitBeginSend,
   };
   params.proxy = reactive(params);
   return params;
+}
+
+function useRadioAsync(props = {}) {
+  //
 }

@@ -161,3 +161,70 @@ RTab = defineComponent({
     };
   },
 });
+
+function RTabHoc(config = {}) {
+  const options = {
+    renderSkelecton: () => null,
+    ...config,
+  };
+
+  return defineComponent({
+    props: {
+      clickStop: Boolean,
+      listHook: Object,
+    },
+    setup(props, context) {
+      // eslint-disable-next-line
+      const { listHook } = props;
+
+      const htmls = {
+        itemsHtml: [],
+        parentHtml: null,
+        scrollHtml: null,
+      };
+
+      const ActiveNode = withMemo(
+        [],
+        () => (
+          <Active listHook={listHook} htmls={htmls}>
+            {{
+              default: (...arg) => context.slots?.active?.(...arg),
+            }}
+          </Active>
+        ),
+        []
+      );
+
+      return (vm) => {
+        return (
+          <div class="r-tab">
+            <div class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
+              <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
+                {renderList(listHook.list, (item, index) => {
+                  if (context?.slots?.item) return context?.slots?.item({ index, item });
+                  return (
+                    <div
+                      class={["r-tab-item", listHook.same(item) && "r-tab-item-same"]}
+                      ref={(el) => (htmls.itemsHtml[index] = el)}
+                      key={index}
+                      onClick={(event) => {
+                        if (props.clickStop) event.stopPropagation();
+                        if (listHook.onSelect(item, index)) return;
+                        context.emit("change", item, index);
+                      }}
+                    >
+                      {renderSlot(context.slots, "default", { index, item }, () => [
+                        <div> {listHook.formatterLabel(item)} </div>,
+                      ])}
+                    </div>
+                  );
+                })}
+                {ActiveNode}
+              </div>
+            </div>
+          </div>
+        );
+      };
+    },
+  });
+}

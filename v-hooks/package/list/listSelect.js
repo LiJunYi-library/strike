@@ -22,11 +22,11 @@ function useListSelect(props = {}) {
   const selectHooks = useSelect({ ...props, list: listHooks.list.value });
 
   listHooks.afterSetList = (hooks, type) => {
-    // console.log("listHooks.afterSetList", type < 1);
     selectHooks.resolveList(listHooks.list.value);
   };
 
   const endSlice = ref(config.pageSize);
+
   function lazyListLoad() {
     endSlice.value += config.pageSize;
   }
@@ -34,6 +34,7 @@ function useListSelect(props = {}) {
   const lazyList = computed(() => {
     return listHooks.list.value.slice(0, endSlice.value);
   });
+  
   const finished = computed(() => endSlice.value >= listHooks.list.value.length);
 
   const arguments_ = {

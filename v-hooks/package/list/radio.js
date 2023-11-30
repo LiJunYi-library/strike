@@ -1,6 +1,8 @@
 import { ref, reactive } from "vue";
 import { usePromise } from "../promise";
 import { getSelectProps } from "./select";
+import { useProxy } from "../../other";
+
 export { useRadio, useAsyncRadio };
 
 function useRadio(props = {}) {
@@ -133,7 +135,6 @@ function useRadio(props = {}) {
     restore();
     changeContextToProxy();
   }
-
 
   function transform() {
     if (context === params.proxy) return (context = store);
@@ -291,25 +292,27 @@ function useAsyncRadio(props = {}) {
     radioHooks.list.value = [];
     return asyncHooks.beginSend(...arg);
   }
+
   function nextBeginSend(...arg) {
     radioHooks.list.value = [];
     return asyncHooks.nextBeginSend(...arg);
   }
+
   function awaitBeginSend(...arg) {
     radioHooks.list.value = [];
     return asyncHooks.awaitBeginSend(...arg);
   }
 
-  const params = {
+  const params = useProxy({
     ...radioHooks,
     ...asyncHooks,
     finished,
-    fetchBegin:nextBeginSend,
+    fetchBegin: nextBeginSend,
     beginSend,
     nextBeginSend,
     awaitBeginSend,
-  };
-  params.proxy = reactive(params);
+  });
+  
   return params;
 }
 

@@ -14,6 +14,7 @@ export const RPulldown = defineComponent({
     teleportDisabled: { type: Boolean, default: true },
     visible: Boolean,
   },
+  emits:['labelClick'],
   setup(props, context) {
     let pulldownHtml;
 

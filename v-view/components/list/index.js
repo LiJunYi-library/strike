@@ -9,6 +9,7 @@ export const RListSelectProps = {
 
 export const RListSelect = defineComponent({
   props: RListSelectProps,
+  emits:['change'],
   setup(props, context) {
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { listHook } = props;

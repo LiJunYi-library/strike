@@ -38,7 +38,16 @@ export const RPopup = defineComponent({
     bottom: { type: [Number, String], default: "" },
     position: { type: String, default: "bottom" }, // center top bottom right left
   },
-  emits: ["beforeOpen", "open", "close", "update:visible", "opened", "closed"],
+  emits: [
+    "beforeOpen",
+    "open",
+    "close",
+    "update:visible",
+    "opened",
+    "closed",
+    "prveClose",
+    "currentClose",
+  ],
   setup(props, context) {
     let lock = false;
     // eslint-disable-next-line
@@ -104,7 +113,9 @@ export const RPopup = defineComponent({
       if (visible.value) return;
       // console.log("before open");
       context.emit("beforeOpen");
-      if (prvePopup) prvePopup.emitClose();
+      if (prvePopup) {
+        prvePopup.emitClose(isPrve);
+      }
       // console.log("open");
       context.emit("open");
       prvePopup = ctx;
@@ -115,18 +126,19 @@ export const RPopup = defineComponent({
       props?.scrollController?.setCanScroll?.(false);
     }
 
-    function close() {
+    function close(isPrve) {
       if (!visible.value) return;
       overlay.visible = false;
       visible.value = false;
       prvePopup = undefined;
-      // console.log("close");
       context.emit("close");
+      if (isPrve) context.emit("prveClose");
+      else context.emit("currentClose");
       props?.scrollController?.setCanScroll?.(true);
     }
 
-    function emitClose() {
-      close();
+    function emitClose(isPrve) {
+      close(isPrve);
       context.emit("update:visible", false);
     }
 

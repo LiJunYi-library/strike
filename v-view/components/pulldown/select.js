@@ -8,6 +8,7 @@ export const RPulldownSelect = defineComponent({
     label: { type: [String, Number], default: "" },
     ...RListSelectProps,
   },
+  emits:['change'],
   setup(props, context) {
     // eslint-disable-next-line
     const listHook = props.listHook;
@@ -36,7 +37,7 @@ export const RPulldownSelect = defineComponent({
             default: (popCtx) => (
               <div class={"r-pulldown-list-select"}>
                 <RListSelect {...props} onChange={(item, index) => onChange(item, index, popCtx)}>
-                  {{ ...context.slots }}
+                  {{default: context.slots.default,item: context.slots.item }}
                 </RListSelect>
               </div>
             ),

@@ -14,6 +14,7 @@ import { RLoading } from "../loading";
 
 // eslint-disable-next-line no-var
 var RTab;
+
 export { RTab };
 
 const Active = defineComponent({

@@ -108,8 +108,8 @@
   }
   .r-list-select-win {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3列，每列宽度相等 */
-    grid-gap: 8px; /* 列间距 */
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 8px;
     box-sizing: border-box;
     background: #f4f4fb;
     max-height: 300px;

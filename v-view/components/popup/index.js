@@ -114,7 +114,7 @@ export const RPopup = defineComponent({
       // console.log("before open");
       context.emit("beforeOpen");
       if (prvePopup) {
-        prvePopup.emitClose(isPrve);
+        prvePopup.emitClose(true);
       }
       // console.log("open");
       context.emit("open");

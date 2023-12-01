@@ -17,7 +17,6 @@ export const RPulldown = defineComponent({
   emits: ["labelClick", "update:visible"],
   setup(props, context) {
     let pulldownHtml;
-
     const visible = ref(false);
     function onUpdateVisible(val) {
       visible.value = val;

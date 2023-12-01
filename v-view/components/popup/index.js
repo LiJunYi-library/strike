@@ -37,6 +37,7 @@ export const RPopup = defineComponent({
     top: { type: [Number, String], default: "" },
     bottom: { type: [Number, String], default: "" },
     position: { type: String, default: "bottom" }, // center top bottom right left
+    popClass: { type: String, default: "" },
   },
   emits: [
     "beforeOpen",
@@ -76,7 +77,6 @@ export const RPopup = defineComponent({
         event.stopPropagation();
       },
       onClick(event) {
-        // console.log("overlay-onClick");
         event.stopPropagation();
         if (props.closeOnClickOverlay) emitClose();
       },
@@ -212,7 +212,7 @@ export const RPopup = defineComponent({
             <div
               ref={(el) => (content.el = el)}
               v-show={visible.value}
-              class={["r-popup", `r-popup-${props.position}`]}
+              class={["r-popup", `r-popup-${props.position}`, props.popClass]}
               style={cStyle}
             >
               <Transition name={"popup-" + props.position}>{renderContent(cStyle)}</Transition>{" "}

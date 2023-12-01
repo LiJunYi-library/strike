@@ -9,7 +9,7 @@ export const RListSelectProps = {
 
 export const RListSelect = defineComponent({
   props: RListSelectProps,
-  emits:['change'],
+  emits: ["change"],
   setup(props, context) {
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { listHook } = props;
@@ -25,7 +25,11 @@ export const RListSelect = defineComponent({
                 if (context?.slots?.item) return context?.slots?.item({ index, item });
                 return (
                   <div
-                    class={["r-list-item", listHook.same(item) && "r-list-item-same"]}
+                    class={[
+                      "r-list-item",
+                      "r-list-item-store" + listHook?.store?.index,
+                      listHook.same(item) && "r-list-item-same",
+                    ]}
                     key={index}
                     onClick={(event) => {
                       if (listHook.onSelect(item, index)) return;

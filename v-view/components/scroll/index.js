@@ -100,11 +100,15 @@ export const RScroll = defineComponent({
     provide("RScrollContext", RScrollContext);
     let prveTop = 0;
     let scrollTop = 0;
-    const resizeObserver = new ResizeObserver(([entries]) => {
-      RScrollContext.children.forEach((el) => {
-        el.onResize(entries, RScrollContext.element.scrollTop);
+    let resizeObserver;
+
+    try {
+      resizeObserver = new ResizeObserver(([entries]) => {
+        RScrollContext.children.forEach((el) => {
+          el.onResize(entries, RScrollContext.element.scrollTop);
+        });
       });
-    });
+    } catch (error) {}
 
     function onScroll(event) {
       if (RScrollContext.isHandActuated) {
@@ -157,7 +161,6 @@ export const RScroll = defineComponent({
     });
 
     onMounted(() => {
-      // console.log("r-scroll onMounted");
       resizeObserver?.observe?.(RScrollContext.contentElement);
     });
 

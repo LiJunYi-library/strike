@@ -46,11 +46,14 @@
     font-weight: 800;
   }
 
+  .r-tab-item-active-transition {
+    transition: 0.25s;
+  }
+
   .r-tab-item-active {
     position: absolute;
     left: 0;
     top: 0;
-    transition: 0.25s;
     text-align: center;
     line-height: var(--tab-height);
     color: black;

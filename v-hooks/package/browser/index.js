@@ -17,18 +17,24 @@ export function useResizeObserver(el, cb) {
 
   function getEl() {
     if (typeof el === "function") return el();
-    if (el.value) return el.value;
+    if (el && el.value) return el.value;
     return el;
   }
 
   onMounted(() => {
-    if (getEl()) resizeObserver?.observe?.(getEl());
+    let ele = getEl();
+    if (ele instanceof Array) {
+      ele.forEach((item) => {
+        if (item) resizeObserver?.observe?.(item);
+      });
+    } else {
+      if (ele) resizeObserver?.observe?.(ele);
+    }
   });
 
   onBeforeUnmount(() => {
-    if (getEl()) resizeObserver?.unobserve?.(getEl());
     resizeObserver?.disconnect?.();
   });
 
-  return resizeObserver
+  return resizeObserver;
 }

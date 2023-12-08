@@ -9,7 +9,7 @@ import {
   withMemo,
 } from "vue";
 import "./tab.scss";
-
+import { useResizeObserver } from "@rainbow_ljy/v-hooks";
 import { RLoading } from "../loading";
 
 // eslint-disable-next-line no-var
@@ -27,12 +27,12 @@ const Active = defineComponent({
     const { listHook } = props;
     const offset = ref({});
     let actItemHtml = null;
+    const isTransition = ref(true);
 
     function getOffset() {
       const { itemsHtml, parentHtml, scrollHtml } = props.htmls;
       let offset = {};
       actItemHtml = itemsHtml[listHook.index];
-      // debugger;
       if (!actItemHtml) return offset;
       const activeOffset = actItemHtml.getBoundingClientRect();
       const parentOffset = parentHtml.getBoundingClientRect();
@@ -44,34 +44,44 @@ const Active = defineComponent({
         top: activeOffset.top - parentOffset.top,
         scrollLeft: actItemHtml.offsetLeft - (scrollOffset.width - activeOffset.width) / 2,
       };
-      scrollTo(offset.scrollLeft);
       return offset;
     }
 
-    function scrollTo(left) {
+    //'instant',"smooth"
+    function scrollTo(left, behavior = "instant") {
       const { scrollHtml } = props.htmls;
       if (!scrollHtml) return;
-      scrollHtml.scrollTo({ left, behavior: "smooth" });
+      scrollHtml.scrollTo({ left, behavior });
     }
 
-    async function setOffset() {
+    async function loyout() {
       await nextTick();
       offset.value = getOffset();
+      isTransition.value = false;
+      scrollTo(offset.value.scrollLeft);
+    }
+
+    async function transitionLoyout() {
+      await nextTick();
+      offset.value = getOffset();
+      isTransition.value = true;
+      scrollTo(offset.value.scrollLeft, "smooth");
     }
 
     watch(
       () => props.listHook.select,
       () => {
-        setOffset();
+        transitionLoyout();
       }
     );
 
     onMounted(() => {
-      if (listHook.select) setOffset();
+      if (listHook.select) loyout();
     });
 
+    context.expose({ loyout, transitionLoyout });
+
     return () => {
-      console.log("render RTab Active");
       if (!listHook.select) return null;
       return (
         <div
@@ -80,7 +90,7 @@ const Active = defineComponent({
             height: offset.value.height + "px",
             transform: `translateX(${offset.value.left}px) translateY(${offset.value.top}px)`,
           }}
-          class={["r-tab-item-active"]}
+          class={["r-tab-item-active", isTransition.value && "r-tab-item-active-transition"]}
         >
           {renderSlot(context.slots, "default", listHook, () => [
             <div class="r-tab-item-active-line" />,
@@ -103,27 +113,21 @@ RTab = defineComponent({
   setup(props, context) {
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { listHook } = props;
-
+    let activeNode;
     const htmls = {
       itemsHtml: [],
       parentHtml: null,
       scrollHtml: null,
     };
 
-    const ActiveNode = withMemo(
-      [],
-      () => (
-        <Active listHook={listHook} htmls={htmls}>
-          {{
-            default: (...arg) => context.slots?.active?.(...arg),
-          }}
-        </Active>
-      ),
-      []
+    useResizeObserver(
+      () => htmls.scrollHtml,
+      (es) => {
+        activeNode?.loyout?.();
+      }
     );
 
     return (vm) => {
-      console.log("render RTab>>");
       return (
         <div class="r-tab">
           <div class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
@@ -138,8 +142,14 @@ RTab = defineComponent({
                   if (context?.slots?.item) return context?.slots?.item({ index, item });
                   return (
                     <div
-                      class={["r-tab-item", listHook.same(item) && "r-tab-item-same"]}
-                      ref={(el) => (htmls.itemsHtml[index] = el)}
+                      class={[
+                        "r-tab-item",
+                        "r-tab-item" + listHook.formatterValue(item),
+                        listHook.same(item) && "r-tab-item-same",
+                      ]}
+                      ref={(el) => {
+                        htmls.itemsHtml[index] = el;
+                      }}
                       key={index}
                       onClick={(event) => {
                         if (props.clickStop) event.stopPropagation();
@@ -153,7 +163,11 @@ RTab = defineComponent({
                     </div>
                   );
                 })}
-                {ActiveNode}
+                <Active listHook={listHook} htmls={htmls} ref={(el) => (activeNode = el)}>
+                  {{
+                    default: (...arg) => context.slots?.active?.(...arg),
+                  }}
+                </Active>
               </div>
             </RLoading>
           </div>

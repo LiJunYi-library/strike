@@ -96,7 +96,7 @@
 }
 
 .popup-top-enter-from {
-  transform: translateY(-100%);
+  transform: translateY(-99.9%);
 }
 
 .popup-top-enter-to {
@@ -112,7 +112,7 @@
 }
 
 .popup-bottom-enter-from {
-  transform: translateY(100%);
+  transform: translateY(99.9%);
 }
 
 .popup-bottom-enter-to {
@@ -128,7 +128,7 @@
 }
 
 .popup-left-enter-from {
-  transform: translateX(-100%);
+  transform: translateX(-99.9%);
 }
 
 .popup-left-enter-to {
@@ -144,7 +144,7 @@
 }
 
 .popup-right-enter-from {
-  transform: translateX(100%);
+  transform: translateX(99.9%);
 }
 
 .popup-right-enter-to {

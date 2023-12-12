@@ -215,7 +215,7 @@ export const RPopup = defineComponent({
               class={["r-popup", `r-popup-${props.position}`, props.popClass]}
               style={cStyle}
             >
-              <Transition name={"popup-" + props.position}>{renderContent(cStyle)}</Transition>{" "}
+              <Transition name={"popup-" + props.position}>{renderContent(cStyle)}</Transition>
             </div>
           </Transition>
         </Teleport>,

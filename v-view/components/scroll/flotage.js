@@ -1,5 +1,5 @@
 import { defineComponent, renderSlot, onBeforeUnmount, ref, inject } from "vue";
-import { ScrollController, useScrollController } from "./";
+import { useScrollController } from "./";
 
 export const RScrollFlotage = defineComponent({
   props: {

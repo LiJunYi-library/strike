@@ -4,7 +4,8 @@ import { ScrollController, useScrollController } from "./";
 export const RScrollSticky = defineComponent({
   props: {
     zIndex: [Number, String],
-    top: { type: Number, default: 0 },
+    top: Number,
+    bottom: Number,
     changeTop: Number,
   },
   setup(props, context) {
@@ -21,11 +22,18 @@ export const RScrollSticky = defineComponent({
     });
 
     return (vm) => {
+      let positionStyle = {
+        top: `${props.top}px`,
+        bottom: `${props.bottom}px`,
+      };
+
+      if (props.top === undefined && props.bottom === undefined) positionStyle.top = 0 + "px";
+
       return (
         <div
           style={{
             zIndex: props.zIndex,
-            top: top.value + "px",
+            ...positionStyle,
           }}
           class={["r-scroll-sticky", isChangeTop.value && "r-scroll-sticky-act"]}
         >

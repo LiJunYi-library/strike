@@ -166,7 +166,7 @@ export const RScrollVirtualList = defineComponent({
     });
 
     onBeforeUnmount(() => {
-      scrollController.destroy();
+      observerBottom.disconnect();
     });
 
     onMounted(() => {

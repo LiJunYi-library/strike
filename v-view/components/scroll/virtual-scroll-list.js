@@ -239,10 +239,6 @@ export const RVirtualScrollList = defineComponent({
       },
     });
 
-    onBeforeUnmount(() => {
-      scrollController.destroy();
-    });
-
     function onRef(el) {
       node = el;
     }

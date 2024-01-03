@@ -19,10 +19,6 @@ export const RScrollFixed = defineComponent({
       },
     });
 
-    onBeforeUnmount(() => {
-      scrollController.destroy();
-    });
-
     return (vm) => {
       return (
         <div

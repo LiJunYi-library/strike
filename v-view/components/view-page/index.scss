@@ -12,9 +12,11 @@
       display: none;
     }
   }
+
   .r-view-page-list-transition {
     transition: 0.25s;
   }
+
   .r-view-page-item {
     width: var(--page-width);
     min-height: 400px;

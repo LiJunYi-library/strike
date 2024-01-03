@@ -81,6 +81,10 @@ export function useScrollController(props = {}) {
     arrayRemove(RScrollContext?.children, this);
   }
 
+  onBeforeUnmount(() => {
+    destroy();
+  });
+
   return controller;
 }
 
@@ -138,8 +142,14 @@ export const RScroll = defineComponent({
 
     RScrollContext.scrollTo = (top) => {
       RScrollContext.isHandActuated = true;
-      RScrollContext.element.scrollTop = top;
-      prveTop = top;
+      if (typeof top === "number") {
+        RScrollContext.element.scrollTop = top;
+        prveTop = top;
+      }
+      if (typeof top === "object") {
+        RScrollContext.element.scrollTo(top);
+        prveTop = top.top;
+      }
     };
 
     RScrollContext.scrollAdd = (space) => {
@@ -155,6 +165,7 @@ export const RScroll = defineComponent({
     };
 
     if (SC) SC.addElement(RScrollContext);
+
     onBeforeUnmount(() => {
       if (SC) SC.removeElement(RScrollContext);
       resizeObserver?.disconnect?.();
@@ -189,3 +200,4 @@ export * from "./fixed";
 export * from "./list";
 export * from "./virtual-list";
 export * from "./virtual-scroll-list";
+export * from "./scroll-page";

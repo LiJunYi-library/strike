@@ -22,3 +22,5 @@ export class ScrollController {
   events: any[];
   scrollAllTop: (top: number) => void;
 }
+
+export * from "./scroll-page";

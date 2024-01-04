@@ -7,7 +7,7 @@
     max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-
+    height: var(--tab-height);
     &::-webkit-scrollbar {
       display: none;
     }

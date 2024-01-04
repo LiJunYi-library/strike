@@ -127,6 +127,13 @@ RTab = defineComponent({
       }
     );
 
+    useResizeObserver(
+      () => htmls.itemsHtml,
+      (es) => {
+        activeNode?.loyout?.();
+      }
+    );
+
     return (vm) => {
       return (
         <div class="r-tab">

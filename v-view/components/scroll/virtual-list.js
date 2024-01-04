@@ -86,6 +86,7 @@ export const RScrollVirtualList = defineComponent({
     let tasks = [];
     let initLock = false;
     const recycleHeight = window.innerHeight * 2;
+    const recycleNum = Math.floor(recycleHeight / (avgHeight + space)) * columnNum;
     const offsetH = computed(() => {
       if (!listHook.list.length) return 0;
       return (
@@ -115,9 +116,10 @@ export const RScrollVirtualList = defineComponent({
       return div;
     }
 
-    function renderItems(index, addH = 0) {
+    function renderItems(sTop, index, addH = 0) {
       if (index < 0) return;
       if (index >= listHook.list.length) return;
+      if (node.offsetTop - sTop + addH > recycleHeight) return;
       arrayLoop(columnNum, (i) => {
         if (index >= listHook.list.length) return;
         const div = getRecycleDiv();
@@ -135,16 +137,17 @@ export const RScrollVirtualList = defineComponent({
       });
       addH = addH + avgHeight + space;
 
-      if (addH < recycleHeight) renderItems(index++, addH);
+      if (addH < recycleHeight) renderItems(sTop, index++, addH);
     }
 
     function layout(sTop) {
       node.innerHTML = "";
       recycle = [...tasks];
       tasks = [];
+      if (node.offsetTop - sTop > recycleHeight) return;
       let index = Math.floor((sTop - node.offsetTop) / (avgHeight + space)) * columnNum;
       if (index < 0) index = 0;
-      renderItems(index);
+      renderItems(sTop, index);
     }
 
     const scrollController = useScrollController({
@@ -160,7 +163,6 @@ export const RScrollVirtualList = defineComponent({
       if (entries.isIntersecting && isobserver) {
         // if (listHook.error) return null;
         context.emit("scrollEnd");
-        console.log("scrollEnd");
       }
       isobserver = true;
     });
@@ -174,10 +176,9 @@ export const RScrollVirtualList = defineComponent({
     });
 
     function onRef(el) {
-      // console.log("r-scroll-virtual-list onRef ");
       node = el;
       if (initLock) return;
-      renderItems(0);
+      renderItems(0, 0);
       initLock = true;
     }
 

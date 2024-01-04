@@ -20,7 +20,7 @@ export const RScrollSticky = defineComponent({
     const scrollController = useScrollController({
       type: "sticky",
       onScroll(event, sTop) {
-        layout(sTop);
+        layoutTop(sTop);
       },
     });
 
@@ -28,7 +28,8 @@ export const RScrollSticky = defineComponent({
       html = ref;
     }
 
-    function layout(sTop) {
+    function layoutTop(sTop) {
+      if (props.top === undefined) return;
       if (props.changeTop !== undefined) isChangeTop.value = sTop >= props.changeTop;
       const value = Math.round(html.offsetTop - sTop);
       isSticky.value = value - props.fluctuate <= props.top && props.top <= value + props.fluctuate;
@@ -38,7 +39,7 @@ export const RScrollSticky = defineComponent({
 
     onMounted(() => {
       const sTop = scrollController?.context?.element?.scrollTop ?? 0;
-      layout(sTop);
+      layoutTop(sTop);
     });
 
     return (vm) => {

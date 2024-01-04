@@ -20,7 +20,7 @@ const props = {
   cache: { type: Boolean, default: true },
   width: { type: Number, default: window.innerWidth },
   offsetTop: { type: Number, default: 0 },
-  behavior: { type: String, default: "smooth" },
+  behavior: { type: String, default: "instant" },
   isTriggerScroll: Boolean, // 初始触发定位
 };
 
@@ -36,18 +36,28 @@ const Context = defineComponent({
     event = scrollTo;
     let isTriggerWatch = true;
     let scrollTimer;
+    let isHandActuated = false;
     const scrollController = useScrollController({
       onScroll(event, sTop) {
-        // console.log("sTop", sTop);
+        if (isHandActuated) {
+          isHandActuated = false;
+          return;
+        }
+
         RScrollPageContext.children.forEach((ele, index) => {
-          if (
-            sTop > ele.html.offsetTop - props.offsetTop &&
-            sTop < ele.html.offsetTop - props.offsetTop + ele.html.offsetHeight
-          ) {
+          const min = ele.html.offsetTop - props.offsetTop;
+          const max = ele.html.offsetTop - props.offsetTop + ele.html.offsetHeight;
+
+          if (index === 0 && sTop <= min) {
             if (listHook.index === index) return;
             isTriggerWatch = false;
             listHook.updateIndex(index);
-            // console.log("sTop index", index);
+          }
+
+          if (sTop > min && sTop < max) {
+            if (listHook.index === index) return;
+            isTriggerWatch = false;
+            listHook.updateIndex(index);
           }
         });
       },
@@ -69,6 +79,7 @@ const Context = defineComponent({
     );
 
     function scrollTo() {
+      isHandActuated = true;
       let currentItem = RScrollPageContext.children[listHook.index];
       let currentHtml = currentItem.html;
       let top = currentHtml.offsetTop - props.offsetTop;
@@ -81,8 +92,7 @@ const Context = defineComponent({
         top = currentItem.props.scrollTop;
       }
 
-      // scrollController.context.element.scrollTo({ top: top, behavior: props.behavior });
-      scrollController.context.scrollTo(top);
+      scrollController.context.element.scrollTo({ top: top, behavior: props.behavior });
     }
 
     function renderContent() {

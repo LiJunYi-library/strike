@@ -3,9 +3,12 @@ import { useScrollController } from "./";
 
 export const RScrollFixed = defineComponent({
   props: {
+    zIndex: [Number, String],
     top: { type: Number, default: 0 },
     changeTop: Number,
     opacityFun: Function,
+    opacityInversion: Boolean,
+    opacityTop: Number,
   },
   setup(props, context) {
     const top = ref(props.top);
@@ -19,12 +22,21 @@ export const RScrollFixed = defineComponent({
       },
     });
 
+    function getOpacity() {
+      if (props.opacityFun) return props?.opacityFun?.(scrollTop.value);
+      if (props.opacityTop === undefined) return 1;
+      let o = scrollTop.value / props.opacityTop;
+      if (props.opacityInversion) return 1 - o;
+      return o;
+    }
+
     return (vm) => {
       return (
         <div
           style={{
+            zIndex: props.zIndex,
             top: top.value + "px",
-            opacity: props?.opacityFun?.(scrollTop.value),
+            opacity: getOpacity(),
           }}
           class={["r-scroll-fixed", isChangeTop.value && "r-scroll-fixed-act"]}
         >

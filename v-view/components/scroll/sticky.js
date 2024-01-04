@@ -1,5 +1,5 @@
 import { defineComponent, renderSlot, onBeforeUnmount, ref, inject, onMounted } from "vue";
-import { ScrollController, useScrollController } from "./";
+import { useScrollController } from "./";
 
 export const RScrollSticky = defineComponent({
   props: {
@@ -31,17 +31,9 @@ export const RScrollSticky = defineComponent({
     function layout(sTop) {
       if (props.changeTop !== undefined) isChangeTop.value = sTop >= props.changeTop;
       const value = Math.round(html.offsetTop - sTop);
-      isSticky.value =
-        value - props.fluctuate <= html.offsetHeight &&
-        html.offsetHeight <= value + props.fluctuate;
-      unStickyTop.value = value > html.offsetHeight;
-      unStickyBottom.value = value < html.offsetHeight;
-
-      // debugger
-      // if(value-props.fluctuate<= html.offsetHeight && html.offsetHeight<=value+props.fluctuate ){
-      //   console.log( 'RScrollSticky   正在吸顶');
-      // }
-      // console.log( 'RScrollSticky',value === html.offsetHeight);
+      isSticky.value = value - props.fluctuate <= props.top && props.top <= value + props.fluctuate;
+      unStickyTop.value = value > props.top;
+      unStickyBottom.value = value < props.top;
     }
 
     onMounted(() => {

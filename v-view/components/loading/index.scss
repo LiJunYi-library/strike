@@ -18,6 +18,14 @@
   top: 0;
 }
 
+.r-c-load {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
 .r-c-error {
   display: flex;
   flex-direction: column;

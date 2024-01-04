@@ -44,6 +44,11 @@ export const loadingProps = {
     default: "暂无相关数据，试试其他条件吧",
   },
 
+  loadText: {
+    type: [Number, String],
+    default: "",
+  },
+
   listHook: Object,
 
   loadingHook: [Object, Array],
@@ -156,10 +161,26 @@ export function useListLoadingHoc(listHook, props, context, configs = {}) {
     if (listHook.finished) return null;
     if (listHook.error) return null;
     if (!props.loadingText) return null;
-    return renderSlot(context.slots, "loading", listHook, () => [
+    const loadingVnode = renderSlot(context.slots, "loading", listHook, () => [
       <div class={["r-c-loading r-loading"]}>
         <RILoading class="r-c-loading-icon r-loading-icon" />
         <div class={["r-c-loading-text r-loading-text"]}>{props.loadingText}</div>
+      </div>,
+    ]);
+
+    if (!props.loadText) {
+      return loadingVnode;
+    }
+    
+    if (loadHook.loading) {
+      return loadingVnode;
+    }
+
+    return renderSlot(context.slots, "load", listHook, () => [
+      <div class={["r-c-load r-load"]}>
+        <div onClick={() => context.emit("loadClick")} class={["r-c-load-text r-load-text"]}>
+          {props.loadText}
+        </div>
       </div>,
     ]);
   }

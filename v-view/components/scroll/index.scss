@@ -91,7 +91,12 @@
     flex-direction: row;
     min-height: 50px;
   }
-  .r-finished{
+  .r-finished {
+    display: flex;
+    flex-direction: row;
+    min-height: 50px;
+  }
+  .r-load {
     display: flex;
     flex-direction: row;
     min-height: 50px;

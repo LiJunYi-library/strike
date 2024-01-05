@@ -178,7 +178,6 @@ export const RScrollVirtualList = defineComponent({
     function onRef(el) {
       node = el;
       if (initLock) return;
-      renderItems(0, 0);
       initLock = true;
     }
 

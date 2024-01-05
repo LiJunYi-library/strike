@@ -52,12 +52,14 @@ const Context = defineComponent({
             if (listHook.index === index) return;
             isTriggerWatch = false;
             listHook.updateIndex(index);
+            context.emit("change", index);
           }
 
           if (sTop > min && sTop < max) {
             if (listHook.index === index) return;
             isTriggerWatch = false;
             listHook.updateIndex(index);
+            context.emit("change", index);
           }
         });
       },

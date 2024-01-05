@@ -13,6 +13,7 @@ import {
 } from "vue";
 import "./index.scss";
 
+
 export const RImageHoc = (options = {}) => {
   let config = {
     props: {},

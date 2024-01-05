@@ -3,22 +3,31 @@ import { useScrollController } from "./";
 
 export const RScrollFlotage = defineComponent({
   props: {
+    zIndex: [Number, String],
     top: { type: Number, default: 0 },
     flotageTop: { type: Number, default: 0 },
+    fluctuate: { type: Number, default: 1 }, // 波动范围 未使用
   },
   setup(props, context) {
     const height = props.top;
     const maxHeight = props.flotageTop;
     const top = ref(height);
+    const isSticky = ref(false);
+    const unStickyTop = ref(false);
+    const unStickyBottom = ref(false);
+    const isFlotage = ref(false);
+    const unFlotageTop = ref(false);
+    const unFlotageBottom = ref(false);
     let tY = height;
     let prveTop = 0;
     let isDispatch = true;
+    let html;
 
     const scrollController = useScrollController({
       onScroll(event, sTop) {
         const { scrollTop, space } = event;
         // console.log("onScroll", event, sTop);
-        // const space = sTop - prveTop;
+        // // // const space = sTop - prveTop;
         tY = tY - space;
         if (tY < height) tY = height;
         if (tY > maxHeight) tY = maxHeight;
@@ -41,7 +50,19 @@ export const RScrollFlotage = defineComponent({
 
         prveTop = sTop;
         top.value = tY;
-        scrollController.top = top.value;
+
+        const value = Math.round(html.offsetTop - sTop);
+        isSticky.value =
+          value - props.fluctuate <= props.top && props.top <= value + props.fluctuate;
+        unStickyTop.value = value - props.fluctuate > props.top;
+        unStickyBottom.value = value + props.fluctuate < props.top;
+
+        isFlotage.value =
+          value - props.fluctuate <= props.flotageTop && props.flotageTop <= value + props.fluctuate;
+        unFlotageTop.value = value - props.fluctuate > props.flotageTop;
+        unFlotageBottom.value = value + props.fluctuate < props.flotageTop;
+
+        console.log("RScrollFlotage onScroll", value);
       },
     });
 
@@ -49,12 +70,23 @@ export const RScrollFlotage = defineComponent({
       return (
         <div
           ref={(el) => {
-            scrollController.el = el;
+            html = el;
           }}
           style={{
+            zIndex: props.zIndex,
             top: top.value + "px",
           }}
-          class="r-scroll-flotage"
+          class={[
+            "r-scroll-flotage",
+            isSticky.value && "r-scroll-flotage-sticky",
+            !isSticky.value && "r-scroll-flotage-un-sticky",
+            unStickyTop.value && "r-scroll-flotage-un-sticky-top",
+            unStickyBottom.value && "r-scroll-flotage-un-sticky-bottom",
+            isFlotage.value && "r-scroll-flotage-flotage",
+            !isFlotage.value && "r-scroll-flotage-un-flotage",
+            unFlotageTop.value && "r-scroll-flotage-un-flotage-top",
+            unFlotageBottom.value && "r-scroll-flotage-un-flotage-bottom",
+          ]}
         >
           {renderSlot(context.slots, "default")}
         </div>

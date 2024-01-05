@@ -70,11 +70,11 @@ const ListItem = defineComponent({
 export const RScrollVirtualList = defineComponent({
   props: {
     ...loadingProps,
-    bothEndsHeight: { type: Number, default: 0 },
-    space: { type: Number, default: 10 },
-    spaceStyle: Object,
-    avgHeight: { type: Number, default: 120 },
-    columnNum: { type: Number, default: 1 },
+    bothEndsHeight: { type: Number, default: 0 }, //列表 两端的高度
+    space: { type: Number, default: 10 }, // 列表之间空格的间距
+    spaceStyle: Object, // 列表之间空格的样式
+    avgHeight: { type: Number, default: 120 }, // 每个item高度
+    columnNum: { type: Number, default: 1 }, // 一行几个item
   },
   setup(props, context) {
     // eslint-disable-next-line
@@ -99,6 +99,15 @@ export const RScrollVirtualList = defineComponent({
 
     const loadComs = useListLoadingHoc(listHook, props, context);
 
+    const scrollController = useScrollController({
+      onScroll(event, sTop) {
+        layout(sTop);
+      },
+      onResize(entries, sTop) {
+        layout(sTop);
+      },
+    });
+
     function getLeft(i) {
       return `calc( ${(100 / columnNum) * i}% - ${
         (((columnNum - 1) * space) / columnNum) * i
@@ -119,7 +128,7 @@ export const RScrollVirtualList = defineComponent({
     function renderItems(sTop, index, addH = 0) {
       if (index < 0) return;
       if (index >= listHook.list.length) return;
-      if (node.offsetTop - sTop + addH > recycleHeight) return;
+      if (scrollController.getOffsetTop(node) - sTop + addH > recycleHeight) return;
       arrayLoop(columnNum, (i) => {
         if (index >= listHook.list.length) return;
         const div = getRecycleDiv();
@@ -144,20 +153,12 @@ export const RScrollVirtualList = defineComponent({
       node.innerHTML = "";
       recycle = [...tasks];
       tasks = [];
-      if (node.offsetTop - sTop > recycleHeight) return;
-      let index = Math.floor((sTop - node.offsetTop) / (avgHeight + space)) * columnNum;
+      const offsetTop = scrollController.getOffsetTop(node);
+      if (offsetTop - sTop > recycleHeight) return;
+      let index = Math.floor((sTop - offsetTop) / (avgHeight + space)) * columnNum;
       if (index < 0) index = 0;
       renderItems(sTop, index);
     }
-
-    const scrollController = useScrollController({
-      onScroll(event, sTop) {
-        layout(sTop);
-      },
-      onResize(entries, sTop) {
-        layout(sTop);
-      },
-    });
 
     const observerBottom = new IntersectionObserver(([entries]) => {
       if (entries.isIntersecting && isobserver) {

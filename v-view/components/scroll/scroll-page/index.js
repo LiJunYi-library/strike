@@ -33,7 +33,7 @@ const Context = defineComponent({
     // eslint-disable-next-line
     const { listHook } = props;
     const RScrollPageContext = inject("RScrollPageContext") || {};
-    event = scrollTo;
+    // event = scrollTo;
     let isTriggerWatch = true;
     let scrollTimer;
     let isHandActuated = false;
@@ -63,11 +63,14 @@ const Context = defineComponent({
           }
         });
       },
+      onMounted() {
+        if (props.isTriggerScroll) scrollTo();
+      },
     });
 
-    onMounted(() => {
-      if (props.isTriggerScroll) event();
-    });
+    // onMounted(() => {
+    //   if (props.isTriggerScroll) event();
+    // });
 
     watch(
       () => props.listHook.select,
@@ -126,7 +129,7 @@ const Context = defineComponent({
 
     return (vm) => {
       return renderContent();
-      // return <div class={["r-scroll-page"]}>{renderContent()}</div>;
+     // // return <div class={["r-scroll-page"]}>{renderContent()}</div>;
     };
   },
 });

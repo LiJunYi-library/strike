@@ -63,6 +63,7 @@ export function useScrollController(props = {}) {
     onScroll: () => undefined,
     onFlotage: () => undefined,
     onResize: () => undefined,
+    onMounted: () => undefined,
     ...props,
     destroy,
     getOffsetTop,
@@ -175,13 +176,16 @@ export const RScroll = defineComponent({
 
     if (SC) SC.addElement(RScrollContext);
 
+    onMounted(() => {
+      RScrollContext.children.forEach((el) => {
+        el.onMounted(RScrollContext.element.scrollTop);
+      });
+      resizeObserver?.observe?.(RScrollContext.contentElement);
+    });
+
     onBeforeUnmount(() => {
       if (SC) SC.removeElement(RScrollContext);
       resizeObserver?.disconnect?.();
-    });
-
-    onMounted(() => {
-      resizeObserver?.observe?.(RScrollContext.contentElement);
     });
 
     function onRef(el) {

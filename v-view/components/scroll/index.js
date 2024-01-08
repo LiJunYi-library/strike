@@ -61,6 +61,7 @@ export function useScrollController(props = {}) {
   const RScrollContext = inject("RScrollContext") || {};
   const controller = reactive({
     onScroll: () => undefined,
+    onScrollend: () => undefined,
     onFlotage: () => undefined,
     onResize: () => undefined,
     onMounted: () => undefined,
@@ -150,6 +151,12 @@ export const RScroll = defineComponent({
       prveTop = scrollTop;
     }
 
+    function onScrollend(event) {
+      RScrollContext.children.forEach((el) => {
+        el.onScrollend(event, scrollTop);
+      });
+    }
+
     RScrollContext.scrollTo = (top) => {
       RScrollContext.isHandActuated = true;
       if (typeof top === "number") {
@@ -198,7 +205,7 @@ export const RScroll = defineComponent({
 
     return (vm) => {
       return (
-        <div ref={onRef} class="r-scroll" onScroll={onScroll}>
+        <div ref={onRef} class="r-scroll" onScroll={onScroll} onScrollend={onScrollend}>
           <div ref={onContentRef}>{renderSlot(context.slots, "default")}</div>
         </div>
       );

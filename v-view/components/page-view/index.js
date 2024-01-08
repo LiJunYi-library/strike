@@ -8,6 +8,7 @@ import {
   provide,
   inject,
   onBeforeUnmount,
+  watch,
   ref,
 } from "vue";
 import "./index.scss";
@@ -17,6 +18,7 @@ const props = {
   lazy: Boolean,
   cache: { type: Boolean, default: true },
   width: { type: Number, default: window.innerWidth },
+  behavior: { type: String, default: "smooth" }, // smooth  instant
 };
 
 const Context = defineComponent({
@@ -27,122 +29,134 @@ const Context = defineComponent({
     const itemsHtml = [];
     let parentHtml = null;
     let containerHtml = null;
+    let prveSLeft = 0;
+    let sLeft = 0;
+    let lock = false;
+    let isTriggerWatch = true;
     const actItemHtml = null;
-    const RViewPageContext = inject("RViewPageContext") || {};
-    const compatibility = {
-      className: "r-view-page-compatibility",
-      getTranslateX() {
-        return 0;
-      },
-    };
-    const normal = {
-      className: "r-view-page",
-      getTranslateX() {
-        if (!containerHtml) return;
-        const width = containerHtml.offsetWidth;
-        const nth = listHook.index;
-        const x = nth * -width; // 反过来 nth * width - (listHook.list.length - 1) * width
-        return x;
-      },
-    };
-    const opt = normal;
+    const RPageViewContext = inject("RPageViewContext") || {};
 
-    onMounted(() => {
-      parentHtml.style.transform = `translateX(${opt.getTranslateX()}px)`;
-    });
+    onMounted(() => {});
 
-    function renderListHookItem() {
-      return renderList(listHook.list, (item, index) => {
-        if (props.lazy) {
-          if (listHook.same(item)) item.rViewPageIscache = true;
-          if (!item.rViewPageIscache) return null;
+    watch(
+      () => props.listHook.select,
+      () => {
+        if (isTriggerWatch === false) {
+          isTriggerWatch = true;
+          return;
         }
+        lock = true;
+        // console.log("watch");
+        scrollTo();
+      }
+    );
 
-        return (
-          <div
-            style={{
-              left: `${props.width * index}px`,
-              top: "0px",
-              width: props.width + "px",
-            }}
-            class={["r-view-page-item", listHook.same(item) && "r-view-page-item-same"]}
-            ref={(el) => (itemsHtml[index] = el)}
-            key={index}
-          >
-            {renderSlot(RViewPageContext.slots, "item", { item, index })}
-          </div>
-        );
-      });
+    function scrollTo() {
+      let left = props.width * listHook.index;
+      containerHtml.scrollTo({ left, behavior: props.behavior });
     }
 
+    function onTouchStart() {
+      // console.log("onTouchStart");
+    }
+
+    function onScrollend(params) {
+      // console.log("onScrollend");
+      lock = false;
+    }
+
+    function update(index) {
+      // console.log("update",lock);
+      if (index === listHook.index) return;
+      if (lock === true) return;
+      isTriggerWatch = false;
+      listHook.updateIndex(index);
+      context.emit("change", index);
+    }
+
+    function onScroll(event) {
+      // console.log("onScroll");
+      sLeft = containerHtml.scrollLeft;
+      let sapce = sLeft - prveSLeft;
+      if (sapce < 0) onScrollRight(event, sLeft);
+      if (sapce > 0) onScrollLeft(event, sLeft);
+      prveSLeft = sLeft;
+
+      let index = Math.round(sLeft) / props.width;
+      if (!Number.isInteger(index)) return;
+      // console.log(index, listHook.index);
+      update(index);
+      lock = false;
+    }
+
+    function onScrollLeft(event, sLeft) {}
+
+    function onScrollRight(event, sLeft) {}
+
     function renderContent() {
-      const isUseHook = !RViewPageContext?.children?.length;
-      const listRenderData = isUseHook ? listHook.list : RViewPageContext.children;
+      const isUseHook = !RPageViewContext?.children?.length;
+      const listRenderData = isUseHook ? listHook.list : RPageViewContext.children;
       const same = (item, index) => {
         if (isUseHook) return listHook.same(item);
         return listHook.index === index;
       };
-      // console.log(listRenderData);
 
       return renderList(listRenderData, (item, index) => {
-        if (props.lazy) {
-          if (same(item, index)) item.rViewPageIscache = true;
-          if (!item.rViewPageIscache) {
-            return (
-              <div
-                style={{ width: props.width + "px" }}
-                key={index}
-                ref={(el) => (itemsHtml[index] = el)}
-                class={["r-view-page-item", same(item, index) && "r-view-page-item-same"]}
-              ></div>
-            );
-          }
-        }
+        // if (props.lazy) {
+        //   if (same(item, index)) item.rViewPageIscache = true;
+        //   if (!item.rViewPageIscache) {
+        //     return (
+        //       <div
+        //         style={{ width: props.width + "px" }}
+        //         key={index}
+        //         ref={(el) => (itemsHtml[index] = el)}
+        //         class={["r-page-view-item", same(item, index) && "r-page-view-item-same"]}
+        //       ></div>
+        //     );
+        //   }
+        // }
 
-        if (!props.cache && !same(item, index)) {
-          return (
-            <div
-              style={{ width: props.width + "px" }}
-              key={index}
-              ref={(el) => (itemsHtml[index] = el)}
-              class={["r-view-page-item", same(item, index) && "r-view-page-item-same"]}
-            ></div>
-          );
-        }
+        // if (!props.cache && !same(item, index)) {
+        //   return (
+        //     <div
+        //       style={{ width: props.width + "px" }}
+        //       key={index}
+        //       ref={(el) => (itemsHtml[index] = el)}
+        //       class={["r-page-view-item", same(item, index) && "r-page-view-item-same"]}
+        //     ></div>
+        //   );
+        // }
 
         return (
           <div
             style={{ width: props.width + "px" }}
             key={index}
             ref={(el) => (itemsHtml[index] = el)}
-            class={["r-view-page-item", same(item, index) && "r-view-page-item-same"]}
+            class={["r-page-view-item", same(item, index) && "r-page-view-item-same"]}
           >
             {isUseHook
-              ? renderSlot(RViewPageContext.slots, "item", { item, index })
+              ? renderSlot(RPageViewContext.slots, "item", { item, index })
               : renderSlot(item.slots, "default")}
           </div>
         );
       });
     }
 
-    function onScroll(params) {
-      console.log("params", params);
-    }
-
     return (vm) => {
       return (
         <div
-          class={opt.className}
+          class={["r-page-view"]}
           ref={(el) => (containerHtml = el)}
           onScroll={onScroll}
+          onScrollend={onScrollend}
+          onTouchstart={onTouchStart}
         >
           <div
             ref={(el) => (parentHtml = el)}
+            class={["r-page-view-list"]}
             style={{
               width: props.width * (listHook?.list?.length ?? 0) + "px",
-              transform: `translateX(${opt.getTranslateX()}px)`,
             }}
-            class={["r-view-page-list", parentHtml && "r-view-page-list-transition"]}
           >
             {renderContent()}
           </div>
@@ -152,17 +166,17 @@ const Context = defineComponent({
   },
 });
 
-export const RViewPage = defineComponent({
+export const RPageView = defineComponent({
   props: props,
   setup(props, ctx) {
-    const RViewPageContext = reactive({
+    const RPageViewContext = reactive({
       context: ctx,
       slots: ctx.slots,
       attrs: ctx.attrs,
       children: [],
       element: null,
     });
-    provide("RViewPageContext", RViewPageContext);
+    provide("RPageViewContext", RPageViewContext);
 
     return () => {
       return [renderSlot(ctx.slots, "default"), <Context {...ctx.attrs} {...props}></Context>];
@@ -170,9 +184,9 @@ export const RViewPage = defineComponent({
   },
 });
 
-export const RViewPageItem = defineComponent({
+export const RPageViewItem = defineComponent({
   setup(props, context) {
-    const RViewPageContext = inject("RViewPageContext") || {};
+    const RPageViewContext = inject("RPageViewContext") || {};
 
     const item = reactive({
       context: context,
@@ -180,9 +194,10 @@ export const RViewPageItem = defineComponent({
       attrs: context.attrs,
     });
 
-    RViewPageContext?.children?.push?.(item);
+    RPageViewContext?.children?.push?.(item);
+
     onBeforeUnmount(() => {
-      RViewPageContext?.children?.filter?.((el) => el !== item);
+      RPageViewContext?.children?.filter?.((el) => el !== item);
     });
 
     return () => {

@@ -20,7 +20,7 @@ const props = {
   cache: { type: Boolean, default: true },
   width: { type: Number, default: window.innerWidth },
   offsetTop: { type: Number, default: 0 },
-  behavior: { type: String, default: "instant" },
+  behavior: { type: String, default: "instant" }, // smooth  instant
   isTriggerScroll: Boolean, // 初始触发定位
 };
 
@@ -33,12 +33,14 @@ const Context = defineComponent({
     // eslint-disable-next-line
     const { listHook } = props;
     const RScrollPageContext = inject("RScrollPageContext") || {};
-    // event = scrollTo;
     let isTriggerWatch = true;
-    let scrollTimer;
     let isHandActuated = false;
+    let lock = false;
+
     const scrollController = useScrollController({
       onScroll(event, sTop) {
+        // if (lock === true) return; 浏览器版本大于105生效
+
         if (isHandActuated) {
           isHandActuated = false;
           return;
@@ -66,11 +68,10 @@ const Context = defineComponent({
       onMounted() {
         if (props.isTriggerScroll) scrollTo();
       },
+      onScrollend() {
+        lock = false;
+      },
     });
-
-    // onMounted(() => {
-    //   if (props.isTriggerScroll) event();
-    // });
 
     watch(
       () => props.listHook.select,
@@ -84,6 +85,7 @@ const Context = defineComponent({
     );
 
     function scrollTo() {
+      lock = true;
       isHandActuated = true;
       let currentItem = RScrollPageContext.children[listHook.index];
       let currentHtml = currentItem.html;
@@ -129,7 +131,6 @@ const Context = defineComponent({
 
     return (vm) => {
       return renderContent();
-     // // return <div class={["r-scroll-page"]}>{renderContent()}</div>;
     };
   },
 });

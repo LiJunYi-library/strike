@@ -103,6 +103,7 @@ const Active = defineComponent({
 
 RTab = defineComponent({
   props: {
+    isObserverItems: Boolean,
     clickStop: Boolean,
     listHook: Object,
     skelectonCount: {
@@ -127,12 +128,14 @@ RTab = defineComponent({
       }
     );
 
-    useResizeObserver(
-      () => htmls.itemsHtml,
-      (es) => {
-        activeNode?.loyout?.();
-      }
-    );
+    if (props.isObserverItems) {
+      useResizeObserver(
+        () => htmls.itemsHtml,
+        (es) => {
+          activeNode?.loyout?.();
+        }
+      );
+    }
 
     return (vm) => {
       return (

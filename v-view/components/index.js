@@ -3,6 +3,7 @@ export * from "./tab/tab";
 export * from "./virtual-list/list";
 export * from "./virtual-list/list-falls";
 export * from "./view-page";
+export * from "./page-view";
 export * from './icon'
 export * from './loading'
 export * from './scroll'

@@ -1,4 +1,4 @@
 import { DefineComponent } from "vue";
 
-export declare const RViewPage: DefineComponent<any>;
-export declare const RViewPageItem: DefineComponent<any>;
+export declare const RPageView: DefineComponent<any>;
+export declare const RPageViewItem: DefineComponent<any>;

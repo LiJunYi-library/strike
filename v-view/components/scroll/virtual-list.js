@@ -108,6 +108,13 @@ export const RScrollVirtualList = defineComponent({
       },
     });
 
+    watch(
+      () => props.listHook.list,
+      () => {
+        layout(scrollController.context.element.scrollTop);
+      }
+    );
+
     function getLeft(i) {
       return `calc( ${(100 / columnNum) * i}% - ${
         (((columnNum - 1) * space) / columnNum) * i

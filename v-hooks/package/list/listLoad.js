@@ -6,30 +6,30 @@ export { useListLoad, getListLoadProps, useAsyncListLoad };
 
 function getListLoadProps(options) {
   const config = {
-    setList: (res) => {
+    setList: (res) => { // 设置数据的回调 返回[]
       if (!res) return [];
       if (res instanceof Array) return res;
       return res.list || [];
     },
-    setTotal: (res) => {
+    setTotal: (res) => {// 设置总数的回调 返回数字
       if (!res) return 0;
       if (res instanceof Array) return res.length;
       return res.total * 1;
     },
-    setFinished: (res, hooks) => {
+    setFinished: (res, hooks) => { // 设置结束状态的回调 返回Boolean
       return hooks.list.length >= hooks.total;
     },
-    fetchCB: () => undefined,
+    fetchCB: () => undefined,  // 异步的回调 返回异步数据
     fetchBeginCB: () => undefined,
     fetchConcatCB: () => undefined,
     beforeBegin: () => undefined,
-    currentPage: 1,
-    pageSize: 10,
+    currentPage: 1, // 当前的页码
+    pageSize: 10,  // 请求的页数
     accumulationList: true,
     dataMethodListeners: [],
     loadingMethodListeners: [],
     ...options,
-    list: options.list || [],
+    list: options.list || [], // 默认列表的数据
   };
   return config;
 }

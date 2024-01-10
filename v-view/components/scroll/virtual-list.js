@@ -154,8 +154,12 @@ export const RScrollVirtualList = defineComponent({
         div.style.left = getLeft(i);
         div.style.width = itemWidth;
         div.style.height = avgHeight + "px";
-        render(<ListItem item={listHook.list[index]} index={index} slots={context.slots}></ListItem>, div);
+        render(
+          <ListItem item={listHook.list[index]} index={index} slots={context.slots}></ListItem>,
+          div
+        );
         node.appendChild(div);
+        context.emit("renderIrem", { item: listHook.list[index], index });
         tasks.push(div);
         index++;
       });

@@ -7,7 +7,7 @@ export const RScrollSticky = defineComponent({
     top: Number,
     bottom: Number,
     changeTop: Number, // r-scroll-sticky-act 的高度
-    fluctuate: { type: Number, default: 0 }, // 波动范围
+    fluctuate: { type: Number, default: 1 }, // 波动范围
   },
   setup(props, context) {
     let html;
@@ -31,10 +31,10 @@ export const RScrollSticky = defineComponent({
     function layoutTop(sTop) {
       if (props.top === undefined) return;
       if (props.changeTop !== undefined) isChangeTop.value = sTop >= props.changeTop;
-      const value = Math.round(html.offsetTop - sTop);
+      const value = html.offsetTop - sTop;
       isSticky.value = value - props.fluctuate <= props.top && props.top <= value + props.fluctuate;
-      unStickyTop.value = value > props.top;
-      unStickyBottom.value = value < props.top;
+      unStickyTop.value = value - props.fluctuate > props.top;
+      unStickyBottom.value = value + props.fluctuate < props.top;
     }
 
     onMounted(() => {

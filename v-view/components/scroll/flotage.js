@@ -6,7 +6,7 @@ export const RScrollFlotage = defineComponent({
     zIndex: [Number, String],
     top: { type: Number, default: 0 },
     flotageTop: { type: Number, default: 0 },
-    fluctuate: { type: Number, default: 1 }, // 波动范围 未使用
+    fluctuate: { type: Number, default: 1 }, // 波动范围
   },
   setup(props, context) {
     const height = props.top;
@@ -26,8 +26,6 @@ export const RScrollFlotage = defineComponent({
     const scrollController = useScrollController({
       onScroll(event, sTop) {
         const { scrollTop, space } = event;
-        // console.log("onScroll", event, sTop);
-        // // // const space = sTop - prveTop;
         tY = tY - space;
         if (tY < height) tY = height;
         if (tY > maxHeight) tY = maxHeight;
@@ -37,7 +35,6 @@ export const RScrollFlotage = defineComponent({
         if (tY === height || tY === maxHeight) {
           if (isDispatch === false) {
             scrollController.dispatchFlotage(event, tY);
-            // console.log("dispatch  flotage", tY, event.flotageHeight);
           }
           isDispatch = true;
         }
@@ -45,24 +42,22 @@ export const RScrollFlotage = defineComponent({
         if (height < tY && tY < maxHeight) {
           isDispatch = false;
           scrollController.dispatchFlotage(event, tY);
-          // console.log("dispatch  flotage", tY, event.flotageHeight);
         }
 
         prveTop = sTop;
         top.value = tY;
 
-        const value = Math.round(html.offsetTop - sTop);
+        const value = html.offsetTop - sTop;
         isSticky.value =
           value - props.fluctuate <= props.top && props.top <= value + props.fluctuate;
         unStickyTop.value = value - props.fluctuate > props.top;
         unStickyBottom.value = value + props.fluctuate < props.top;
 
         isFlotage.value =
-          value - props.fluctuate <= props.flotageTop && props.flotageTop <= value + props.fluctuate;
+          value - props.fluctuate <= props.flotageTop &&
+          props.flotageTop <= value + props.fluctuate;
         unFlotageTop.value = value - props.fluctuate > props.flotageTop;
         unFlotageBottom.value = value + props.fluctuate < props.flotageTop;
-
-        console.log("RScrollFlotage onScroll", value);
       },
     });
 

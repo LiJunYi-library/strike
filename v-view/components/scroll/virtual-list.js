@@ -93,6 +93,9 @@ export const RScrollVirtualList = defineComponent({
     let recycle = [];
     let tasks = [];
     let initLock = false;
+    let prvePList = [];
+    let prveIndex = 0;
+
     const recycleHeight = window.innerHeight * 2;
     const recycleNum = Math.floor(recycleHeight / (avgHeight + space)) * columnNum;
     const offsetH = computed(() => {
@@ -104,7 +107,6 @@ export const RScrollVirtualList = defineComponent({
       );
     });
     const itemWidth = `calc( ${100 / columnNum}% - ${((columnNum - 1) * space) / columnNum}px )`; //${};
-
     const loadComs = useListLoadingHoc(listHook, props, context);
 
     const scrollController = useScrollController({
@@ -140,43 +142,60 @@ export const RScrollVirtualList = defineComponent({
       return div;
     }
 
-    function renderItems(sTop, index, addH = 0) {
-      if (index < 0) return;
-      if (index >= listHook.list.length) return;
-      if (scrollController.getOffsetTop(node) - sTop + addH > recycleHeight) return;
+    function renderItems(sTop, index, addH = 0, pList = []) {
+      if (index < 0) return pList;
+      if (index >= listHook.list.length) return pList;
+      if (scrollController.getOffsetTop(node) - sTop + addH > recycleHeight) return pList;
       arrayLoop(columnNum, (i) => {
-        if (index >= listHook.list.length) return;
-        const div = getRecycleDiv();
+        if (index >= listHook.list.length) return pList;
         const nth = Math.floor(index / columnNum);
         let top = nth * (avgHeight + space) + bothEndsHeight + "px";
         if (nth === 0) top = bothEndsHeight + "px";
-        div.style.top = top;
-        div.style.left = getLeft(i);
-        div.style.width = itemWidth;
-        div.style.height = avgHeight + "px";
-        render(
-          <ListItem item={listHook.list[index]} index={index} slots={context.slots}></ListItem>,
-          div
-        );
-        node.appendChild(div);
-        context.emit("renderIrem", { item: listHook.list[index], index });
-        tasks.push(div);
+        let left = getLeft(i);
+        let width = itemWidth;
+        let height = avgHeight + "px";
+        pList.push({ index, top, left, width, height });
         index++;
       });
       addH = addH + avgHeight + space;
 
-      if (addH < recycleHeight) renderItems(sTop, index++, addH);
+      if (addH < recycleHeight) return renderItems(sTop, index++, addH, pList);
+      return pList;
     }
 
     function layout(sTop) {
+      const offsetTop = scrollController.getOffsetTop(node);
+      if (offsetTop - sTop > recycleHeight) return (node.innerHTML = "");
+      if (sTop - (offsetTop + node.offsetHeight) > recycleHeight) return (node.innerHTML = "");
+      let index = Math.floor((sTop - offsetTop) / (avgHeight + space)) * columnNum;
+      if (index < 0) index = 0;
+      const pList = renderItems(sTop, index);
+      if (prveIndex === index && prvePList.length === pList.length) return;
+      // console.log("index", index, "prveIndex", prveIndex);
+      // console.log("prvePList", prvePList);
+      // console.log("pList", pList);
+      // 使用 Vue 3.0 diff 算法优化
+
       node.innerHTML = "";
       recycle = [...tasks];
       tasks = [];
-      const offsetTop = scrollController.getOffsetTop(node);
-      if (offsetTop - sTop > recycleHeight) return;
-      let index = Math.floor((sTop - offsetTop) / (avgHeight + space)) * columnNum;
-      if (index < 0) index = 0;
-      renderItems(sTop, index);
+
+      pList.forEach(({ top, left, width, height, index: nth }) => {
+        const div = getRecycleDiv();
+        div.style.top = top;
+        div.style.left = left;
+        div.style.width = width;
+        div.style.height = height;
+        render(
+          <ListItem item={listHook.list[nth]} index={nth} slots={context.slots}></ListItem>,
+          div
+        );
+        node.appendChild(div);
+        tasks.push(div);
+      });
+
+      prveIndex = index;
+      prvePList = pList;
     }
 
     const observerBottom = new IntersectionObserver(([entries]) => {

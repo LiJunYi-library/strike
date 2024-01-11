@@ -142,6 +142,8 @@ export const RScrollVirtualList = defineComponent({
       return div;
     }
 
+    function diff() {}
+
     function renderItems(sTop, index, addH = 0, pList = []) {
       if (index < 0) return pList;
       if (index >= listHook.list.length) return pList;
@@ -165,8 +167,16 @@ export const RScrollVirtualList = defineComponent({
 
     function layout(sTop) {
       const offsetTop = scrollController.getOffsetTop(node);
-      if (offsetTop - sTop > recycleHeight) return (node.innerHTML = "");
-      if (sTop - (offsetTop + node.offsetHeight) > recycleHeight) return (node.innerHTML = "");
+      if (
+        offsetTop - sTop > recycleHeight ||
+        sTop - (offsetTop + node.offsetHeight) > recycleHeight
+      ) {
+        prveIndex = 0;
+        prvePList = [];
+        node.innerHTML = "";
+        return
+      }
+
       let index = Math.floor((sTop - offsetTop) / (avgHeight + space)) * columnNum;
       if (index < 0) index = 0;
       const pList = renderItems(sTop, index);

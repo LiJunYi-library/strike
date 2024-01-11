@@ -167,6 +167,9 @@ export const RScrollVirtualList = defineComponent({
 
     function layout(sTop) {
       const offsetTop = scrollController.getOffsetTop(node);
+      console.log("recycleHeight", recycleHeight);
+      console.log("sTop", sTop);
+      console.log("offsetTop", sTop);
       if (
         offsetTop - sTop > recycleHeight ||
         sTop - (offsetTop + node.offsetHeight) > recycleHeight

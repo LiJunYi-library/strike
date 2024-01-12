@@ -96,8 +96,8 @@ export const RScrollVirtualList = defineComponent({
     let prvePList = [];
     let prveIndex = 0;
 
-    const recycleHeight = window.innerHeight * 2;
-    const recycleNum = Math.floor(recycleHeight / (avgHeight + space)) * columnNum;
+    const recycleHeight = () => window.innerHeight * 2; // 有些浏览器初始拿innerHeight有时为0;
+    const recycleNum = Math.floor(recycleHeight() / (avgHeight + space)) * columnNum;
     const offsetH = computed(() => {
       if (!listHook.list.length) return 0;
       return (
@@ -147,7 +147,7 @@ export const RScrollVirtualList = defineComponent({
     function renderItems(sTop, index, addH = 0, pList = []) {
       if (index < 0) return pList;
       if (index >= listHook.list.length) return pList;
-      if (scrollController.getOffsetTop(node) - sTop + addH > recycleHeight) return pList;
+      if (scrollController.getOffsetTop(node) - sTop + addH > recycleHeight()) return pList;
       arrayLoop(columnNum, (i) => {
         if (index >= listHook.list.length) return pList;
         const nth = Math.floor(index / columnNum);
@@ -161,23 +161,21 @@ export const RScrollVirtualList = defineComponent({
       });
       addH = addH + avgHeight + space;
 
-      if (addH < recycleHeight) return renderItems(sTop, index++, addH, pList);
+      if (addH < recycleHeight()) return renderItems(sTop, index++, addH, pList);
       return pList;
     }
 
     function layout(sTop) {
       const offsetTop = scrollController.getOffsetTop(node);
-      console.log("recycleHeight", recycleHeight);
-      console.log("sTop", sTop);
-      console.log("offsetTop", sTop);
+
       if (
-        offsetTop - sTop > recycleHeight ||
-        sTop - (offsetTop + node.offsetHeight) > recycleHeight
+        offsetTop - sTop > recycleHeight() ||
+        sTop - (offsetTop + node.offsetHeight) > recycleHeight()
       ) {
         prveIndex = 0;
         prvePList = [];
         node.innerHTML = "";
-        return
+        return;
       }
 
       let index = Math.floor((sTop - offsetTop) / (avgHeight + space)) * columnNum;

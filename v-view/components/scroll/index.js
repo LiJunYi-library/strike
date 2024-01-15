@@ -219,5 +219,6 @@ export * from "./fold";
 export * from "./fixed";
 export * from "./list";
 export * from "./virtual-list";
+export * from "./virtual-list2";
 export * from "./virtual-scroll-list";
 export * from "./scroll-page";

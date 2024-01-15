@@ -53,9 +53,12 @@ export const RScrollVirtualList2 = defineComponent({
     // eslint-disable-next-line
     const { listHook, bothEndsHeight, space, avgHeight, columnNum } = props;
     let contentHtml;
+    let bottomHtml;
+    let isobserver = false;
 
     const recycleHeight = () => window.innerHeight * 2; // 有些浏览器初始拿innerHeight有时为0;
     const itemWidth = `calc( ${100 / columnNum}% - ${((columnNum - 1) * space) / columnNum}px )`;
+    const loadComs = useListLoadingHoc(listHook, props, context);
 
     const scrollController = useScrollController({
       onScroll(event, sTop) {
@@ -117,6 +120,21 @@ export const RScrollVirtualList2 = defineComponent({
       mCtx.renderList = renderItems(index);
     }
 
+    const observerBottom = new IntersectionObserver(([entries]) => {
+      if (entries.isIntersecting && isobserver) {
+        context.emit("scrollEnd");
+      }
+      isobserver = true;
+    });
+
+    onBeforeUnmount(() => {
+      observerBottom.disconnect();
+    });
+
+    onMounted(() => {
+      observerBottom.observe(bottomHtml);
+    });
+
     return (vm) => {
       layout();
       return (
@@ -129,6 +147,12 @@ export const RScrollVirtualList2 = defineComponent({
           >
             <Context keyExtractor={props.keyExtractor}></Context>
           </div>
+          {loadComs.renderError()}
+          {loadComs.renderLoading()}
+          {loadComs.renderBegin({ height: avgHeight, space, column: columnNum })}
+          {loadComs.renderfinished()}
+          {loadComs.renderEmpty()}
+          <div ref={(el) => (bottomHtml = el)} class="r-scroll-list-bottom" />
         </div>
       );
     };

@@ -6,25 +6,28 @@ export { useListLoad, getListLoadProps, useAsyncListLoad };
 
 function getListLoadProps(options) {
   const config = {
-    setList: (res) => { // 设置数据的回调 返回[]
+    setList: (res) => {
+      // 设置数据的回调 返回[]
       if (!res) return [];
       if (res instanceof Array) return res;
       return res.list || [];
     },
-    setTotal: (res) => {// 设置总数的回调 返回数字
+    setTotal: (res) => {
+      // 设置总数的回调 返回数字
       if (!res) return 0;
       if (res instanceof Array) return res.length;
       return res.total * 1;
     },
-    setFinished: (res, hooks) => { // 设置结束状态的回调 返回Boolean
+    setFinished: (res, hooks) => {
+      // 设置结束状态的回调 返回Boolean
       return hooks.list.length >= hooks.total;
     },
-    fetchCB: () => undefined,  // 异步的回调 返回异步数据
+    fetchCB: () => undefined, // 异步的回调 返回异步数据
     fetchBeginCB: () => undefined,
     fetchConcatCB: () => undefined,
     beforeBegin: () => undefined,
     currentPage: 1, // 当前的页码
-    pageSize: 10,  // 请求的页数
+    pageSize: 10, // 请求的页数
     accumulationList: true,
     dataMethodListeners: [],
     loadingMethodListeners: [],
@@ -100,7 +103,7 @@ function useListLoad(props = {}) {
 
 function useAsyncListLoad(props = {}) {
   const config = getListLoadProps(props);
-  const asyncHooks = usePromise(config.fetchCb, { ...config });
+  const asyncHooks = config.asyncHooks || usePromise(config.fetchCb, { ...config });
 
   const list = ref(config.list);
   const currentPage = ref(config.currentPage);

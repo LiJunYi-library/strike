@@ -160,7 +160,7 @@ function useMultiple(props = {}) {
       context.select = context.select.filter((v) => v !== item);
       context.value = context.select.map((v) => formatterValue(v));
       context.label = context.select.map((v) => formatterLabel(v));
-      context.index = context.value.filter((v) => v !== i);
+      context.index = context.index.filter((v) => v !== i);
     } else {
       context.select.push(item);
       context.value.push(val);

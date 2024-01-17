@@ -6,8 +6,9 @@ export { getListProps, useList };
 
 function getListProps(options = {}) {
   const config = {
-    ...options,
     afterSetList: () => undefined,
+    ...options,
+    list: options.list || [],
     listStorage: options.list || [],
   };
   return config;

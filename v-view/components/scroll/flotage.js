@@ -1,4 +1,4 @@
-import { defineComponent, renderSlot, onBeforeUnmount, ref, inject } from "vue";
+import { defineComponent, renderSlot, reactive, ref, inject } from "vue";
 import { useScrollController } from "./";
 
 export const RScrollFlotage = defineComponent({
@@ -61,6 +61,16 @@ export const RScrollFlotage = defineComponent({
       },
     });
 
+    const arg = reactive({
+      top,
+      isSticky,
+      unStickyTop,
+      unStickyBottom,
+      isFlotage,
+      unFlotageTop,
+      unFlotageBottom,
+    });
+
     return (vm) => {
       return (
         <div
@@ -83,7 +93,7 @@ export const RScrollFlotage = defineComponent({
             unFlotageBottom.value && "r-scroll-flotage-un-flotage-bottom",
           ]}
         >
-          {renderSlot(context.slots, "default")}
+          {renderSlot(context.slots, "default", arg)}
         </div>
       );
     };

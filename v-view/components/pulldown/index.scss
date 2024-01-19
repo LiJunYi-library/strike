@@ -135,3 +135,34 @@
     border-radius: 3px;
   }
 }
+
+.r-pulldown-list-select-footer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 8px;
+  padding: 0 12px;
+  padding-bottom: 12px;
+  background: #f4f4fb;
+  .reset {
+    background: rgb(181, 181, 181);
+    color: #ffffff;
+    height: 36px;
+    line-height: 36px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+  }
+  .confirm {
+    background: #eed9cd;
+    color: #ffffff;
+    height: 36px;
+    line-height: 36px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+  }
+}

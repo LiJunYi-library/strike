@@ -85,12 +85,12 @@ const Context = defineComponent({
     );
 
     function scrollTo() {
-      lock = true;
-      isHandActuated = true;
       let currentItem = RScrollPageContext.children[listHook.index];
       if (!currentItem) return;
       let currentHtml = currentItem.html;
       if (!currentHtml) return;
+      lock = true;
+      isHandActuated = true;
       let top = currentHtml.offsetTop - props.offsetTop;
 
       if (typeof currentItem.props.offsetTop === "number") {

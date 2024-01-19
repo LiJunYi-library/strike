@@ -6,21 +6,46 @@ import { RListSelect, RListSelectProps } from "../list";
 export const RPulldownSelect = defineComponent({
   props: {
     label: { type: [String, Number], default: "" },
+    secondaryConfirm: { type: Boolean, default: false },
     ...RListSelectProps,
   },
-  emits:['change'],
+  emits: ["change", "beforeOpen", "close"],
   setup(props, context) {
     // eslint-disable-next-line
     const listHook = props.listHook;
 
     function onChange(item, index, popCtx) {
+      if (props.secondaryConfirm) return;
+      context.emit("change", listHook.value);
+      popCtx.setVisible(false);
+    }
+
+    function onBeforeOpen() {
+      if (props.secondaryConfirm) listHook.save_changeContextToStore();
+      context.emit("beforeOpen");
+    }
+
+    function onClose() {
+      if (props.secondaryConfirm) listHook.changeContextToProxy();
+      context.emit("close");
+    }
+
+    function confirm(popCtx) {
+      if (props.secondaryConfirm) listHook.restore_changeContextToProxy();
+      context.emit("change", listHook.value);
+      popCtx.setVisible(false);
+    }
+
+    function reset(popCtx) {
+      listHook.reset();
+      if (props.secondaryConfirm) listHook.restore_changeContextToProxy();
       context.emit("change", listHook.value);
       popCtx.setVisible(false);
     }
 
     return () => {
       return (
-        <RPulldown {...context.attrs}>
+        <RPulldown {...context.attrs} onBeforeOpen={onBeforeOpen} onClose={onClose}>
           {{
             content: (popCtx) => (
               <div class={["r-pulldown-text", listHook.label && "r-pulldown-text-act"]}>
@@ -37,8 +62,25 @@ export const RPulldownSelect = defineComponent({
             default: (popCtx) => (
               <div class={"r-pulldown-list-select"}>
                 <RListSelect {...props} onChange={(item, index) => onChange(item, index, popCtx)}>
-                  {{default: context.slots.default,item: context.slots.item }}
+                  {{ default: context.slots.default, item: context.slots.item }}
                 </RListSelect>
+                {props.secondaryConfirm &&
+                  renderSlot(context.slots, "footer", { popCtx, reset, confirm, context }, () => [
+                    <div class={"r-pulldown-list-select-footer"}>
+                      <button
+                        onClick={() => reset(popCtx)}
+                        class={"r-pulldown-list-select-footer-reset reset"}
+                      >
+                        重置
+                      </button>
+                      <button
+                        onClick={() => confirm(popCtx)}
+                        class={"r-pulldown-list-select-footer-confirm confirm"}
+                      >
+                        确认
+                      </button>
+                    </div>,
+                  ])}
               </div>
             ),
           }}

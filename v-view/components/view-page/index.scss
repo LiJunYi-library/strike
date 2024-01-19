@@ -6,7 +6,7 @@
   }
 
   .r-view-page-list {
-    display: inline-flex;
+    display: flex;
     flex-wrap: nowrap;
     &::-webkit-scrollbar {
       display: none;

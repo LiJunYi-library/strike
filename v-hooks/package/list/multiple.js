@@ -114,11 +114,16 @@ function useMultiple(props = {}) {
     getSelectOfValue: selectOfValue,
     getLabelOfValue: labelOfValue,
     getIndexOfValue: indexOfValue,
+    getContext,
   };
 
   params.proxy = reactive(params);
 
   let context = params.proxy;
+
+  function getContext() {
+    return context;
+  }
 
   function save() {
     store.select = [...params.proxy.select];

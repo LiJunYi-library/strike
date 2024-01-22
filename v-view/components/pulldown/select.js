@@ -43,14 +43,19 @@ export const RPulldownSelect = defineComponent({
       popCtx.setVisible(false);
     }
 
+    function revLabel(params) {
+      if (params instanceof Array) return params.join(",");
+      return params;
+    }
+
     return () => {
       return (
         <RPulldown {...context.attrs} onBeforeOpen={onBeforeOpen} onClose={onClose}>
           {{
             content: (popCtx) => (
-              <div class={["r-pulldown-text", listHook.label && "r-pulldown-text-act"]}>
+              <div class={["r-pulldown-text", revLabel(listHook.label) && "r-pulldown-text-act"]}>
                 {renderSlot(context.slots, "label", popCtx, () => [
-                  <div class="r-pulldown-label"> {listHook.label || props.label} </div>,
+                  <div class="r-pulldown-label"> {revLabel(listHook.label) || props.label} </div>,
                 ])}
                 <span class={["r-pulldown-icon", !popCtx.visible && "rote"]}>
                   {renderSlot(context.slots, "icon", popCtx, () => [

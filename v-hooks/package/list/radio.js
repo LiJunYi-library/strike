@@ -94,11 +94,16 @@ function useRadio(props = {}) {
     getIndexOfValue,
     indexOfValue: getIndexOfValue, // 废弃
     someValue,
+    getContext,
   };
 
   params.proxy = reactive(params);
 
   let context = params.proxy;
+
+  function getContext() {
+    return context;
+  }
 
   function save() {
     // store.list = [...params.proxy.list];
@@ -312,7 +317,7 @@ function useAsyncRadio(props = {}) {
     nextBeginSend,
     awaitBeginSend,
   });
-  
+
   return params;
 }
 

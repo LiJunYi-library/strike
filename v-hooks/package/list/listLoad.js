@@ -22,6 +22,9 @@ function getListLoadProps(options) {
       // 设置结束状态的回调 返回Boolean
       return hooks.list.length >= hooks.total;
     },
+    setCurrentPage: (res, hooks) => {
+      return hooks.currentPage + 1;
+    },
     fetchCB: () => undefined, // 异步的回调 返回异步数据
     fetchBeginCB: () => undefined,
     fetchConcatCB: () => undefined,
@@ -74,7 +77,7 @@ function useListLoad(props = {}) {
     return asyncHooks.runBegin(...arg).then((res) => {
       listData.value = config.setList(res, proxy);
       list.value = listData.value;
-      currentPage.value = currentPage.value + 1;
+      currentPage.value = config.setCurrentPage(res, params.proxy);
       total.value = config.setTotal(res, proxy);
       finished.value = config.setFinished(res, proxy);
       config.fetchBeginCB(proxy);
@@ -91,7 +94,7 @@ function useListLoad(props = {}) {
     return asyncHooks.run(...arg).then((res) => {
       listData.value = config.setList(res, proxy);
       list.value = list.value.concat(listData.value);
-      currentPage.value = currentPage.value + 1;
+      currentPage.value = config.setCurrentPage(res, params.proxy);
       total.value = config.setTotal(res, proxy);
       finished.value = config.setFinished(res, proxy);
       config.fetchConcatCB(proxy);
@@ -134,7 +137,7 @@ function useAsyncListLoad(props = {}) {
     return asyncHooks.nextBeginSend(...arg).then((res) => {
       listData.value = config.setList(res, params.proxy);
       list.value = listData.value;
-      currentPage.value = currentPage.value + 1;
+      currentPage.value = config.setCurrentPage(res, params.proxy);
       total.value = config.setTotal(res, params.proxy);
       finished.value = config.setFinished(res, params.proxy);
       config.fetchBeginCB(params.proxy);
@@ -147,7 +150,7 @@ function useAsyncListLoad(props = {}) {
     return asyncHooks.awaitSend(...arg).then((res) => {
       listData.value = config.setList(res, params.proxy);
       list.value = list.value.concat(listData.value);
-      currentPage.value = currentPage.value + 1;
+      currentPage.value = config.setCurrentPage(res, params.proxy);
       total.value = config.setTotal(res, params.proxy);
       finished.value = config.setFinished(res, params.proxy);
       config.fetchConcatCB(params.proxy);

@@ -1,6 +1,7 @@
 import { ref, reactive, computed, watch } from "vue";
 import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
 import { useSelect } from "./select";
+import { useProxy } from "../../other";
 
 export { getListProps, useList };
 
@@ -16,46 +17,61 @@ function getListProps(options = {}) {
 
 function useList(props = {}) {
   const config = getListProps(props);
-  let filterFun;
 
-  const listStorage = ref(config.listStorage);
+  const listStorage = ref([...config.list]);
   const list = ref(config.list);
+  const sortFun = ref();
+  const filterFun = ref();
 
-  const arguments_ = {
+  const params = useProxy({
+    filterFun,
+    sortFun,
+    //
     listStorage,
     list,
     afterSetList: config.afterSetList,
     updateList,
     reset,
+    //
+    push,
+    unshift,
+    //
     remove,
     pop,
     shift,
-    push,
-    unshift,
+    //
     filter,
-    filterIncludes,
-    filterRegExp,
+    // filterIncludes,
+    // filterRegExp,
     sort,
     ascendingOrder,
     descendingOrder,
-  };
-  arguments_.proxy = reactive(arguments_);
+  });
 
   function getList() {
-    const list_ = listStorage.value;
-    // if( filterFun) list_ = listStorage.value.filter(filterFun);
+    let list_ = [...listStorage.value];
+    if (filterFun.value) list_ = list_.filter(filterFun.value);
+    if (sortFun.value) list_ = list_.sort(sortFun.value);
     return list_;
   }
 
   function updateList(l) {
     listStorage.value = l;
     list.value = listStorage.value;
-    arguments_.afterSetList(arguments_);
   }
 
   function reset() {
-    list.value = listStorage.value;
-    arguments_.afterSetList(arguments_);
+    list.value = [...listStorage.value];
+    clearSort();
+    clearFilter();
+  }
+
+  function clearSort() {
+    sortFun.value = null;
+  }
+
+  function clearFilter() {
+    filterFun.value = null;
   }
 
   /////////////////////////////////////
@@ -64,35 +80,29 @@ function useList(props = {}) {
   function push(...args) {
     listStorage.value.push(...args);
     list.value = getList();
-    arguments_.afterSetList(arguments_);
   }
 
   function unshift(...args) {
     listStorage.value.unshift(...args);
     list.value = getList();
-    arguments_.afterSetList(arguments_);
   }
 
   /////////////////////////////////////
   /**删除**/
   /////////////////////////////////////
   function pop() {
-    listStorage.value.pop();
-    list.value = getList();
-    arguments_.afterSetList(arguments_);
+    const item = list.value.at(-1);
+    remove(item);
   }
 
   function shift() {
-    listStorage.value.shift();
-    list.value = getList();
-    arguments_.afterSetList(arguments_);
+    const item = list.value[0];
+    remove(item);
   }
 
   function remove(...args) {
-    const list_ = listStorage.value.filter((el) => !args.includes(el));
-    listStorage.value = list_;
-    list.value = getList();
-    arguments_.afterSetList(arguments_);
+    listStorage.value = listStorage.value.filter((el) => !args.includes(el));
+    list.value = list.value.filter((el) => !args.includes(el));
   }
 
   /////////////////////////////////////
@@ -103,48 +113,58 @@ function useList(props = {}) {
   /**查找**/
   /////////////////////////////////////
   function filter(fun) {
-    filterFun = fun;
+    filterFun.value = fun;
     list.value = listStorage.value.filter(fun);
-    arguments_.afterSetList(arguments_, 0);
-  }
-
-  function filterIncludes(formatter, key, isOr) {
-    filterFun = (el, index) => {
-      const keyWord = formatter(el) || "";
-      const keyWords = keyWord.split(" ").filter(Boolean);
-      if (isOr) return keyWords.some((str) => str.includes(key));
-      return keyWords.every((str) => str.includes(key));
-    };
-    list.value = listStorage.value.filter(filterFun);
-    arguments_.afterSetList(arguments_, 0);
-  }
-
-  function filterRegExp(formatter, regExp) {
-    filterFun = (el, index) => {
-      const keyWord = formatter(el) || "";
-      return regExp.test(keyWord);
-    };
-    list.value = listStorage.value.filter(filterFun);
-    arguments_.afterSetList(arguments_, 0);
+    if (sortFun.value) list.value.sort(sortFun.value);
+    params.afterSetList(params, 0);
   }
 
   /////////////////////////////////////
   /**排序**/
   /////////////////////////////////////
   function sort(fun) {
-    list.value = listStorage.value.sort(fun);
-    arguments_.afterSetList(arguments_);
+    sortFun.value = fun;
+    // list.value = listStorage.value.sort(fun);
+    list.value.sort(fun);
+    console.log(listStorage.value);
+    params.afterSetList(params);
   }
 
   function ascendingOrder(formatter) {
-    list.value = listStorage.value.sort((a, b) => formatter(a) - formatter(b));
-    arguments_.afterSetList(arguments_);
+    sortFun.value = (a, b) => formatter(a) - formatter(b);
+    // list.value = listStorage.value.sort((a, b) => formatter(a) - formatter(b));
+    list.value.sort(sortFun.value);
+    console.log(listStorage.value);
+    params.afterSetList(params);
   }
 
   function descendingOrder(formatter) {
-    list.value = listStorage.value.sort((a, b) => formatter(b) - formatter(a));
-    arguments_.afterSetList(arguments_);
+    sortFun.value = (a, b) => formatter(b) - formatter(a);
+    // list.value = listStorage.value.sort((a, b) => formatter(b) - formatter(a));
+    list.value.sort(sortFun.value);
+    console.log(listStorage.value);
+    params.afterSetList(params);
   }
 
-  return arguments_;
+  return params;
 }
+
+// function filterIncludes(formatter, key, isOr) {
+//   filterFun = (el, index) => {
+//     const keyWord = formatter(el) || "";
+//     const keyWords = keyWord.split(" ").filter(Boolean);
+//     if (isOr) return keyWords.some((str) => str.includes(key));
+//     return keyWords.every((str) => str.includes(key));
+//   };
+//   list.value = listStorage.value.filter(filterFun);
+//   params.afterSetList(params, 0);
+// }
+
+// function filterRegExp(formatter, regExp) {
+//   filterFun = (el, index) => {
+//     const keyWord = formatter(el) || "";
+//     return regExp.test(keyWord);
+//   };
+//   list.value = listStorage.value.filter(filterFun);
+//   params.afterSetList(params, 0);
+// }

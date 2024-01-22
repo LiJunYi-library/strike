@@ -91,6 +91,7 @@ function useMultiple(props = {}) {
     transformParams: changeContextToProxy,
     changeContextToProxy,
     save_changeContextToStore,
+    restore_changeContextToProxy,
     transform,
     same,
     onSelect,
@@ -106,9 +107,13 @@ function useMultiple(props = {}) {
     updateListToResolveValue,
     invertSelect,
     allSelect,
+
     selectOfValue,
     labelOfValue,
     indexOfValue,
+    getSelectOfValue: selectOfValue,
+    getLabelOfValue: labelOfValue,
+    getIndexOfValue: indexOfValue,
   };
 
   params.proxy = reactive(params);
@@ -116,7 +121,6 @@ function useMultiple(props = {}) {
   let context = params.proxy;
 
   function save() {
-    // store.list = [...params.proxy.list];
     store.select = [...params.proxy.select];
     store.value = [...params.proxy.value];
     store.label = [...params.proxy.label];
@@ -124,7 +128,6 @@ function useMultiple(props = {}) {
   }
 
   function restore() {
-    // params.proxy.list = [...store.list];
     params.proxy.select = [...store.select];
     params.proxy.value = [...store.value];
     params.proxy.label = [...store.label];
@@ -142,6 +145,11 @@ function useMultiple(props = {}) {
   function save_changeContextToStore() {
     save();
     changeContextToStore();
+  }
+
+  function restore_changeContextToProxy() {
+    restore();
+    changeContextToProxy();
   }
 
   function transform() {

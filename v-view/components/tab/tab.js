@@ -137,6 +137,17 @@ RTab = defineComponent({
       );
     }
 
+    function tabItemClick(event, item, index) {
+      if (context.attrs.onItemClick) {
+        context.attrs.onItemClick(event, item, index);
+        return;
+      }
+
+      if (props.clickStop) event.stopPropagation();
+      if (listHook.onSelect(item, index)) return;
+      context.emit("change", item, index);
+    }
+
     return (vm) => {
       return (
         <div class="r-tab">
@@ -161,11 +172,7 @@ RTab = defineComponent({
                         htmls.itemsHtml[index] = el;
                       }}
                       key={index}
-                      onClick={(event) => {
-                        if (props.clickStop) event.stopPropagation();
-                        if (listHook.onSelect(item, index)) return;
-                        context.emit("change", item, index);
-                      }}
+                      onClick={(event) => tabItemClick(event, item, index)}
                     >
                       {renderSlot(context.slots, "default", { index, item }, () => [
                         <div> {listHook.formatterLabel(item)} </div>,
@@ -220,6 +227,17 @@ function RTabHoc(config = {}) {
         []
       );
 
+      function tabItemClick(event, item, index) {
+        if (context.attrs.onItemClick) {
+          context.attrs.onItemClick(event, item, index);
+          return;
+        }
+
+        if (props.clickStop) event.stopPropagation();
+        if (listHook.onSelect(item, index)) return;
+        context.emit("change", item, index);
+      }
+
       return (vm) => {
         return (
           <div class="r-tab">
@@ -232,11 +250,7 @@ function RTabHoc(config = {}) {
                       class={["r-tab-item", listHook.same(item) && "r-tab-item-same"]}
                       ref={(el) => (htmls.itemsHtml[index] = el)}
                       key={index}
-                      onClick={(event) => {
-                        if (props.clickStop) event.stopPropagation();
-                        if (listHook.onSelect(item, index)) return;
-                        context.emit("change", item, index);
-                      }}
+                      onClick={(event) => tabItemClick(event, item, index)}
                     >
                       {renderSlot(context.slots, "default", { index, item }, () => [
                         <div> {listHook.formatterLabel(item)} </div>,

@@ -95,23 +95,3 @@ export const RPulldownSelect = defineComponent({
   },
 });
 
-// <div class="r-pulldown-select" v-loadings={props.v_loadings}>
-// <div class="r-pulldown-select-list">
-//   {renderList(listHook.list, (item, index) => {
-//     return renderSlot(context.slots, "default", { item, index }, () => [
-//       <div
-//         onClick={() => onClick(item, index, popCtx)}
-//         class={[
-//           "r-pulldown-select-list-item",
-//           listHook.same(item, index) && "r-pulldown-select-list-item-act",
-//         ]}
-//         key={index}
-//       >
-//         {renderSlot(context.slots, "item", { item, index }, () => [
-//           listHook.formatterLabel(item, index),
-//         ])}
-//       </div>,
-//     ]);
-//   })}
-// </div>
-// </div>

@@ -153,9 +153,9 @@ export const RScrollVirtualList = defineComponent({
         const nth = Math.floor(index / columnNum);
         let top = nth * (avgHeight + space) + bothEndsHeight + "px";
         if (nth === 0) top = bothEndsHeight + "px";
-        let left = getLeft(i);
-        let width = itemWidth;
-        let height = avgHeight + "px";
+        const left = getLeft(i);
+        const width = itemWidth;
+        const height = avgHeight + "px";
         pList.push({ index, top, left, width, height });
         index++;
       });

@@ -41,6 +41,7 @@ function useRadio(props = {}) {
   }
 
   const initParms = resolveProps(config, true);
+
   const list = ref(initParms.list);
   const select = ref(initParms.select);
   const value = ref(initParms.value);
@@ -106,7 +107,6 @@ function useRadio(props = {}) {
   }
 
   function save() {
-    // store.list = [...params.proxy.list];
     store.select = params.proxy.select;
     store.value = params.proxy.value;
     store.label = params.proxy.label;
@@ -114,7 +114,6 @@ function useRadio(props = {}) {
   }
 
   function restore() {
-    // params.proxy.list = [...store.list];
     params.proxy.select = store.select;
     params.proxy.value = store.value;
     params.proxy.label = store.label;
@@ -123,12 +122,10 @@ function useRadio(props = {}) {
 
   function changeContextToStore() {
     context = store;
-    // console.log("changeContextToProxy");
   }
 
   function changeContextToProxy() {
     context = params.proxy;
-    // console.log("changeContextToProxy");
   }
 
   function save_changeContextToStore() {
@@ -166,7 +163,6 @@ function useRadio(props = {}) {
     context.label = formatterLabel(item);
     context.value = formatterValue(item);
     config.onChange(context);
-    // console.log("onSelect", context);
     return false;
   }
 

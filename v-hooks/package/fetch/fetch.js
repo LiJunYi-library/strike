@@ -1,6 +1,248 @@
-import { createOverload } from "@rainbow_ljy/rainbow-js";
+import { isRef, ref, reactive } from "vue";
 
-function parseParams(object) {
+export function useFetchHoc(props = {}) {
+  const options = {
+    formatterFileName: (res, config) => {
+      const fName = decodeURIComponent(
+        res.headers.get("Content-Disposition").split("filename=").pop()
+      );
+      const fileName = fName || config.fileName;
+      return fileName;
+    },
+    formatterResponse: async (res, config) => {
+      const fileName = config.formatterFileName(res, config);
+      const d = await res.blob();
+      if (config.isDownloadFile) downloadFile(d, fileName);
+      console.warn("未处理 响应 Content-Type 默认文件", config.isDownloadFile);
+      return d;
+    },
+    formatterData: (d) => d,
+    interceptRequest: undefined,
+    interceptResponseSuccess: undefined,
+    interceptResponseError: undefined,
+    urlParams: undefined,
+    url: "",
+    baseUrl: "",
+    time: 30000,
+    isDownloadFile: false,
+    fileName: "",
+    loading: false,
+    begin: false,
+    error: false,
+    data: undefined,
+    errorData: undefined,
+    ...props,
+  };
+
+  function useFetch(props = {}) {
+    const config = { ...options, ...props };
+
+    let controller = new AbortController();
+    let timer;
+
+    function getBody() {
+      if (!config.body) return undefined;
+      if (config.body instanceof Function) return config.body();
+      if (isRef(config.body)) return config.body.value;
+      return config.body;
+    }
+
+    function revBody(contentType) {
+      const _body = getBody();
+      if (!_body) return undefined;
+      if (typeof _body !== "object") return _body;
+      const formDataType = ["multipart/form-data", "form-data"];
+      if (!formDataType.includes(contentType)) return JSON.stringify(_body);
+      const formData = new FormData();
+      for (const key in _body) {
+        if (Object.prototype.hasOwnProperty.call(_body, key)) {
+          formData.append(key, _body[key]);
+        }
+      }
+      return formData;
+    }
+
+    function getHeaders() {
+      const headers_ = {};
+      if (config.headers) return config.headers;
+      if (config.contentType) headers_["Content-Type"] = config.contentType;
+      return headers_;
+    }
+
+    function getParams() {
+      if (!config.urlParams) return undefined;
+      if (config.urlParams instanceof Function) return config.urlParams();
+      if (isRef(config.urlParams)) return config.urlParams.value;
+      return config.urlParams;
+    }
+
+    /////////////////
+    const loading = ref(config.loading);
+    const data = ref(config.data);
+    const begin = ref(config.begin);
+    const error = ref(config.error);
+    const errorData = ref(config.errorData);
+    const params = {
+      loading,
+      data,
+      begin,
+      error,
+      errorData,
+      send,
+      nextSend,
+      awaitSend,
+      beginSend,
+      nextBeginSend,
+      awaitBeginSend,
+      abort,
+    };
+    params.proxy = reactive(params);
+
+    async function send() {
+      loading.value = true;
+      // console.log("loading --- true");
+      controller = new AbortController();
+      const url = config.baseUrl + config.url + parseParams(getParams());
+      const headers = getHeaders();
+      const body = revBody(headers["Content-Type"]);
+      const fetchConfig = {
+        url,
+        headers,
+        method: config.method,
+        signal: controller.signal,
+        body,
+      };
+      config?.interceptRequest?.(fetchConfig, config);
+      const URL = fetchConfig.url;
+      delete fetchConfig.url;
+
+      if (config.time) {
+        timer = setTimeout(() => {
+          controller.abort();
+          loading.value = false;
+          begin.value = false;
+          // console.log("loading 超时--- false");
+        }, config.time);
+      }
+
+      return fetch(URL, fetchConfig)
+        .catch((err) => {
+          console.error("error");
+          if (err.code === 20) {
+            // console.log("loading  bucl");
+          } else {
+            loading.value = false;
+            begin.value = false;
+            error.value = true;
+            errorData.value = err;
+            // console.log("loading err--- false");
+          }
+
+          if (config.interceptResponseError) {
+            const errReset = config.interceptResponseError(err, config);
+            if (errReset) return errReset;
+          }
+          return Promise.reject(err);
+        })
+        .then(async (res) => {
+          const resContentType = res.headers.get("Content-Type");
+          let d;
+
+          switch (resContentType) {
+            default:
+              d = await config.formatterResponse(res, config);
+              break;
+
+            case "application/json":
+              d = await res.json();
+              break;
+          }
+
+          if (config.interceptResponseSuccess) {
+            const reset = config.interceptResponseSuccess(res, d, config);
+            if (reset instanceof Promise) {
+              return reset
+                .catch((mErr) => {
+                  // console.log(mErr);
+                  error.value = true;
+                  errorData.value = mErr;
+                  return Promise.reject(mErr);
+                })
+                .then(async (mRes) => {
+                  // console.log(mRes);
+                  data.value = config.formatterData(mRes, d, res);
+                  return Promise.resolve(mRes);
+                })
+                .finally(async () => {
+                  loading.value = false;
+                  begin.value = false;
+                  // console.log("loading --Success--finally false");
+                });
+            }
+          }
+
+          loading.value = false;
+          begin.value = false;
+          data.value = d;
+          // console.log("loading --Success-- false", d);
+          return data.value;
+        });
+    }
+
+    function nextSend() {
+      controller.abort();
+      return send();
+    }
+
+    function awaitSend() {
+      if (loading.value === true) return Promise.reject(" loading ");
+      return send();
+    }
+
+    function beginSend() {
+      begin.value = true;
+      return send();
+    }
+
+    function nextBeginSend() {
+      begin.value = true;
+      return nextSend();
+    }
+
+    function awaitBeginSend() {
+      if (loading.value === true) return Promise.reject(" loading ");
+      return beginSend();
+    }
+
+    function abort() {
+      controller.abort();
+      clearTimeout(timer);
+      loading.value = false;
+      begin.value = false;
+    }
+
+    return params;
+  }
+
+  return useFetch;
+}
+
+export function downloadFile(blob, fileName) {
+  if ("msSaveOrOpenBlob" in navigator) {
+    window.navigator.msSaveOrOpenBlob(blob, fileName);
+  } else {
+    const elink = document.createElement("a");
+    elink.download = fileName;
+    elink.style.display = "none";
+    elink.href = URL.createObjectURL(blob);
+    document.body.appendChild(elink);
+    elink.click();
+    URL.revokeObjectURL(elink.href);
+    document.body.removeChild(elink);
+  }
+}
+
+export function parseParams(object) {
   if (!object) return "";
   if (typeof object !== "object") return object;
   if (!Object.keys(object).length) return "";
@@ -20,361 +262,3 @@ function parseParams(object) {
   str = str.slice(0, -1);
   return `?${str}`;
 }
-
-function mergeRequestInit(source = {}, target = {}) {
-  let propertys = [
-    "body",
-    "cache",
-    "credentials",
-    "headers",
-    "integrity",
-    "keepalive",
-    "method",
-    "mode",
-    "redirect",
-    "referrer",
-    "referrerPolicy",
-    "signal",
-    "window",
-  ];
-  let newObj = {};
-  propertys.forEach((key) => {
-    const val = source[key] || target[key];
-    if (val !== undefined) newObj[key] = val;
-  });
-  return newObj;
-}
-
-function getFetchProps(...args) {
-  let options = {};
-  let propertys = ["url", "method", "body", "contentType", "headers"];
-  if (args && args.length === 1 && typeof args[0] === "object") {
-    options = Object.assign(options, args[0]);
-  } else {
-    propertys.forEach((key, index) => {
-      if (args[index] !== undefined) options[key] = args[index];
-    });
-  }
-  let h = {};
-  if (options.contentType) h["Content-Type"] = options.contentType;
-  let config = {
-    ...options,
-    headers: {
-      ...h,
-      ...options.headers,
-    },
-  };
-  return config;
-}
-
-function resolveRequestInit(options = {}) {
-  if (options.body instanceof Function) {
-    options.body = options.body();
-  }
-
-  if (options.urlParams instanceof Function) {
-    options.urlParams = options.urlParams();
-  }
-
-  const methods = ["get", "head"];
-  if (methods.includes(options.method)) {
-    options.urlParams = { ...options.body };
-    options.body = undefined;
-  }
-
-  const urlParams = parseParams(options.urlParams);
-
-  if (options.url && urlParams !== "") {
-    options.url = options.url + urlParams;
-  }
-
-  if (options.urlPath) options.url = options.urlPath + options.url;
-
-  const jsonContentType = ["application/json"];
-  if (
-    options.body !== undefined &&
-    jsonContentType.includes(options.contentType) &&
-    typeof options.body !== "string"
-  ) {
-    options.body = JSON.stringify(options.body);
-  }
-
-  const formDataType = ["multipart/form-data", "form-data"];
-  if (
-    options.body !== undefined &&
-    formDataType.includes(options.contentType) &&
-    !(options.body instanceof FormData)
-  ) {
-    const formData = new FormData();
-    for (const key in options.body) {
-      if (options.body.hasOwnProperty(key)) {
-        formData.append(key, options.body[key]);
-      }
-    }
-    options.body = formData;
-  }
-
-  const deleteContentType = ["multipart/form-data", "form-data"];
-  if (deleteContentType.includes(options.contentType)) {
-    if (options?.headers?.["Content-Type"]) {
-      delete options?.headers?.["Content-Type"];
-    }
-  }
-}
-
-/* ************************* */
-
-function createHttpFetch(request) {
-  return {};
-  const get = request.create({ method: "get", contentType: "" });
-  const post = request.create({ method: "post", contentType: "application/json" });
-  const form = request.create((config) => {
-    const formData = new FormData();
-    const body = config.body;
-    for (const key in body) {
-      if (body.hasOwnProperty(key)) {
-        formData.append(key, body[key]);
-      }
-    }
-    config.body = formData;
-    config.method = "post";
-    return config;
-  });
-
-  return { get, post, form };
-}
-
-class Body {
-  constructor(obj) {
-    Object.assign(this, obj);
-  }
-}
-
-const options = {
-  onRequest() {
-    //
-  },
-  onResponse() {
-    //
-  },
-};
-
-function createHttpRequest2(options = {}) {
-  const config = {
-    url: "",
-    method: "get",
-    body: undefined,
-    headers: {},
-    contentType: undefined,
-    data: undefined,
-    urlParams: undefined,
-    timeout: 2000,
-    formatterSuccessResponse: async (response) => {
-      if (response.type === "application/json") {
-        return await response.json();
-      }
-      return response;
-    },
-    formatterErrorResponse: async (response) => {
-      if (response.type === "application/json") {
-        return await response.json();
-      }
-      return response;
-    },
-    formatterStatus: (response) => response.status === 200,
-  };
-
-  // const request = createOverload((overloadCB) => {
-  //   overloadCB.addimpl("Object", (object) => {
-  //     Object.assign(request.$config, object);
-  //     console.log("Object", request.$config);
-  //   });
-
-  //   overloadCB.addimpl("String", function setUrl(url) {
-  //     config.url = url;
-  //     return promise();
-  //   });
-
-  //   overloadCB.addimpl(["String", "Object"], (url, data) => {
-  //     config.url = url;
-  //     config.data = data;
-  //   });
-
-  //   overloadCB.addimpl(["String", "Object", "String"], (url, data, contentType) => {
-  //     config.url = url;
-  //     config.data = data;
-  //     config.contentType = contentType;
-  //   });
-  //   //  //   //
-  //   overloadCB.addimpl(["String", "String"], (url, method) => {
-  //     config.url = url;
-  //     config.method = method;
-  //   });
-
-  //   overloadCB.addimpl(["String", "String", "Object"], (url, method, body) => {
-  //     config.url = url;
-  //     config.method = method;
-  //     config.body = body;
-  //   });
-
-  //   overloadCB.addimpl(["String", "Function"], (url, body) => {
-  //     config.url = url;
-  //     config.body = body;
-  //   });
-  // });
-
-  //currie
-  let $config = Object.assign({}, config);
-
-  function request(url, a, b, c) {
-    console.log("?????????????????");
-    console.log(url, a, b, c);
-    $config.url = url;
-    // let opos = Object.assign({ url }, $config);
-    // console.log(opos);
-    let pro = promise();
-    $config = Object.assign({}, config);
-    return pro;
-  }
-
-  // request.toBind = (obj) => {
-  //   console.log("request.toBind", obj);
-  //   function func(...args) {
-  //     console.log("toBind", ...args);
-  //     return request(obj, ...args);
-  //   }
-  //   Object.assign(func, request.prototype.constructor);
-  //   return func;
-  // };
-
-  request.setUrlParams = (urlParams) => {
-    $config.urlParams = urlParams;
-    return request;
-  };
-
-  request.setData = (data) => {
-    $config.data = data;
-    return request;
-  };
-
-  function promise() {
-    let controller = new AbortController();
-    let timer;
-
-    controller.signal.onabort = () => {
-      console.log(" controller.signal.onabort ");
-    };
-
-    const promise = new Promise((resolve, reject) => {
-      const requestInit = {};
-      // const $config = request.$config;
-      // _intercept.request({ config, requestInit, resolve, reject });
-      const str = parseParams($config.urlParams);
-      const uri = $config.url + str;
-      console.log(uri, "config ", $config);
-      fetch(uri, {
-        signal: controller.signal,
-      })
-        .then(async (response) => {
-          resolve(response);
-          // let data;
-          // if (config.formatterStatus().includes(response.status)) {
-          //   try {
-          //     data = await config.formatterResponse(response);
-          //     _intercept.success({ config, requestInit, response, data, resolve, reject });
-          //     resolve(data);
-          //   } catch (error) {
-          //     console.error(error);
-          //   }
-          // } else {
-          //   try {
-          //     data = await config.formatterResponse(response);
-          //     _intercept.error({ config, requestInit, response, data, resolve, reject });
-          //     reject(response);
-          //   } catch (error) {
-          //     console.error(error);
-          //   }
-          // }
-        })
-        .catch((error) => {
-          console.log(" fetch.catch ", error.code, error.name);
-          // _intercept.error({ config, requestInit, error, resolve, reject });
-          // reject(error);
-        });
-
-      if ($config.timeout) {
-        timer = setTimeout(() => {
-          controller.abort();
-          options?.onTimeout?.();
-        }, $config.timeout);
-      }
-    });
-
-    promise.key = "____";
-
-    return promise;
-  }
-
-  return request;
-}
-
-const aaa = createHttpRequest2({
-  data() {
-    return {
-      Message: {
-        success: {
-          text: "操作成功",
-          visible: false,
-        },
-        error: {
-          text: "失败了",
-          visible: true,
-        },
-      },
-      ///
-      Overlay: {
-        visible: false,
-        use: false,
-      },
-    };
-  },
-  currie: {
-    useMessage(text) {
-      this.Message.success.text = text;
-      this.Message.success.visible = true;
-    },
-    useOverlay() {
-      this.Overlay.use = true;
-    },
-  },
-  onRequest() {
-    function handleOverlay() {
-      if (!this.Overlay.use) return;
-      this.Overlay.visible = true;
-      console.log("弹出遮罩");
-    }
-  },
-  onResponse() {
-    function handleOverlay() {
-      if (!this.Overlay.use) return;
-      this.Overlay.visible = false;
-      console.log("关闭遮罩");
-    }
-  },
-  onTimeout() {
-    console.log("超时 onTimeout");
-  },
-});
-
-// (async function name(params) {
-//   let pro = aaa.setUrlParams({ page: 30 }).setData({ dd: 30 })("http://dev-test.com/api/list");
-//   console.log(pro);
-//   // aaa.setUrlParams({ size: 30 }).setData({ aa: 30 })("http://dev-test.com/api/list");
-
-//   // aaa("http://dev-test.com/api/list");
-// })();
-
-// // aaa("https");.message("添加成功")
-// // aaa("https", {});
-// // aaa("https", {}, "contentType");
-// // aaa("https", "post");

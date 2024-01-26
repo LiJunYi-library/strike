@@ -1,6 +1,6 @@
 import { isRef, ref, reactive } from "vue";
 
-export function useFetchHoc(props = {}) {
+export function useFetchHOC(props = {}) {
   const options = {
     formatterFileName: (res, config) => {
       const fName = decodeURIComponent(
@@ -165,7 +165,7 @@ export function useFetchHoc(props = {}) {
                 })
                 .then(async (mRes) => {
                   data.value = config.formatterData(mRes, d, res);
-                  return Promise.resolve(mRes);
+                  return Promise.resolve(data.value);
                 })
                 .finally(async () => {
                   loading.value = false;

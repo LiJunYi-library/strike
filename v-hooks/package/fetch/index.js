@@ -1,6 +1,5 @@
 import { ref, reactive } from "vue";
-import { createOverload } from "@rainbow_ljy/rainbow-js";
-import "./fetch.js";
+export * from "./fetch.js";
 
 export { createHttpRequest, useFetchHoc, createHttpFetch };
 

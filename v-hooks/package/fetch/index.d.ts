@@ -8,3 +8,5 @@ export declare const request = {
   nextGet,
   awaitGet,
 };
+
+export declare function useFetchHOC(...options: any): any;

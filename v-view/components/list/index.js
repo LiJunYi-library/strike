@@ -14,7 +14,7 @@ export const RListSelect = defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { listHook } = props;
     const loadConfig = {};
-    const loadComs = useLoadingHoc(listHook, props, context, loadConfig);
+    const loadComs = useLoadingHoc(props, context, loadConfig);
 
     return (vm) => {
       return (

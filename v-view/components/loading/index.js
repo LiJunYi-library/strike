@@ -43,18 +43,17 @@ export const loadingProps = {
     type: [Number, String],
     default: "暂无相关数据，试试其他条件吧",
   },
-
   loadText: {
     type: [Number, String],
     default: "",
   },
-
   listHook: Object,
-
+  promiseHook: Object,
   loadingHook: [Object, Array],
 };
 
-export function useLoadingHoc(listHook, props, context, configs = {}) {
+export function useLoadingHoc(props, context, configs = {}) {
+  const { listHook } = props;
   const loadHook = useLoading({ ...props, promiseHook: listHook });
 
   function setRelative(bool = true) {
@@ -171,7 +170,7 @@ export function useListLoadingHoc(listHook, props, context, configs = {}) {
     if (!props.loadText) {
       return loadingVnode;
     }
-    
+
     if (loadHook.loading) {
       return loadingVnode;
     }
@@ -257,6 +256,27 @@ export function useListLoadingHoc(listHook, props, context, configs = {}) {
 
   return { renderLoading, renderBegin, renderfinished, renderEmpty, renderError, renderContent };
 }
+
+export const RListLoading = defineComponent({
+  props: loadingProps,
+  setup(props, context) {
+    const loadComs = useLoadingHoc(props, context);
+    return () => {
+      return [
+        loadComs.renderContent(renderSlot(context.slots, "default")),
+        loadComs.renderError(),
+        loadComs.renderLoading(),
+        loadComs.renderBegin({
+          height: props.avgHeight,
+          space: props.space,
+          column: props.columnNum,
+        }),
+        loadComs.renderfinished(),
+        loadComs.renderEmpty(),
+      ];
+    };
+  },
+});
 
 export const RLoading = defineComponent({
   props: {

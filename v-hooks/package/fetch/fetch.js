@@ -76,7 +76,6 @@ export function useFetchHoc(props = {}) {
       return config.urlParams;
     }
 
-    /////////////////
     const loading = ref(config.loading);
     const data = ref(config.data);
     const begin = ref(config.begin);
@@ -100,7 +99,6 @@ export function useFetchHoc(props = {}) {
 
     async function send() {
       loading.value = true;
-      // console.log("loading --- true");
       controller = new AbortController();
       const url = config.baseUrl + config.url + parseParams(getParams());
       const headers = getHeaders();
@@ -121,7 +119,6 @@ export function useFetchHoc(props = {}) {
           controller.abort();
           loading.value = false;
           begin.value = false;
-          // console.log("loading 超时--- false");
         }, config.time);
       }
 
@@ -129,13 +126,12 @@ export function useFetchHoc(props = {}) {
         .catch((err) => {
           console.error("error");
           if (err.code === 20) {
-            // console.log("loading  bucl");
+            console.warn("fetch is about");
           } else {
             loading.value = false;
             begin.value = false;
             error.value = true;
             errorData.value = err;
-            // console.log("loading err--- false");
           }
 
           if (config.interceptResponseError) {
@@ -163,20 +159,17 @@ export function useFetchHoc(props = {}) {
             if (reset instanceof Promise) {
               return reset
                 .catch((mErr) => {
-                  // console.log(mErr);
                   error.value = true;
                   errorData.value = mErr;
                   return Promise.reject(mErr);
                 })
                 .then(async (mRes) => {
-                  // console.log(mRes);
                   data.value = config.formatterData(mRes, d, res);
                   return Promise.resolve(mRes);
                 })
                 .finally(async () => {
                   loading.value = false;
                   begin.value = false;
-                  // console.log("loading --Success--finally false");
                 });
             }
           }
@@ -184,7 +177,6 @@ export function useFetchHoc(props = {}) {
           loading.value = false;
           begin.value = false;
           data.value = d;
-          // console.log("loading --Success-- false", d);
           return data.value;
         });
     }

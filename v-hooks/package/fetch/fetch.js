@@ -1,4 +1,5 @@
 import { isRef, ref, reactive } from "vue";
+import { useProxy } from "../../other";
 
 export function useFetchHOC(props = {}) {
   const options = {
@@ -81,7 +82,7 @@ export function useFetchHOC(props = {}) {
     const begin = ref(config.begin);
     const error = ref(config.error);
     const errorData = ref(config.errorData);
-    const params = {
+    const params = useProxy({
       loading,
       data,
       begin,
@@ -94,8 +95,7 @@ export function useFetchHOC(props = {}) {
       nextBeginSend,
       awaitBeginSend,
       abort,
-    };
-    params.proxy = reactive(params);
+    });
 
     async function send() {
       loading.value = true;
@@ -186,8 +186,10 @@ export function useFetchHOC(props = {}) {
       return send();
     }
 
+    const errLoading = { message: "loading", code: 41 };
+
     function awaitSend() {
-      if (loading.value === true) return Promise.reject(" loading ");
+      if (loading.value === true) throw errLoading;
       return send();
     }
 
@@ -202,7 +204,7 @@ export function useFetchHOC(props = {}) {
     }
 
     function awaitBeginSend() {
-      if (loading.value === true) return Promise.reject(" loading ");
+      if (loading.value === true) throw errLoading;
       return beginSend();
     }
 

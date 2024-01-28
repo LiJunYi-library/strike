@@ -1,21 +1,8 @@
-import {
-  ElText,
-  ElMessageBox,
-  ElDialog,
-  ElFormItem,
-  formItemProps,
-  ElInput,
-} from "element-plus";
-import {
-  onMounted,
-  computed,
-  reactive,
-  defineComponent,
-  renderSlot,
-  render,
-} from "vue";
+import { ElForm, ElButton } from "element-plus";
+import { defineComponent, provide, reactive, inject, renderSlot } from "vue";
+export * from "./item";
 
-export function FormItemHoc(options = {}) {
+export function FormHoc(options = {}) {
   const config = {
     ...options,
     props: {},
@@ -25,66 +12,56 @@ export function FormItemHoc(options = {}) {
   };
   return defineComponent({
     props: {
-      ...formItemProps,
-      regExp: RegExp,
-      regExpTrigger: {
-        type: String,
-        default: "blur",
-      },
-      regExpMessage: {
-        type: [String, Function],
-        default(props) {
-          return props.label + "有误";
-        },
-      },
-      requiredTrigger: {
-        type: String,
-        default: "blur",
-      },
-      requiredMessage: {
-        type: [String, Function],
-        default(props) {
-          let trigger = "请选择";
-          if (props.requiredTrigger === "blur") trigger = "请输入";
-          return `${trigger}${props.label}`;
-        },
-      },
       ...config.props,
     },
     setup(props, context) {
+      const ELFContext = reactive({
+        ref: null,
+      });
+
+      provide("elementLibraryForm", ELFContext);
+
+      function getRef(el) {
+        Object.assign(ELFContext, el);
+      }
+
+      context.expose(ELFContext);
+
       return (vm) => {
-        const message = (m) => {
-          if (m instanceof Function) return m();
-          return m;
-        };
-
-        const regExpRule = {
-          trigger: props.regExpTrigger,
-          validator: (rule, value, callback) => {
-            if (props.regExp.test(value))
-              callback(new Error(message(props.regExpMessage)));
-          },
-        };
-
-        const requiredRule = {
-          required: props.required,
-          trigger: props.requiredTrigger,
-          message: message(props.requiredMessage),
-        };
-
-        const rules = [
-          props.regExp && regExpRule,
-          props.required && requiredRule,
-          ...(props.rules || []),
-        ].filter(Boolean);
         return (
-          <ElFormItem {...props} {...context.attrs} rules={rules}>
+          <ElForm {...props} {...context.attrs} ref={getRef}>
             {{ ...context.slots }}
-          </ElFormItem>
+          </ElForm>
         );
       };
     },
   });
 }
 
-export const FormItem = FormItemHoc();
+export const Form = FormHoc();
+
+export const FormSubmit = defineComponent({
+  props: {
+    comType:  { type: String, default: 'button' }, // button
+    isValidate: { type: Boolean, default: true },
+  },
+  setup(props, context) {
+    const ELFContext = inject("elementLibraryForm");
+
+    async function onClick() {
+      if (props.isValidate) await ELFContext.validate();
+      context.emit("submit");
+    }
+
+    return () => {
+      if (props.comType === "button") {
+        return (
+          <ElButton {...context.attrs} onClick={onClick}>
+            {renderSlot(context.slots, "default")}
+          </ElButton>
+        );
+      }
+      return <div onClick={onClick}>{renderSlot(context.slots, "default")}</div>;
+    };
+  },
+});

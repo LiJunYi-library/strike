@@ -6,16 +6,17 @@ export declare class Radio {
 }
 
 export declare function useRadio(options: any): any;
-export declare function useRadio2(options: any): any;
 export declare function useAsyncRadio(options: any): any;
-export declare function useAsyncRadio2(options: any): any;
 export declare function useMultiple(options: any): any;
-export declare function useMultiple2(options: any): any;
 export declare function useAsyncMultiple(options: any): any;
-export declare function useAsyncMultiple2(options: any): any;
 export declare function useSelect(options: any): any;
-export declare function useSelect2(options: any): any;
 export declare function useAsyncSelect(options: any): any;
+
+export declare function useRadio2(options: any): any;
+export declare function useAsyncRadio2(options: any): any;
+export declare function useMultiple2(options: any): any;
+export declare function useAsyncMultiple2(options: any): any;
+export declare function useSelect2(options: any): any;
 export declare function useAsyncSelect2(options: any): any;
 
 export declare function usePagination(options: any): any;
@@ -25,6 +26,8 @@ export declare function useAsyncPagination(options: any): any;
 export declare function useAsyncPaginationSelect(options: any): any;
 export declare function useAsyncListPagination(options: any): any;
 export declare function useFetchPagination(options: any): any;
+
+export declare function useFetchPagination2(options: any): any;
 
 export declare function useList(options: any): any;
 export declare function useLazyList(options: any): any;

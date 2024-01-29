@@ -1,7 +1,7 @@
 import { useRadio2, useAsyncRadio2 } from "./radio2";
 import { useMultiple2, useAsyncMultiple2 } from "./multiple2";
 
-export { getSelectProps, useSelect, useAsyncSelect };
+export { getSelectProps, useSelect2, useAsyncSelect2 };
 
 function getSelectProps(options = {}) {
   return {
@@ -23,12 +23,12 @@ function getSelectProps(options = {}) {
   };
 }
 
-function useSelect(props = {}) {
+function useSelect2(props = {}) {
   if (props.isMultiple) return useMultiple2(props);
   return useRadio2(props);
 }
 
-function useAsyncSelect(props = {}) {
+function useAsyncSelect2(props = {}) {
   if (props.isMultiple) return useAsyncMultiple2(props);
   return useAsyncRadio2(props);
 }

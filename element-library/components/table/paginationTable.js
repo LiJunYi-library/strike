@@ -189,15 +189,12 @@ export const PaginationTableHoc = (option = {}) => {
               data={listHook.list}
               onSelect={(list, ...arg) => {
                 context.emit("select", list, ...arg);
-                // console.log("select", list, ...arg);
               }}
               onSelect-all={(list, ...arg) => {
                 context.emit("select-all", list, ...arg);
-                // console.log("select-all", list, ...arg);
               }}
               onSelection-change={(list, ...arg) => {
                 context.emit("selection-change", list, ...arg);
-                // console.log("selection-change", list, ...arg);
                 listHook?.updateSelect?.(list);
               }}
               onSort-change={({ column, prop, order }) => {
@@ -241,34 +238,26 @@ export const PaginationTableHoc = (option = {}) => {
                 "current-page": listHook.currentPage,
                 "page-size": listHook.pageSize,
                 "onUpdate:current-page": (page, size) => {
-                  // console.log("onUpdate:current-page", page, size);
                   listHook.updatePage(page);
-                  //
                 },
                 "onUpdate:page-size": (size, page) => {
-                  // console.log("onUpdate:page-size", page, size);
                   listHook.updatePageSize(size);
-                  //
                 },
                 onSizeChange: (...v) => {
                   context.emit("size-change", ...v);
                   context.emit("page-change");
-                  // console.log("onSizeChange", ...v);
                 },
                 onCurrentChange: (...v) => {
                   context.emit("current-change", ...v);
                   context.emit("page-change");
-                  // console.log("onCurrentChange", ...v);
                 },
                 onPrevClick: (...v) => {
                   context.emit("prev-click", ...v);
                   context.emit("page-change");
-                  // console.log("onPrevClick", ...v);
                 },
                 onNextClick: (...v) => {
                   context.emit("next-click", ...v);
                   context.emit("page-change");
-                  // console.log("onNextClick", ...v);
                 },
               })}
           </div>

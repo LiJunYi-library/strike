@@ -8,6 +8,7 @@ export * from "./multiple2";
 export * from "./select";
 export * from "./select2";
 export * from "./listLoad";
+export * from "./pagination2";
 
 export * from "./list";
 export * from "./listSelect";

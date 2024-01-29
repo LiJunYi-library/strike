@@ -45,12 +45,14 @@ export const Dialog = defineComponent({
   },
 });
 
-export function useDialogCreate() {
+export function useDialogCreate(config = {}) {
   let instance;
   let ref;
+  const appContext = config.appContext;
   const div = document.createElement("div");
 
   function create(node) {
+    if (!node.appContext) node.appContext = appContext;
     if (instance) {
       ref.visible = true;
       render(node, div);
@@ -62,13 +64,15 @@ export function useDialogCreate() {
       Object.assign(create, el);
     };
     render(node, div);
+    console.log(node);
     if (!instance) instance = node;
   }
   return create;
 }
 
-export function useDialog(node) {
+export function useDialog(node, appContext) {
   const div = document.createElement("div");
+  node.appContext = appContext;
   node.props.rootNode = div;
   render(node, div);
   document.body.appendChild(div);

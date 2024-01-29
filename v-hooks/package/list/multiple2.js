@@ -45,6 +45,7 @@ function useMultiple2(props = {}) {
     if (isHave(index_)) map.indexItem = index_.map((el) => options.list?.[el]);
     if (isHave(value_)) map.valueItem = filterForValue(options.list, value_);
     if (isHave(label_)) map.labelItem = filterForLabel(options.list, label_);
+    if (options.isCheckAll) map.valueItem = options.list;
     let items;
     // eslint-disable-next-line prefer-const
     items = map[options.priority] || map.valueItem || map.indexItem || map.labelItem;

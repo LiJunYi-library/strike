@@ -14,5 +14,5 @@ export function useReactive(hooks = {}) {
   proxy.getProto = () => hooks;
   proxy.proto = hooks;
   hooks.proxy = proxy;
-  return hooks;
+  return proxy;
 }

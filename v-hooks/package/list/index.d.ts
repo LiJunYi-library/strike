@@ -24,6 +24,7 @@ export declare function useList(options: any): any;
 export declare function useLazyList(options: any): any;
 export declare function useListSelect(options: any): any;
 export declare function useListLoad(options: any): any;
+export declare function useListLoad2(options: any): any;
 export declare function useAsyncListLoad(options: any): any;
 
 // export * from "./radio";

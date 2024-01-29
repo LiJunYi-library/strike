@@ -2,12 +2,16 @@ import { ref, reactive, computed, watch } from "vue";
 import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
 
 export * from "./radio";
+export * from "./radio2";
 export * from "./multiple";
+export * from "./multiple2";
 export * from "./select";
+export * from "./select2";
+export * from "./listLoad";
+
 export * from "./list";
 export * from "./listSelect";
 export * from "./pagination";
-export * from "./listLoad";
 /**********
  *
  *

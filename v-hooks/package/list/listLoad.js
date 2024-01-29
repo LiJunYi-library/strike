@@ -77,7 +77,7 @@ function useListLoad(props = {}) {
     return asyncHooks.runBegin(...arg).then((res) => {
       listData.value = config.setList(res, proxy);
       list.value = listData.value;
-      currentPage.value = config.setCurrentPage(res, params.proxy);
+      currentPage.value = config.setCurrentPage(res, arguments_.proxy);
       total.value = config.setTotal(res, proxy);
       finished.value = config.setFinished(res, proxy);
       config.fetchBeginCB(proxy);
@@ -94,7 +94,7 @@ function useListLoad(props = {}) {
     return asyncHooks.run(...arg).then((res) => {
       listData.value = config.setList(res, proxy);
       list.value = list.value.concat(listData.value);
-      currentPage.value = config.setCurrentPage(res, params.proxy);
+      currentPage.value = config.setCurrentPage(res, arguments_.proxy);
       total.value = config.setTotal(res, proxy);
       finished.value = config.setFinished(res, proxy);
       config.fetchConcatCB(proxy);

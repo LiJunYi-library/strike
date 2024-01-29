@@ -173,11 +173,11 @@ function useRadio(props = {}) {
     context.index = undefined;
   }
 
-  //  --  //
-  function updateList(l) {
+  //  --  // 
+  function updateList(l, values = {}) {
     list.value = l;
     context.list = l;
-    const arg = { ...config, list: l };
+    const arg = { ...config, list: l, ...values };
     const parms = resolveProps(arg);
     context.select = parms.select;
     context.value = parms.value;

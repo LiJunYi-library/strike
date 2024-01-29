@@ -1,5 +1,5 @@
 import { isRef, ref } from "vue";
-import { useReactive } from "../../other";
+import { useProxy } from "../../other";
 
 export function useFetchHOC(props = {}) {
   const options = {
@@ -82,7 +82,7 @@ export function useFetchHOC(props = {}) {
     const begin = ref(config.begin);
     const error = ref(config.error);
     const errorData = ref(config.errorData);
-    const params = useReactive({
+    const params = useProxy({
       loading,
       data,
       begin,

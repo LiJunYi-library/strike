@@ -1,5 +1,5 @@
-import { isRef, ref } from "vue";
-import { useReactive } from "../../other";
+import { isRef, ref, reactive } from "vue";
+import { useProxy } from "../../other";
 
 export function useFetchHOC(props = {}) {
   const options = {
@@ -82,7 +82,7 @@ export function useFetchHOC(props = {}) {
     const begin = ref(config.begin);
     const error = ref(config.error);
     const errorData = ref(config.errorData);
-    const params = useReactive({
+    const params = useProxy({
       loading,
       data,
       begin,
@@ -122,62 +122,63 @@ export function useFetchHOC(props = {}) {
         }, config.time);
       }
 
-      try {
-        const res = await fetch(URL, fetchConfig);
-        const resContentType = res.headers.get("Content-Type");
-        let d;
-        switch (resContentType) {
-          default:
-            d = await config.formatterResponse(res, config);
-            break;
-          case "application/json":
-            d = await res.json();
-            break;
-        }
-        if (!res.ok) throw d;
-
-        if (config.interceptResponseSuccess) {
-          const reset = config.interceptResponseSuccess(res, d, config);
-          if (reset instanceof Promise) {
-            return reset
-              .catch((mErr) => {
-                error.value = true;
-                errorData.value = mErr;
-                return Promise.reject(mErr);
-              })
-              .then(async (mRes) => {
-                data.value = config.formatterData(mRes, d, res);
-                return Promise.resolve(data.value);
-              })
-              .finally(async () => {
-                loading.value = false;
-                begin.value = false;
-              });
+      return fetch(URL, fetchConfig)
+        .catch((err) => {
+          console.error("error");
+          if (err.code === 20) {
+            console.warn("fetch is about");
+          } else {
+            loading.value = false;
+            begin.value = false;
+            error.value = true;
+            errorData.value = err;
           }
-        }
 
-        loading.value = false;
-        begin.value = false;
-        data.value = d;
-        return data.value;
-      } catch (err) {
-        console.error("error");
-        if (err.code === 20) {
-          console.warn("fetch is about");
-        } else {
+          if (config.interceptResponseError) {
+            const errReset = config.interceptResponseError(err, config);
+            if (errReset) return errReset;
+          }
+          return Promise.reject(err);
+        })
+        .then(async (res) => {
+          const resContentType = res.headers.get("Content-Type");
+          let d;
+
+          switch (resContentType) {
+            default:
+              d = await config.formatterResponse(res, config);
+              break;
+
+            case "application/json":
+              d = await res.json();
+              break;
+          }
+
+          if (config.interceptResponseSuccess) {
+            const reset = config.interceptResponseSuccess(res, d, config);
+            if (reset instanceof Promise) {
+              return reset
+                .catch((mErr) => {
+                  error.value = true;
+                  errorData.value = mErr;
+                  return Promise.reject(mErr);
+                })
+                .then(async (mRes) => {
+                  data.value = config.formatterData(mRes, d, res);
+                  return Promise.resolve(data.value);
+                })
+                .finally(async () => {
+                  loading.value = false;
+                  begin.value = false;
+                });
+            }
+          }
+
           loading.value = false;
           begin.value = false;
-          error.value = true;
-          errorData.value = err;
-        }
-
-        if (config.interceptResponseError) {
-          const errReset = config.interceptResponseError(err, config);
-          if (errReset) return errReset;
-        }
-
-        throw err;
-      }
+          data.value = d;
+          return data.value;
+        });
     }
 
     function nextSend() {
@@ -186,7 +187,6 @@ export function useFetchHOC(props = {}) {
     }
 
     const errLoading = { message: "loading", code: 41 };
-    const errAbout = { message: "about", code: 20 };
 
     function awaitSend() {
       if (loading.value === true) throw errLoading;

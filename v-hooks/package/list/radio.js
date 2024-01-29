@@ -173,7 +173,7 @@ function useRadio(props = {}) {
     context.index = undefined;
   }
 
-  //  --  // 
+  //  --  //
   function updateList(l, values = {}) {
     list.value = l;
     context.list = l;
@@ -315,8 +315,4 @@ function useAsyncRadio(props = {}) {
   });
 
   return params;
-}
-
-function useRadioAsync(props = {}) {
-  //
 }

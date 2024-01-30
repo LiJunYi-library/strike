@@ -52,6 +52,7 @@ export declare type PromiseHooks = {
   run: ProFun;
 };
 export declare function usePromise(fun: any, config?: any): any;
+export declare function usePromise2(fun: any, config?: any): any;
 
 export declare function nextTask(pro: any): any;
 

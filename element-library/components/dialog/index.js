@@ -4,6 +4,10 @@ import "./index.scss";
 
 export const Dialog = defineComponent({
   props: {
+    top: {
+      type: String,
+      default: "0px",
+    },
     modelValue: {
       type: Boolean,
       default: true,
@@ -33,7 +37,7 @@ export const Dialog = defineComponent({
 
     return () => {
       return (
-        <ElDialog {...props} {...context.attrs} ref={ref} onClosed={onClosed}>
+        <ElDialog {...props} {...context.attrs} class="lib-dialog" ref={ref} onClosed={onClosed}>
           {{
             header: () => renderSlot(context.slots, "header", { dialog }),
             footer: () => renderSlot(context.slots, "footer", { dialog }),

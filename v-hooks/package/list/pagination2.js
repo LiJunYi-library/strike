@@ -1,5 +1,5 @@
 import { ref, reactive, computed, watch } from "vue";
-import { usePromise, nextTaskHoc } from "../promise";
+import { usePromise2, nextTaskHoc } from "../promise";
 import { useSelect2 } from "./select2";
 import { useReactive } from "../../other";
 
@@ -112,7 +112,7 @@ function useFetchPagination2(props = {}) {
   const order = ref(config.order);
 
   const selectHooks = config.selectHooks || useSelect2({ ...config });
-  const asyncHooks = config.asyncHooks || usePromise(config.fetchCb, { ...config });
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
   const paginationHooks = usePagination(config);
 
   const time0 = () => {

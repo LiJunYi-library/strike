@@ -1,5 +1,5 @@
 import { ref, reactive, watch } from "vue";
-import { usePromise } from "../promise";
+import { usePromise2 } from "../promise";
 import { getSelectProps } from "./select";
 import { useReactive } from "../../other";
 
@@ -272,7 +272,7 @@ function useRadio2(props = {}) {
 function useAsyncRadio2(props = {}) {
   const config = { fetchCb: () => undefined, ...props };
   const radioHooks = useRadio2(config);
-  const asyncHooks = config.asyncHooks || usePromise(config.fetchCb, { ...config });
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
 
   watch(
     () => asyncHooks.data,

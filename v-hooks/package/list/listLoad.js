@@ -1,5 +1,5 @@
 import { ref, reactive } from "vue";
-import { usePromise } from "../promise";
+import { usePromise, usePromise2 } from "../promise";
 import { useProxy, useReactive } from "../../other";
 
 export { useListLoad, getListLoadProps, useAsyncListLoad, useListLoad2 };
@@ -162,7 +162,7 @@ function useAsyncListLoad(props = {}) {
 
 function useListLoad2(props = {}) {
   const config = getListLoadProps(props);
-  const asyncHooks = config.asyncHooks || usePromise(config.fetchCb, { ...config });
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
 
   const list = ref(config.list);
   const currentPage = ref(config.currentPage);

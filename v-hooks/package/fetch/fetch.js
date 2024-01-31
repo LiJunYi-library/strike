@@ -1,20 +1,69 @@
 import { isRef, ref } from "vue";
 import { useReactive } from "../../other";
 
+function getBody(config) {
+  if (!config.body) return undefined;
+  if (config.body instanceof Function) return config.body();
+  if (isRef(config.body)) return config.body.value;
+  return config.body;
+}
+
+function revBody(contentType, config) {
+  const _body = getBody(config);
+  if (!_body) return undefined;
+  if (typeof _body !== "object") return _body;
+  const formDataType = ["multipart/form-data", "form-data"];
+  if (!formDataType.includes(contentType)) return JSON.stringify(_body);
+  const formData = new FormData();
+  for (const key in _body) {
+    if (Object.prototype.hasOwnProperty.call(_body, key)) {
+      formData.append(key, _body[key]);
+    }
+  }
+  return formData;
+}
+
+function getHeaders(config) {
+  const headers_ = {};
+  if (config.headers) return config.headers;
+  if (config.contentType) headers_["Content-Type"] = config.contentType;
+  return headers_;
+}
+
+function getParams(config) {
+  if (!config.urlParams) return undefined;
+  if (config.urlParams instanceof Function) return config.urlParams();
+  if (isRef(config.urlParams)) return config.urlParams.value;
+  return config.urlParams;
+}
+
 export function useFetchHOC(props = {}) {
   const options = {
-    formatterFileName: (res, config) => {
-      const fName = decodeURIComponent(
-        res.headers.get("Content-Disposition").split("filename=").pop()
-      );
-      const fileName = fName || config.fileName;
+    formatterFile: async (res, config) => {
+      const file = await res.blob();
+      return file;
+    },
+    formatterFileName: async (res, config) => {
+      const disposition = res.headers.get("Content-Disposition")?.split("filename=")?.pop();
+      const fName = decodeURIComponent(disposition);
+      const fileName = config.fileName || fName;
       return fileName;
     },
     formatterResponse: async (res, config) => {
-      const fileName = config.formatterFileName(res, config);
-      const d = await res.blob();
-      if (config.isDownloadFile) downloadFile(d, fileName);
-      console.warn("未处理 响应 Content-Type 默认文件", config.isDownloadFile);
+      let d;
+      if (config.isDownloadFile) {
+        d = await config.formatterFile(res, config);
+        return d;
+      }
+      const resContentType = res.headers.get("Content-Type");
+      switch (resContentType) {
+        default:
+          d = await res.text();
+          break;
+        case "application/json":
+          d = await res.json();
+          break;
+      }
       return d;
     },
     formatterData: (d) => d,
@@ -28,60 +77,24 @@ export function useFetchHOC(props = {}) {
     isDownloadFile: false,
     fileName: "",
     loading: false,
-    begin: false,
+    begin: true,
     error: false,
     data: undefined,
     errorData: undefined,
     ...props,
   };
 
-  function useFetch(props = {}) {
-    const config = { ...options, ...props };
+  function useFetch(props2 = {}) {
+    const configs = { ...options, ...props2 };
 
     let controller = new AbortController();
     let timer;
 
-    function getBody() {
-      if (!config.body) return undefined;
-      if (config.body instanceof Function) return config.body();
-      if (isRef(config.body)) return config.body.value;
-      return config.body;
-    }
-
-    function revBody(contentType) {
-      const _body = getBody();
-      if (!_body) return undefined;
-      if (typeof _body !== "object") return _body;
-      const formDataType = ["multipart/form-data", "form-data"];
-      if (!formDataType.includes(contentType)) return JSON.stringify(_body);
-      const formData = new FormData();
-      for (const key in _body) {
-        if (Object.prototype.hasOwnProperty.call(_body, key)) {
-          formData.append(key, _body[key]);
-        }
-      }
-      return formData;
-    }
-
-    function getHeaders() {
-      const headers_ = {};
-      if (config.headers) return config.headers;
-      if (config.contentType) headers_["Content-Type"] = config.contentType;
-      return headers_;
-    }
-
-    function getParams() {
-      if (!config.urlParams) return undefined;
-      if (config.urlParams instanceof Function) return config.urlParams();
-      if (isRef(config.urlParams)) return config.urlParams.value;
-      return config.urlParams;
-    }
-
-    const loading = ref(config.loading);
-    const data = ref(config.data);
-    const begin = ref(config.begin);
-    const error = ref(config.error);
-    const errorData = ref(config.errorData);
+    const loading = ref(configs.loading);
+    const data = ref(configs.data);
+    const begin = ref(configs.begin);
+    const error = ref(configs.error);
+    const errorData = ref(configs.errorData);
     const params = useReactive({
       loading,
       data,
@@ -97,12 +110,14 @@ export function useFetchHOC(props = {}) {
       abort,
     });
 
-    async function send() {
+    async function send(props3) {
+      const config = { ...configs, ...props3 };
+
       loading.value = true;
       controller = new AbortController();
-      const url = config.baseUrl + config.url + parseParams(getParams());
-      const headers = getHeaders();
-      const body = revBody(headers["Content-Type"]);
+      const url = config.baseUrl + config.url + parseParams(getParams(config));
+      const headers = getHeaders(config);
+      const body = revBody(headers["Content-Type"], config);
       const fetchConfig = {
         url,
         headers,
@@ -124,17 +139,13 @@ export function useFetchHOC(props = {}) {
 
       try {
         const res = await fetch(URL, fetchConfig);
-        const resContentType = res.headers.get("Content-Type");
-        let d;
-        switch (resContentType) {
-          default:
-            d = await config.formatterResponse(res, config);
-            break;
-          case "application/json":
-            d = await res.json();
-            break;
-        }
+        const d = await config.formatterResponse(res, config);
         if (!res.ok) throw d;
+
+        if (config.isDownloadFile) {
+          const fileName = await config.formatterFileName(res, config);
+          downloadFile(d, fileName);
+        }
 
         if (config.interceptResponseSuccess) {
           const reset = config.interceptResponseSuccess(res, d, config);
@@ -180,32 +191,32 @@ export function useFetchHOC(props = {}) {
       }
     }
 
-    function nextSend() {
+    function nextSend(...arg) {
       controller.abort();
-      return send();
+      return send(...arg);
     }
 
     const errLoading = { message: "loading", code: 41 };
     const errAbout = { message: "about", code: 20 };
 
-    function awaitSend() {
+    function awaitSend(...arg) {
       if (loading.value === true) throw errLoading;
-      return send();
+      return send(...arg);
     }
 
-    function beginSend() {
+    function beginSend(...arg) {
       begin.value = true;
-      return send();
+      return send(...arg);
     }
 
-    function nextBeginSend() {
+    function nextBeginSend(...arg) {
       begin.value = true;
-      return nextSend();
+      return nextSend(...arg);
     }
 
-    function awaitBeginSend() {
+    function awaitBeginSend(...arg) {
       if (loading.value === true) throw errLoading;
-      return beginSend();
+      return beginSend(...arg);
     }
 
     function abort() {

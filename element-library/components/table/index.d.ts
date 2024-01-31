@@ -9,6 +9,7 @@ export declare const Table: DefineComponent<TableProps>;
 export declare const PaginationTable: DefineComponent<TableProps>;
 
 export declare const TableColumn: DefineComponent<any>;
+export declare const TableColumnSelectHook: DefineComponent<any>;
 export declare const TableColumnOptions: DefineComponent<any>;
 export declare const TableColumnButton: DefineComponent<any>;
 export declare const TableColumnText: DefineComponent<any>;

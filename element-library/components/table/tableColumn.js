@@ -70,6 +70,15 @@ export function TableColumnHoc(options = {}) {
 }
 /** */
 export const TableColumn = TableColumnHoc();
+/**  */
+export const TableColumnSelectHook = TableColumnHoc({
+  props: {
+    listHook: Object,
+  },
+  renderDefault({ props, context, vm, cellValue }, arg) {
+    return props.listHook.getLabelOfValue(cellValue);
+  },
+});
 /** */
 export const TableColumnOptions = TableColumnHoc({});
 TableColumnOptions.props.label = {

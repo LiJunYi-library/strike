@@ -86,7 +86,7 @@ function usePagination(props = {}) {
     list.value = paging(params);
   }
 
-  function updateList(l) {
+  function updateList(l = []) {
     listSource.value = l;
     if (currentPage.value > maxPage.value) currentPage.value = maxPage.value;
     list.value = paging(params);
@@ -140,7 +140,15 @@ function useFetchPagination2(props = {}) {
     updatePageSize,
     updateProp,
     updateOrder,
+    updateList,
   });
+
+  function updateList(l = []) {
+    paginationHooks.updateList(l);
+    total.value = paginationHooks.total;
+    list.value = paginationHooks.list;
+    selectHooks.updateListAndReset(list.value);
+  }
 
   function handleServerPagingRest() {
     if (!config.isServerPaging) {

@@ -42,7 +42,7 @@ const SelectHoc = (options = {}) => {
                 renderList(listHook.list, (item, index) => {
                   return (
                     <ElSelect.Option
-                      key={index}
+                      key={listHook.formatterValue(item)}
                       disabled={listHook.formatterDisabled(item)}
                       label={listHook.formatterLabel(item)}
                       value={listHook.formatterValue(item)}

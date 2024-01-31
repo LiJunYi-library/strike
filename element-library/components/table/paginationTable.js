@@ -170,7 +170,7 @@ export const PaginationTableHoc = (option = {}) => {
 
       return (VM, _cache) => {
         return (
-          <div class={["lib-table", config.class]}>
+          <div class={["lib-table", config.class, context.attrs.class]}>
             {listHook.loading && !listHook.begin && (
               <div class={["lib-loading"]}>
                 {context?.slots?.loading?.() || config.renderLoading(props, context, VM)}

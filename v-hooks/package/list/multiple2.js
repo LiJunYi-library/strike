@@ -280,7 +280,13 @@ function useMultiple2(props = {}) {
 }
 
 function useAsyncMultiple2(props = {}) {
-  const config = { fetchCb: () => undefined, ...props };
+  const config = {
+    watchDataCb(multipleHook, asyncHooks, data) {
+      multipleHook.updateListToResolveValue(data);
+    },
+    fetchCb: () => undefined,
+    ...props,
+  };
 
   const multipleHook = useMultiple2(config);
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
@@ -288,7 +294,7 @@ function useAsyncMultiple2(props = {}) {
   watch(
     () => asyncHooks.data,
     (data) => {
-      multipleHook.updateListToResolveValue(data);
+      config.watchDataCb(multipleHook, asyncHooks, data);
     }
   );
 

@@ -4,4 +4,14 @@ export function useResizeObserver(
   cb: ResizeObserverCallback
 ): ResizeObserver;
 
-export declare function useLocalStorageRef<T>(key: string, defaultValue?: T): Ref<T>;
+type useLocalStorageRefConfig = {
+  isListener?: Boolean;
+  onListener: (event: StorageEvent) => void;
+};
+export declare function useLocalStorageRef<T>(
+  key: string,
+  defaultValue?: T,
+  config?: useLocalStorageRefConfig
+): Ref<T>;
+
+export declare function useCookie<T>(key: string, defaultValue?: T): Ref<T>;

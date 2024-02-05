@@ -16,7 +16,7 @@ import { useLocalStorageRef } from "./localStorage";
 function parseCookie(cookieString) {
   const cookies = {};
   const cookiePairs = cookieString.split(";");
-  for (let pair of cookiePairs) {
+  for (const pair of cookiePairs) {
     const [name, value] = pair.trim().split("=");
     cookies[name] = decodeURIComponent(value);
   }

@@ -5,7 +5,7 @@ export function useResizeObserver(
 ): ResizeObserver;
 
 type useLocalStorageRefConfig = {
-  isListener?: Boolean;
+  isListener?: boolean;
   onListener: (event: StorageEvent) => void;
 };
 export declare function useLocalStorageRef<T>(
@@ -15,3 +15,9 @@ export declare function useLocalStorageRef<T>(
 ): Ref<T>;
 
 export declare function useCookie<T>(key: string, defaultValue?: T): Ref<T>;
+
+export declare function useBroadcast(
+  channelKey: string,
+  key: string,
+  expose: any
+): BroadcastChannel;

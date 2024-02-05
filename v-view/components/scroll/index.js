@@ -110,6 +110,7 @@ export const RScroll = defineComponent({
       contentElement: null,
       otherElement: [],
       children: [],
+      stickys: [],
       isHandActuated: false,
     });
     provide("RScrollContext", RScrollContext);

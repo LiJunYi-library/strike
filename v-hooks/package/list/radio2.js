@@ -270,21 +270,27 @@ function useRadio2(props = {}) {
 }
 
 function useAsyncRadio2(props = {}) {
-  const config = { fetchCb: () => undefined, ...props };
+  const config = {
+    watchDataCb: ({ data, updateList }) => {
+      updateList(data);
+    },
+    fetchCb: () => undefined,
+    ...props,
+  };
   const radioHooks = useRadio2(config);
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
-
-  watch(
-    () => asyncHooks.data,
-    (data) => {
-      radioHooks.updateListToResolveValue(data);
-    }
-  );
 
   const params = useReactive({
     ...radioHooks.getProto(),
     ...asyncHooks.getProto(),
   });
+
+  watch(
+    () => asyncHooks.data,
+    (data) => {
+      config.watchDataCb(params, data);
+    }
+  );
 
   return params;
 }

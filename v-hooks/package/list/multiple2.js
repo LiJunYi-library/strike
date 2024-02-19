@@ -60,7 +60,7 @@ function useMultiple2(props = {}) {
     return arg;
   }
 
-  const initParms = resolveProps(config, true);
+  const initParms = resolveProps(config);
   const list = ref(initParms.list);
   const select = ref(initParms.select);
   const value = ref(initParms.value);
@@ -203,8 +203,14 @@ function useMultiple2(props = {}) {
     context.index = [];
   }
 
-  function updateList(li) {
+  function updateList(li, values = {}) {
     list.value = revArray(li);
+    const arg = { ...config, list: li, ...values };
+    const parms = resolveProps(arg);
+    context.select = parms.select;
+    context.value = parms.value;
+    context.label = parms.label;
+    context.index = parms.index;
   }
 
   function updateSelect(val) {
@@ -281,8 +287,8 @@ function useMultiple2(props = {}) {
 
 function useAsyncMultiple2(props = {}) {
   const config = {
-    watchDataCb(multipleHook, asyncHooks, data) {
-      multipleHook.updateListToResolveValue(data);
+    watchDataCb({ data, updateList }) {
+      updateList(data);
     },
     fetchCb: () => undefined,
     ...props,
@@ -291,17 +297,17 @@ function useAsyncMultiple2(props = {}) {
   const multipleHook = useMultiple2(config);
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
 
-  watch(
-    () => asyncHooks.data,
-    (data) => {
-      config.watchDataCb(multipleHook, asyncHooks, data);
-    }
-  );
-
   const params = useReactive({
     ...multipleHook.getProto(),
     ...asyncHooks.getProto(),
   });
+
+  watch(
+    () => asyncHooks.data,
+    (data) => {
+      config.watchDataCb(params, data);
+    }
+  );
 
   return params;
 }

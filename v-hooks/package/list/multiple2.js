@@ -1,4 +1,4 @@
-import { ref, reactive, watch } from "vue";
+import { ref, reactive, watch, computed } from "vue";
 import { usePromise2 } from "../promise";
 import { getSelectProps } from "./select";
 import { useReactive } from "../../other";
@@ -75,6 +75,10 @@ function useMultiple2(props = {}) {
     index: [],
   });
 
+  var isAllSelect = computed(() => {
+    return context.select.length === list.value.length;
+  });
+
   const params = useReactive({
     list,
     select,
@@ -83,6 +87,7 @@ function useMultiple2(props = {}) {
     index,
     store,
     isMultiple,
+    isAllSelect,
     formatterValue,
     formatterLabel,
     formatterDisabled,
@@ -119,7 +124,7 @@ function useMultiple2(props = {}) {
     getContext,
   });
 
-  let context = params;
+  var context = params;
 
   function getContext() {
     return context;

@@ -1,6 +1,5 @@
 import { ref, reactive, computed, watch } from "vue";
 import { usePromise, nextTaskHoc } from "../promise";
-import { useMultiple } from "./multiple";
 import { useSelect } from "./select";
 import { useList } from "./list";
 

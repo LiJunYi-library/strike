@@ -75,7 +75,7 @@ function useMultiple2(props = {}) {
     index: [],
   });
 
-  var isAllSelect = computed(() => {
+  const isAllSelect = computed(() => {
     return context.select.length === list.value.length;
   });
 
@@ -210,7 +210,7 @@ function useMultiple2(props = {}) {
 
   function updateList(li, values = {}) {
     list.value = revArray(li);
-    const arg = { ...config, list: li, ...values };
+    const arg = { ...config, list: list.value, ...values };
     const parms = resolveProps(arg);
     context.select = parms.select;
     context.value = parms.value;
@@ -278,7 +278,7 @@ function useMultiple2(props = {}) {
   }
 
   function updateListToResolveValue(li) {
-    updateList(li);
+    list.value = revArray(li);
     resolveValue();
   }
 

@@ -1,13 +1,12 @@
 import { ref, reactive, computed, watch } from "vue";
-import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promise";
-import { useSelect } from "./select";
-import { useProxy } from "../../other";
+import { usePromise2 } from "../promise";
+import { useReactive } from "../../other";
+import { useSelect2 } from "./select2";
 
-export { getListProps, useList };
+export { getListProps, useList, useAsyncList, useListSelect, useAsyncListSelect };
 
 function getListProps(options = {}) {
   const config = {
-    afterSetList: () => undefined,
     ...options,
     list: options.list || [],
     listStorage: options.list || [],
@@ -23,26 +22,29 @@ function useList(props = {}) {
   const sortFun = ref();
   const filterFun = ref();
 
-  const params = useProxy({
+  const params = useReactive({
     filterFun,
     sortFun,
     //
     listStorage,
     list,
-    afterSetList: config.afterSetList,
+    //
     updateList,
+    //
+    clearSort,
+    clearFilter,
     reset,
     //
     push,
     unshift,
+    splice,
     //
     remove,
     pop,
     shift,
     //
     filter,
-    // filterIncludes,
-    // filterRegExp,
+    //
     sort,
     ascendingOrder,
     descendingOrder,
@@ -57,26 +59,26 @@ function useList(props = {}) {
 
   function updateList(l) {
     listStorage.value = l;
-    list.value = listStorage.value;
+    list.value = getList();
   }
 
   function reset() {
     list.value = [...listStorage.value];
-    clearSort();
-    clearFilter();
+    sortFun.value = null;
+    filterFun.value = null;
   }
 
   function clearSort() {
     sortFun.value = null;
+    list.value = getList();
   }
 
   function clearFilter() {
     filterFun.value = null;
+    list.value = getList();
   }
 
-  /////////////////////////////////////
-  /**增加**/
-  /////////////////////////////////////
+  /**增加**/ /////////////////////////////////////
   function push(...args) {
     listStorage.value.push(...args);
     list.value = getList();
@@ -87,9 +89,13 @@ function useList(props = {}) {
     list.value = getList();
   }
 
+  function splice(...args) {
+    listStorage.value.splice(...args);
+    list.value = getList();
+  }
   /////////////////////////////////////
-  /**删除**/
-  /////////////////////////////////////
+
+  /**删除**/ /////////////////////////////////////
   function pop() {
     const item = list.value.at(-1);
     remove(item);
@@ -104,67 +110,111 @@ function useList(props = {}) {
     listStorage.value = listStorage.value.filter((el) => !args.includes(el));
     list.value = list.value.filter((el) => !args.includes(el));
   }
-
-  /////////////////////////////////////
-  /**修改**/
   /////////////////////////////////////
 
+  /**修改**/ /////////////////////////////////////
   /////////////////////////////////////
-  /**查找**/
-  /////////////////////////////////////
+
+  /**查找**/ /////////////////////////////////////
   function filter(fun) {
     filterFun.value = fun;
     list.value = listStorage.value.filter(fun);
     if (sortFun.value) list.value.sort(sortFun.value);
-    params.afterSetList(params, 0);
   }
+  /////////////////////////////////////
 
-  /////////////////////////////////////
-  /**排序**/
-  /////////////////////////////////////
+  /**排序**/ /////////////////////////////////////
   function sort(fun) {
     sortFun.value = fun;
-    // list.value = listStorage.value.sort(fun);
     list.value.sort(fun);
-    console.log(listStorage.value);
-    params.afterSetList(params);
   }
 
   function ascendingOrder(formatter) {
     sortFun.value = (a, b) => formatter(a) - formatter(b);
-    // list.value = listStorage.value.sort((a, b) => formatter(a) - formatter(b));
     list.value.sort(sortFun.value);
-    console.log(listStorage.value);
-    params.afterSetList(params);
   }
 
   function descendingOrder(formatter) {
     sortFun.value = (a, b) => formatter(b) - formatter(a);
-    // list.value = listStorage.value.sort((a, b) => formatter(b) - formatter(a));
     list.value.sort(sortFun.value);
-    console.log(listStorage.value);
-    params.afterSetList(params);
   }
 
   return params;
 }
 
-// function filterIncludes(formatter, key, isOr) {
-//   filterFun = (el, index) => {
-//     const keyWord = formatter(el) || "";
-//     const keyWords = keyWord.split(" ").filter(Boolean);
-//     if (isOr) return keyWords.some((str) => str.includes(key));
-//     return keyWords.every((str) => str.includes(key));
-//   };
-//   list.value = listStorage.value.filter(filterFun);
-//   params.afterSetList(params, 0);
-// }
+function useAsyncList(props = {}) {
+  const config = {
+    watchDataCb: ({ data, updateList }) => {
+      updateList(data);
+    },
+    fetchCb: () => undefined,
+    ...props,
+  };
+  const listHooks = useList(config);
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
 
-// function filterRegExp(formatter, regExp) {
-//   filterFun = (el, index) => {
-//     const keyWord = formatter(el) || "";
-//     return regExp.test(keyWord);
-//   };
-//   list.value = listStorage.value.filter(filterFun);
-//   params.afterSetList(params, 0);
-// }
+  const params = useReactive({
+    ...listHooks.getProto(),
+    ...asyncHooks.getProto(),
+  });
+
+  watch(
+    () => asyncHooks.data,
+    (data) => {
+      config.watchDataCb(params, data);
+    }
+  );
+
+  return params;
+}
+
+function useListSelect(props = {}) {
+  const config = {
+    useListWatchList: (data, selectHooks, listHooks) => {
+      selectHooks.updateListToResolveValue(data);
+    },
+    ...props,
+  };
+  const listHooks = useList(props);
+  const selectHooks = useSelect2({ ...props, list: listHooks.list });
+
+  const params = useReactive({
+    ...selectHooks.getProto(),
+    ...listHooks.getProto(),
+  });
+
+  watch(
+    () => listHooks.list,
+    (data) => {
+      config.useListWatchList(data, selectHooks, listHooks);
+    }
+  );
+
+  return params;
+}
+
+function useAsyncListSelect(props = {}) {
+  const config = {
+    watchDataCb: ({ data, updateList }) => {
+      updateList(data);
+    },
+    fetchCb: () => undefined,
+    ...props,
+  };
+  const listHooks = useListSelect(props);
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
+
+  const params = useReactive({
+    ...listHooks.getProto(),
+    ...asyncHooks.getProto(),
+  });
+
+  watch(
+    () => asyncHooks.data,
+    (data) => {
+      config.watchDataCb(params, data);
+    }
+  );
+
+  return params;
+}

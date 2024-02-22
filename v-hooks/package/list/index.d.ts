@@ -5,50 +5,44 @@ export declare class Radio {
   constructor(params: any);
 }
 
-export declare function useRadio(options: any): any;
-export declare function useAsyncRadio(options: any): any;
-export declare function useMultiple(options: any): any;
-export declare function useAsyncMultiple(options: any): any;
-export declare function useSelect(options: any): any;
-export declare function useAsyncSelect(options: any): any;
+export declare function useRadio(options: any): any; // todo
+export declare function useAsyncRadio(options: any): any; // todo
+export declare function useMultiple(options: any): any; // todo
+export declare function useAsyncMultiple(options: any): any; // todo
+export declare function useSelect(options: any): any; // todo
+export declare function useAsyncSelect(options: any): any; // todo
 
-export declare function useRadio2(options: any): any;
-export declare function useAsyncRadio2(options: any): any;
-export declare function useMultiple2(options: any): any;
-export declare function useAsyncMultiple2(options: any): any;
-export declare function useSelect2(options: any): any;
-export declare function useAsyncSelect2(options: any): any;
+export declare function useRadio2(options: any): any; // use
+export declare function useAsyncRadio2(options: any): any; // use
+export declare function useMultiple2(options: any): any; // use
+export declare function useAsyncMultiple2(options: any): any; // use
+export declare function useSelect2(options: any): any; // use
+export declare function useAsyncSelect2(options: any): any; // use
 
-export declare function usePagination(options: any): any;
-export declare function usePaginationSelect(options: any): any;
-export declare function useListPagination(options: any): any;
-export declare function useAsyncPagination(options: any): any;
-export declare function useAsyncPaginationSelect(options: any): any;
-export declare function useAsyncListPagination(options: any): any;
-export declare function useFetchPagination(options: any): any;
+export declare function usePagination(options: any): any; // todo
+export declare function usePaginationSelect(options: any): any; // todo
+export declare function useListPagination(options: any): any; // todo
+export declare function useAsyncPagination(options: any): any; // todo
+export declare function useAsyncPaginationSelect(options: any): any; // todo
+export declare function useAsyncListPagination(options: any): any;  // todo
+export declare function useFetchPagination(options: any): any;  // todo
 
-export declare function useFetchPagination2(options: any): any;
+export declare function useFetchPagination2(options: any): any; // use
 
-export declare function useList(options: any): any;
-export declare function useLazyList(options: any): any;
-export declare function useListSelect(options: any): any;
-export declare function useListLoad(options: any): any;
-export declare function useListLoad2(options: any): any;
-export declare function useAsyncListLoad(options: any): any;
-
-// export * from "./radio";
-/*********
- *
- *
- *
- *
- *
- *
- *
- * ******** */
+export declare function useList(options: any): any; // use
+export declare function useAsyncList(options: any): any; // use
+export declare function useListSelect(options: any): any; // use
+export declare function useAsyncListSelect(options: any): any; // use
+export declare function useListLoad2(options: any): any; // use
+export declare function useListLoadSelect(options: any): any; // use
+export declare function useListLoad(options: any): any; // todo
+export declare function useAsyncListLoad(options: any): any; // todo
 
 /**
  *
+ * 
+ * 
+ * 
  */
 export declare type FetchListHooks = PromiseHooks & {
   list: any[];

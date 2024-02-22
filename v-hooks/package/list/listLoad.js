@@ -189,26 +189,26 @@ function useListLoad2(props = {}) {
     currentPage.value = 1;
     finished.value = false;
     total.value = 0;
-    config.beforeBegin(params.proxy);
+    config.beforeBegin(params);
     return asyncHooks.nextBeginSend(...arg).then((res) => {
-      listData.value = config.setList(res, params.proxy);
+      listData.value = config.setList(res, params);
       list.value = listData.value;
-      currentPage.value = config.setCurrentPage(res, params.proxy);
-      total.value = config.setTotal(res, params.proxy);
-      finished.value = config.setFinished(res, params.proxy);
-      config.fetchBeginCB(params.proxy);
+      currentPage.value = config.setCurrentPage(res, params);
+      total.value = config.setTotal(res, params);
+      finished.value = config.setFinished(res, params);
+      config.fetchBeginCB(params);
       return res;
     });
   }
 
   function awaitConcatSend(...arg) {
     return asyncHooks.awaitSend(...arg).then((res) => {
-      listData.value = config.setList(res, params.proxy);
+      listData.value = config.setList(res, params);
       list.value = list.value.concat(listData.value);
-      currentPage.value = config.setCurrentPage(res, params.proxy);
-      total.value = config.setTotal(res, params.proxy);
-      finished.value = config.setFinished(res, params.proxy);
-      config.fetchConcatCB(params.proxy);
+      currentPage.value = config.setCurrentPage(res, params);
+      total.value = config.setTotal(res, params);
+      finished.value = config.setFinished(res, params);
+      config.fetchConcatCB(params);
       return res;
     });
   }

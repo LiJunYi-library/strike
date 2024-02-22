@@ -189,6 +189,8 @@ function usePromise2(fun, options = {}) {
   const errorData = ref(config.errorData);
   const loading = ref(config.loading);
   const error = ref(config.error);
+  const errLoading = { message: "loading", code: 41 };
+  const errAbout = { message: "about", code: 20 };
 
   function create(params, task = [], promiseConfig = {}) {
     if (params instanceof Function) {
@@ -296,12 +298,12 @@ function usePromise2(fun, options = {}) {
   }
 
   function awaitSend(...args) {
-    if (loading.value === true) return;
+    if (loading.value === true) throw errLoading;
     return send(...args);
   }
 
   function awaitBeginSend(...args) {
-    if (loading.value === true) return;
+    if (loading.value === true) throw errLoading;
     return beginSend(...args);
   }
 

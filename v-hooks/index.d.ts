@@ -6,6 +6,7 @@ export * from "./package/domain-login"
 export * from "./package/event"
 export * from "./package/browser"
 export * from "./package/timer"
+export * from "./package/number"
 
 export declare function useDebounced(cb: any, delay = 500): (...arg: any) => void;
 

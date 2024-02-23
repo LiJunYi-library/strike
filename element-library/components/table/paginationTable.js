@@ -73,7 +73,7 @@ export const PaginationTableHoc = (option = {}) => {
             if (context.attrs.errorClick) {
               context.attrs.errorClick();
             } else {
-              props?.listHook?.fetch();
+              props?.listHook?.awaitSend?.();
             }
           }}
         ></ElResult>
@@ -199,11 +199,6 @@ export const PaginationTableHoc = (option = {}) => {
       return (VM, _cache) => {
         return (
           <div class={["lib-table", config.class, context.attrs.class]}>
-            {/* {listHook.loading && !listHook.begin && (
-              <div class={["lib-loading"]}>
-                {context?.slots?.loading?.() || config.renderLoading(props, context, VM)}
-              </div>
-            )} */}
             <ElTable
               {...config.tableAttrs}
               {...props}
@@ -231,8 +226,8 @@ export const PaginationTableHoc = (option = {}) => {
                   isElTableSort = false;
                   return;
                 }
-                listHook?.updateProp(prop);
-                listHook?.updateOrder(mOrder);
+                listHook?.updateProp?.(prop);
+                listHook?.updateOrder?.(mOrder);
                 context.emit("sort-change", { column, prop, order: mOrder });
               }}
             >
@@ -256,10 +251,10 @@ export const PaginationTableHoc = (option = {}) => {
                 "current-page": listHook.currentPage,
                 "page-size": listHook.pageSize,
                 "onUpdate:current-page": (page, size) => {
-                  listHook.updatePage(page);
+                  listHook?.updatePage?.(page);
                 },
                 "onUpdate:page-size": (size, page) => {
-                  listHook.updatePageSize(size);
+                  listHook?.updatePageSize?.(size);
                 },
                 onSizeChange: (...v) => {
                   context.emit("size-change", ...v);

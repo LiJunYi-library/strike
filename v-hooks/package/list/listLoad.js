@@ -1,5 +1,5 @@
 import { ref, reactive, watch } from "vue";
-import { usePromise, usePromise2 } from "../promise";
+import { usePromise, usePromise2, useLoading } from "../promise";
 import { useProxy, useReactive } from "../../other";
 import { useSelect2 } from "./select2";
 
@@ -171,9 +171,17 @@ function useListLoad2(props = {}) {
   const total = ref(0);
   const finished = ref(false);
   const listData = ref([]);
+  let loadingHooks = {};
+  if (config.loadingHooks) {
+    loadingHooks = useLoading({
+      loadingHook: config.loadingHooks,
+      promiseHook: asyncHooks,
+    });
+  }
 
   const params = useReactive({
     ...asyncHooks.getProto(),
+    ...loadingHooks?.getProto?.(),
     list,
     listData,
     currentPage,
@@ -182,7 +190,16 @@ function useListLoad2(props = {}) {
     total,
     nextBeginSend,
     awaitConcatSend,
+    reset,
   });
+
+  function reset() {
+    list.value = [];
+    listData.value = [];
+    currentPage.value = 1;
+    finished.value = false;
+    total.value = 0;
+  }
 
   function nextBeginSend(...arg) {
     list.value = [];

@@ -1,5 +1,5 @@
 import { ref, reactive, watch, computed } from "vue";
-import { usePromise2 } from "../promise";
+import { usePromise2,useLoading } from "../promise";
 import { getSelectProps } from "./select";
 import { useReactive } from "../../other";
 
@@ -301,10 +301,18 @@ function useAsyncMultiple2(props = {}) {
 
   const multipleHook = useMultiple2(config);
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
+  let loadingHooks = {};
+  if (config.loadingHooks) {
+    loadingHooks = useLoading({
+      loadingHook: config.loadingHooks,
+      promiseHook: asyncHooks,
+    });
+  }
 
   const params = useReactive({
     ...multipleHook.getProto(),
     ...asyncHooks.getProto(),
+    ...loadingHooks?.getProto?.(),
   });
 
   watch(

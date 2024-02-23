@@ -1,5 +1,5 @@
 import { ref, reactive, computed, watch } from "vue";
-import { usePromise2 } from "../promise";
+import { usePromise2, useLoading } from "../promise";
 import { useReactive } from "../../other";
 import { useSelect2 } from "./select2";
 
@@ -152,10 +152,18 @@ function useAsyncList(props = {}) {
   };
   const listHooks = useList(config);
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
+  let loadingHooks = {};
+  if (config.loadingHooks) {
+    loadingHooks = useLoading({
+      loadingHook: config.loadingHooks,
+      promiseHook: asyncHooks,
+    });
+  }
 
   const params = useReactive({
     ...listHooks.getProto(),
     ...asyncHooks.getProto(),
+    ...loadingHooks?.getProto?.(),
   });
 
   watch(
@@ -203,10 +211,18 @@ function useAsyncListSelect(props = {}) {
   };
   const listHooks = useListSelect(props);
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
+  let loadingHooks = {};
+  if (config.loadingHooks) {
+    loadingHooks = useLoading({
+      loadingHook: config.loadingHooks,
+      promiseHook: asyncHooks,
+    });
+  }
 
   const params = useReactive({
     ...listHooks.getProto(),
     ...asyncHooks.getProto(),
+    ...loadingHooks?.getProto?.(),
   });
 
   watch(

@@ -64,6 +64,7 @@ export const RPulldown = defineComponent({
         return props.popLeft;
       }
       if (!pulldownHtml) return 0;
+      if (props.teleport === "body") return 0;
       const offset = pulldownHtml.getBoundingClientRect();
       return -offset.left + "px";
     }

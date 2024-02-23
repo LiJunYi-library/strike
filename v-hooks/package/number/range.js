@@ -77,16 +77,19 @@ export function useRangeNumber(props = {}) {
     context.max = value;
   };
 
+  params["onUpdate:modelValue"] = (value) => {
+    context.max = value;
+  };
+
   params["onUpdate:min"] = (value) => {
     context.min = value;
   };
-  
 
-  function updateMin  (value) {
+  function updateMin(value) {
     context.min = value;
   }
 
-  function updateMax  (value)  {
+  function updateMax(value) {
     context.max = value;
   }
 

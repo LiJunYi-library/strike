@@ -1,5 +1,5 @@
 import { ref, reactive, computed, watch } from "vue";
-import { usePromise2, nextTaskHoc } from "../promise";
+import { usePromise2, nextTaskHoc, useLoading } from "../promise";
 import { useSelect2 } from "./select2";
 import { useReactive } from "../../other";
 
@@ -114,6 +114,13 @@ function useFetchPagination2(props = {}) {
   const selectHooks = config.selectHooks || useSelect2({ ...config });
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
   const paginationHooks = usePagination(config);
+  let loadingHooks = {};
+  if (config.loadingHooks) {
+    loadingHooks = useLoading({
+      loadingHook: config.loadingHooks,
+      promiseHook: asyncHooks,
+    });
+  }
 
   const time0 = () => {
     return new Promise((resolve) => {
@@ -128,6 +135,7 @@ function useFetchPagination2(props = {}) {
   const params = useReactive({
     ...selectHooks.getProto(),
     ...asyncHooks.getProto(),
+    ...loadingHooks?.getProto?.(),
     currentPage,
     pageSize,
     prop,
@@ -141,7 +149,16 @@ function useFetchPagination2(props = {}) {
     updateProp,
     updateOrder,
     updateList,
+    reset,
   });
+
+  function reset() {
+    currentPage.value = 1;
+    pageSize.value = config.pageSize;
+    total.value = 0;
+    list.value = [];
+    selectHooks.reset(list.value);
+  }
 
   function updateList(l = []) {
     paginationHooks.updateList(l);

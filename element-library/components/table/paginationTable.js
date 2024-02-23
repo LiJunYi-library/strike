@@ -168,14 +168,42 @@ export const PaginationTableHoc = (option = {}) => {
         elTable?.sort?.(prop, mOrder, ...arg);
       };
 
+      function renderState(VM) {
+        if (listHook.error === true) {
+          return (
+            <div class="table-state">
+              {context?.slots?.error?.() || config.renderError(props, context, VM)}
+            </div>
+          );
+        }
+
+        if (listHook.begin === true) {
+          return (
+            <div class="table-state">
+              {context?.slots?.begin?.() || config.renderBegin(props, context, VM)}
+            </div>
+          );
+        }
+
+        if (listHook.loading) {
+          return (
+            <div class={["lib-loading"]}>
+              {context?.slots?.loading?.() || config.renderLoading(props, context, VM)}
+            </div>
+          );
+        }
+
+        return null;
+      }
+
       return (VM, _cache) => {
         return (
           <div class={["lib-table", config.class, context.attrs.class]}>
-            {listHook.loading && !listHook.begin && (
+            {/* {listHook.loading && !listHook.begin && (
               <div class={["lib-loading"]}>
                 {context?.slots?.loading?.() || config.renderLoading(props, context, VM)}
               </div>
-            )}
+            )} */}
             <ElTable
               {...config.tableAttrs}
               {...props}
@@ -199,12 +227,10 @@ export const PaginationTableHoc = (option = {}) => {
               }}
               onSort-change={({ column, prop, order }) => {
                 const mOrder = order ? transformOrder[order] : null;
-                // console.log(prop, mOrder);
                 if (isElTableSort) {
                   isElTableSort = false;
                   return;
                 }
-
                 listHook?.updateProp(prop);
                 listHook?.updateOrder(mOrder);
                 context.emit("sort-change", { column, prop, order: mOrder });
@@ -213,18 +239,10 @@ export const PaginationTableHoc = (option = {}) => {
               {{
                 ...context.slots,
                 empty: () => {
-                  if (listHook.error === true) {
-                    return context?.slots?.error?.() || config.renderError(props, context, VM);
-                  }
-
-                  if (listHook.begin === true) {
-                    return context?.slots?.begin?.() || config.renderBegin(props, context, VM);
-                  }
-
                   return context?.slots?.empty?.() || config.renderEmpty(props, context, VM);
                 },
                 append: () => {
-                  renderSlot(context.slots, "append");
+                  return [renderState(VM), renderSlot(context.slots, "append")];
                 },
               }}
             </ElTable>

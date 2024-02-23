@@ -77,7 +77,7 @@ export function useFetchHOC(props = {}) {
     isDownloadFile: false,
     fileName: "",
     loading: false,
-    begin: true,
+    begin: false,
     error: false,
     data: undefined,
     errorData: undefined,

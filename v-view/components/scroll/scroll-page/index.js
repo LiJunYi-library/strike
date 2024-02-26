@@ -85,9 +85,9 @@ const Context = defineComponent({
     );
 
     function scrollTo() {
-      let currentItem = RScrollPageContext.children[listHook.index];
+      const currentItem = RScrollPageContext.children[listHook.index];
       if (!currentItem) return;
-      let currentHtml = currentItem.html;
+      const currentHtml = currentItem.html;
       if (!currentHtml) return;
       lock = true;
       isHandActuated = true;
@@ -121,7 +121,7 @@ const Context = defineComponent({
             }}
             style={{ width: props.width + "px" }}
             key={index}
-            class={["r-scroll-page-item", , same(item, index) && "r-scroll-page-item-same"]}
+            class={["r-scroll-page-item", same(item, index) && "r-scroll-page-item-same"]}
           >
             {isUseHook
               ? renderSlot(RScrollPageContext.slots, "item", { item, index })

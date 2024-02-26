@@ -220,6 +220,7 @@ function useListLoad2(props = {}) {
   }
 
   function awaitConcatSend(...arg) {
+    if (finished.value === true) return;
     return asyncHooks.awaitSend(...arg).then((res) => {
       listData.value = config.setList(res, params);
       list.value = list.value.concat(listData.value);

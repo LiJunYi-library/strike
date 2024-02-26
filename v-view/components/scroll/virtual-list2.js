@@ -8,6 +8,8 @@ import {
   inject,
   reactive,
   provide,
+  watch,
+  nextTick,
 } from "vue";
 import { useScrollController } from "./";
 import { arrayLoop, arrayLoopMap } from "@rainbow_ljy/rainbow-js";
@@ -20,6 +22,9 @@ const configProps = {
   avgHeight: { type: Number, default: 120 }, // 每个item高度
   columnNum: { type: Number, default: 1 }, // 一行几个item
   keyExtractor: { type: Function, default: ({ index }) => index },
+  behavior: { type: String, default: "smooth" }, // smooth  instant
+  scrollOffsetTop: { type: Number, default: 0 }, // 更换list时候的滚动偏移量
+  isScrollTop: { type: Boolean, default: false }, // 更换list时候是否滚动滚动
 };
 
 const mProps = {
@@ -52,8 +57,7 @@ export const RScrollVirtualList2 = defineComponent({
   setup(props, context) {
     // eslint-disable-next-line
     const { listHook, bothEndsHeight, space, avgHeight, columnNum } = props;
-    let contentHtml;
-    let bottomHtml;
+    let contentHtml, virtualListHtml, bottomHtml;
     let isobserver = false;
 
     const recycleHeight = () => window.innerHeight * 2; // 有些浏览器初始拿innerHeight有时为0;
@@ -100,9 +104,9 @@ export const RScrollVirtualList2 = defineComponent({
         const nth = Math.floor(index / columnNum);
         let top = nth * (avgHeight + space) + bothEndsHeight + "px";
         if (nth === 0) top = bothEndsHeight + "px";
-        let left = getLeft(i);
-        let width = itemWidth;
-        let height = avgHeight + "px";
+        const left = getLeft(i);
+        const width = itemWidth;
+        const height = avgHeight + "px";
         pList.push({ index, style: { top, left, width, height }, item: listHook.list[index] });
         index++;
       });
@@ -135,10 +139,27 @@ export const RScrollVirtualList2 = defineComponent({
       observerBottom.observe(bottomHtml);
     });
 
+    watch(
+      () => listHook.begin,
+      async () => {
+        if (!props.isScrollTop) return;
+        await nextTick();
+        const top = scrollController.getOffsetTop(virtualListHtml) - props.scrollOffsetTop;
+        const sTop = scrollController.context.element.scrollTop;
+        if (sTop > top) {
+          scrollController.context.element.scrollTo({ top: top });
+        }
+      }
+    );
+
     return (vm) => {
       layout();
       return (
-        <div class="r-scroll-virtual-list" data-length={listHook.list.length}>
+        <div
+          class="r-scroll-virtual-list"
+          ref={(el) => (virtualListHtml = el)}
+          data-length={listHook.list.length}
+        >
           {renderSlot(context.slots, "header")}
           <div
             ref={(el) => (contentHtml = el)}

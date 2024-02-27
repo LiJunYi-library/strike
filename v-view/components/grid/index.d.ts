@@ -1,3 +1,3 @@
 import { DefineComponent } from "vue";
 
-export declare const RResize: DefineComponent<any>;
+export declare const RGrid: DefineComponent<any>;

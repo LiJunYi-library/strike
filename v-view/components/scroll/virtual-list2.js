@@ -12,7 +12,7 @@ import {
   nextTick,
 } from "vue";
 import { useScrollController } from "./";
-import { arrayLoop, arrayLoopMap } from "@rainbow_ljy/rainbow-js";
+import { arrayLoop } from "@rainbow_ljy/rainbow-js";
 import { useListLoadingHoc, loadingProps } from "../loading";
 
 const configProps = {
@@ -140,7 +140,7 @@ export const RScrollVirtualList2 = defineComponent({
     });
 
     watch(
-      () => listHook.begin,
+      () => listHook.list,
       async () => {
         if (!props.isScrollTop) return;
         await nextTick();
@@ -152,7 +152,7 @@ export const RScrollVirtualList2 = defineComponent({
       }
     );
 
-    return (vm) => {
+    return () => {
       layout();
       return (
         <div

@@ -68,7 +68,6 @@ export function useDialogCreate(config = {}) {
       Object.assign(create, el);
     };
     render(node, div);
-    console.log(node);
     if (!instance) instance = node;
   }
   return create;

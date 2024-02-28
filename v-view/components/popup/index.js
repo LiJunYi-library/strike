@@ -250,7 +250,11 @@ useRPopup.create = (node) => {
     vNode.component.exposed.trigger();
   }
 
-  return { show, trigger };
+  function close() {
+    vNode.component.exposed.close();
+  }
+
+  return { show, trigger, close };
 };
 
 useRPopup.asyncCreate = (node) => {

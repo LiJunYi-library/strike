@@ -232,29 +232,23 @@ export function useRPopup(node) {
     });
   }
   render(node, div);
-
-  nextTick(() => {
-    node.component.exposed.open();
-  });
+  node.component.exposed.open();
 }
 
-useRPopup.create = (node) => {
-  const vNode = node;
+useRPopup.create = (config = {}) => {
+  let instance;
+  const appContext = config.appContext;
   const div = document.createElement("div");
-  render(node, div);
-  function show() {
-    vNode.component.exposed.open();
-  }
 
-  function trigger() {
-    vNode.component.exposed.trigger();
+  function create(node) {
+    if (!node.appContext) node.appContext = appContext;
+    render(node, div);
+    instance = node;
+    node.component.exposed.open();
+    create.close = node.component.exposed.close;
+    create.trigger = node.component.exposed.trigger;
   }
-
-  function close() {
-    vNode.component.exposed.close();
-  }
-
-  return { show, trigger, close };
+  return create;
 };
 
 useRPopup.asyncCreate = (node) => {

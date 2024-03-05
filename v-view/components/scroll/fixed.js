@@ -25,7 +25,7 @@ export const RScrollFixed = defineComponent({
     function getOpacity() {
       if (props.opacityFun) return props?.opacityFun?.(scrollTop.value);
       if (props.opacityTop === undefined) return 1;
-      let o = scrollTop.value / props.opacityTop;
+      const o = scrollTop.value / props.opacityTop;
       if (props.opacityInversion) return 1 - o;
       return o;
     }
@@ -40,7 +40,10 @@ export const RScrollFixed = defineComponent({
           }}
           class={["r-scroll-fixed", isChangeTop.value && "r-scroll-fixed-act"]}
         >
-          {renderSlot(context.slots, "default", { scrollTop: scrollTop.value })}
+          {renderSlot(context.slots, "default", {
+            scrollTop: scrollTop.value,
+            isChangeTop: isChangeTop.value,
+          })}
         </div>
       );
     };

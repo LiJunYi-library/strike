@@ -140,7 +140,7 @@ export const RScrollVirtualList2 = defineComponent({
     });
 
     watch(
-      () => listHook.list,
+      () => listHook.begin,
       async () => {
         if (!props.isScrollTop) return;
         await nextTick();
@@ -152,6 +152,27 @@ export const RScrollVirtualList2 = defineComponent({
       }
     );
 
+    function renderState() {
+      if (listHook.begin)
+        return [
+          loadComs.renderLoading(),
+          loadComs.renderBegin({ height: avgHeight, space, column: columnNum }),
+        ];
+      return [
+        <div
+          ref={(el) => (contentHtml = el)}
+          style={{ height: mCtx.offsetH + "px" }}
+          class="r-scroll-virtual-list-content"
+        >
+          <Context keyExtractor={props.keyExtractor}></Context>
+        </div>,
+        loadComs.renderError(),
+        loadComs.renderLoading(),
+        loadComs.renderfinished(),
+        loadComs.renderEmpty(),
+      ];
+    }
+
     return () => {
       layout();
       return (
@@ -161,18 +182,7 @@ export const RScrollVirtualList2 = defineComponent({
           data-length={listHook.list.length}
         >
           {renderSlot(context.slots, "header")}
-          <div
-            ref={(el) => (contentHtml = el)}
-            style={{ height: mCtx.offsetH + "px" }}
-            class="r-scroll-virtual-list-content"
-          >
-            <Context keyExtractor={props.keyExtractor}></Context>
-          </div>
-          {loadComs.renderError()}
-          {loadComs.renderLoading()}
-          {loadComs.renderBegin({ height: avgHeight, space, column: columnNum })}
-          {loadComs.renderfinished()}
-          {loadComs.renderEmpty()}
+          {renderState()}
           <div ref={(el) => (bottomHtml = el)} class="r-scroll-list-bottom" />
         </div>
       );

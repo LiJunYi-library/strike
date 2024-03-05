@@ -158,6 +158,8 @@ export function useFetchHOC(props = {}) {
               })
               .then(async (mRes) => {
                 data.value = config.formatterData(mRes, d, res);
+                error.value = false;
+                errorData.value = undefined;
                 return Promise.resolve(data.value);
               })
               .finally(async () => {

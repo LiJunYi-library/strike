@@ -33,6 +33,7 @@ function getListLoadProps(options) {
     currentPage: 1, // 当前的页码
     pageSize: 10, // 请求的页数
     accumulationList: true,
+    isBeginSendResetList: true,
     dataMethodListeners: [],
     loadingMethodListeners: [],
     ...options,
@@ -202,7 +203,7 @@ function useListLoad2(props = {}) {
   }
 
   function nextBeginSend(...arg) {
-    list.value = [];
+    if (config.isBeginSendResetList) list.value = [];
     listData.value = [];
     currentPage.value = 1;
     finished.value = false;

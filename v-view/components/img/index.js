@@ -15,7 +15,7 @@ import "./index.scss";
 
 
 export const RImageHoc = (options = {}) => {
-  let config = {
+  const config = {
     props: {},
     renders: {
       error: (props) => (

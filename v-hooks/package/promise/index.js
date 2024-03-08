@@ -2,7 +2,7 @@ import { ref, reactive, unref, onBeforeUnmount } from "vue";
 import { useReactive } from "../../other";
 
 export { getPromiseConfig, usePromise, usePromise2 };
-export * from "./promise";
+export * from "./future";
 export * from "./async";
 export * from "./loading";
 

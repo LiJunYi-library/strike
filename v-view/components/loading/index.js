@@ -331,11 +331,6 @@ export const RLoadings = defineComponent({
     // eslint-disable-next-line
     const { loadingHook, promiseHook } = props;
 
-    // onMounted(() => {
-    //   console.log([props?.parentHtml]);
-    //   console.log(props?.parentHtml?.offsetWidth);
-    // });
-
     const isLoading = computed(() => {
       const loadings = [];
 

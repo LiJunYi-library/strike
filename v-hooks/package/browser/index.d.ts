@@ -4,6 +4,13 @@ export function useResizeObserver(
   cb: ResizeObserverCallback
 ): ResizeObserver;
 
+type useIntersectionObserverConfig = {
+  el: HTMLElement | (() => HTMLElement);
+  cb: IntersectionObserverCallback;
+  intersectionConfig?: IntersectionObserverInit;
+};
+export function useIntersectionObserver(props: useIntersectionObserverConfig): IntersectionObserver;
+
 type useLocalStorageRefConfig = {
   isListener?: boolean;
   onListener: (event: StorageEvent) => void;

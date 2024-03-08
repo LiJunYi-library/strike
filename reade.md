@@ -1,0 +1,1 @@
+如果你不想改变包路径，可以在使用pnpm下载脚手架时，添加--link-workspace-packages=false参数来禁用符号链接功能，这样下载的包将会直接存储在node_modules目录下，而不会改变包路径。

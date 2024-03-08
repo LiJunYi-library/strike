@@ -1,7 +1,7 @@
 import { onBeforeUnmount } from "vue";
 
 export function useSetInterval(callback, ms) {
-  let timer = setInterval(callback, ms);
+  const timer = setInterval(callback, ms);
   onBeforeUnmount(() => {
     clearInterval(timer);
   });
@@ -9,7 +9,7 @@ export function useSetInterval(callback, ms) {
 }
 
 export function useSetTimeout(callback, ms) {
-  let timer = setTimeout(callback, ms);
+  const timer = setTimeout(callback, ms);
   onBeforeUnmount(() => {
     clearTimeout(timer);
   });

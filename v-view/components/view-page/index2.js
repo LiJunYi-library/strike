@@ -243,7 +243,7 @@ const Context = defineComponent({
                 <div
                   style={{ width: props.width + "px" }}
                   key={index}
-                  class={["r-view-page-item", listHook.same(item) && "r-view-page-item-same"]}
+                  class={["r-view-page-item2", listHook.same(item) && "r-view-page-item-same2"]}
                 >
                   {renderActItem({ item, index })}
                 </div>

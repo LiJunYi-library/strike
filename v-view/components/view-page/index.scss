@@ -24,6 +24,20 @@
   .r-view-page-item-same {
     z-index: 5;
   }
+
+  .r-view-page-item2 {
+    overflow: hidden;
+    max-height: 100vh;
+    min-height: none;
+    width: var(--page-width);
+  }
+
+  .r-view-page-item-same2 {
+    overflow: unset;
+    max-height: none;
+    min-height: 100vh;
+    z-index: 5;
+  }
 }
 
 .r-view-page-compatibility {

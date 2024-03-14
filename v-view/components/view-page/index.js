@@ -11,6 +11,7 @@ import {
   ref,
 } from "vue";
 import "./index.scss";
+export * from "./index2";
 
 const props = {
   listHook: Object,
@@ -131,11 +132,7 @@ const Context = defineComponent({
 
     return (vm) => {
       return (
-        <div
-          class={opt.className}
-          ref={(el) => (containerHtml = el)}
-          onScroll={onScroll}
-        >
+        <div class={opt.className} ref={(el) => (containerHtml = el)} onScroll={onScroll}>
           <div
             ref={(el) => (parentHtml = el)}
             style={{

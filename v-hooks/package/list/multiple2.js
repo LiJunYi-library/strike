@@ -1,5 +1,5 @@
 import { ref, reactive, watch, computed } from "vue";
-import { usePromise2,useLoading } from "../promise";
+import { usePromise2, useLoading } from "../promise";
 import { getSelectProps } from "./select";
 import { useReactive } from "../../other";
 
@@ -60,6 +60,7 @@ function useMultiple2(props = {}) {
     return arg;
   }
 
+  let context;
   const initParms = resolveProps(config);
   const list = ref(initParms.list);
   const select = ref(initParms.select);
@@ -124,7 +125,7 @@ function useMultiple2(props = {}) {
     getContext,
   });
 
-  var context = params;
+  context = params;
 
   function getContext() {
     return context;

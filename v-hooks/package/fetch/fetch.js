@@ -1,5 +1,6 @@
 import { isRef, ref } from "vue";
 import { useReactive } from "../../other";
+import { downloadFile, arrayEvents } from "@rainbow_ljy/rainbow-js";
 
 function getBody(config) {
   if (!config.body) return undefined;
@@ -35,6 +36,27 @@ function getParams(config) {
   if (config.urlParams instanceof Function) return config.urlParams();
   if (isRef(config.urlParams)) return config.urlParams.value;
   return config.urlParams;
+}
+
+export function parseParams(object) {
+  if (!object) return "";
+  if (typeof object !== "object") return object;
+  if (!Object.keys(object).length) return "";
+  let str = "";
+  for (const key in object) {
+    if (Object.hasOwnProperty.call(object, key)) {
+      let element = object[key];
+      if (typeof element === "object") {
+        if (element instanceof Array) element = element.toString();
+        else element = JSON.stringify(element);
+      }
+      if (element === undefined) continue;
+      if (element + "" === "NaN") element = null;
+      str += `${key}=${element}&`;
+    }
+  }
+  str = str.slice(0, -1);
+  return `?${str}`;
 }
 
 export function useFetchHOC(props = {}) {
@@ -89,6 +111,10 @@ export function useFetchHOC(props = {}) {
 
     let controller = new AbortController();
     let timer;
+    const errLoading = { message: "loading", code: 41 };
+    const errAbout = { message: "about", code: 20 };
+    const events = arrayEvents();
+    const errEvents = arrayEvents();
 
     const loading = ref(configs.loading);
     const data = ref(configs.data);
@@ -101,6 +127,8 @@ export function useFetchHOC(props = {}) {
       begin,
       error,
       errorData,
+      errEvents,
+      events,
       send,
       nextSend,
       awaitSend,
@@ -112,7 +140,7 @@ export function useFetchHOC(props = {}) {
 
     async function send(props3) {
       const config = { ...configs, ...props3 };
-
+      error.value = false;
       loading.value = true;
       controller = new AbortController();
       const url = config.baseUrl + config.url + parseParams(getParams(config));
@@ -154,12 +182,14 @@ export function useFetchHOC(props = {}) {
               .catch((mErr) => {
                 error.value = true;
                 errorData.value = mErr;
+                errEvents.invoke(mErr);
                 return Promise.reject(mErr);
               })
               .then(async (mRes) => {
                 data.value = config.formatterData(mRes, d, res);
                 error.value = false;
                 errorData.value = undefined;
+                events.invoke(mRes);
                 return Promise.resolve(data.value);
               })
               .finally(async () => {
@@ -172,6 +202,7 @@ export function useFetchHOC(props = {}) {
         loading.value = false;
         begin.value = false;
         data.value = d;
+        events.invoke(d);
         return data.value;
       } catch (err) {
         console.error("error");
@@ -182,6 +213,7 @@ export function useFetchHOC(props = {}) {
           begin.value = false;
           error.value = true;
           errorData.value = err;
+          errEvents.invoke(err);
         }
 
         if (config.interceptResponseError) {
@@ -197,9 +229,6 @@ export function useFetchHOC(props = {}) {
       controller.abort();
       return send(...arg);
     }
-
-    const errLoading = { message: "loading", code: 41 };
-    const errAbout = { message: "about", code: 20 };
 
     function awaitSend(...arg) {
       if (loading.value === true) throw errLoading;
@@ -232,40 +261,4 @@ export function useFetchHOC(props = {}) {
   }
 
   return useFetch;
-}
-
-export function downloadFile(blob, fileName) {
-  if ("msSaveOrOpenBlob" in navigator) {
-    window.navigator.msSaveOrOpenBlob(blob, fileName);
-  } else {
-    const elink = document.createElement("a");
-    elink.download = fileName;
-    elink.style.display = "none";
-    elink.href = URL.createObjectURL(blob);
-    document.body.appendChild(elink);
-    elink.click();
-    URL.revokeObjectURL(elink.href);
-    document.body.removeChild(elink);
-  }
-}
-
-export function parseParams(object) {
-  if (!object) return "";
-  if (typeof object !== "object") return object;
-  if (!Object.keys(object).length) return "";
-  let str = "";
-  for (const key in object) {
-    if (Object.hasOwnProperty.call(object, key)) {
-      let element = object[key];
-      if (typeof element === "object") {
-        if (element instanceof Array) element = element.toString();
-        else element = JSON.stringify(element);
-      }
-      if (element === undefined) continue;
-      if (element + "" === "NaN") element = null;
-      str += `${key}=${element}&`;
-    }
-  }
-  str = str.slice(0, -1);
-  return `?${str}`;
 }

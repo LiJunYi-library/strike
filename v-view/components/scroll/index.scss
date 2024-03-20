@@ -120,7 +120,7 @@
 
 .r-scroll-virtual-list-content {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .r-scroll-virtual-list-item {

@@ -40,7 +40,7 @@ export function useBroadcast(channelKey, key, expose) {
     channel.postMessage({ code: 3, message: "调用方法", method, args });
   }
 
-  function apply(channelName, method, ...args) {}
+  // function apply(channelName, method, ...args) {}
 
   return { applys };
 }

@@ -12,6 +12,7 @@ import {
 } from "vue";
 import "./index.scss";
 export * from "./index2";
+export * from "./index3";
 
 const props = {
   listHook: Object,

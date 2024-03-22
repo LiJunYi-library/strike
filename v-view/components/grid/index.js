@@ -21,7 +21,7 @@ export const RGrid = defineComponent({
     });
     return () => {
       return (
-        <RResize class="mmb-grid" style={style} onChangeWidth={changeWidth}>
+        <RResize class="r-grid" style={style} onChangeWidth={changeWidth}>
           {renderSlot(context.slots, "default")}
         </RResize>
       );

@@ -11,33 +11,31 @@ export const RListSelect = defineComponent({
   props: RListSelectProps,
   emits: ["change"],
   setup(props, context) {
-    // eslint-disable-next-line vue/no-setup-props-destructure
-    const { listHook } = props;
     const loadConfig = {};
     const loadComs = useLoadingHoc(props, context, loadConfig);
-
     return (vm) => {
+      if (!props.listHook) return null;
       return (
         <div class="r-list-select" ref={(el) => loadComs.setParentHtml(el)}>
           {loadComs.renderContent(
             <div class="r-list-select-win">
-              {renderList(listHook.list, (item, index) => {
+              {renderList(props.listHook.list, (item, index) => {
                 if (context?.slots?.item) return context?.slots?.item({ index, item });
                 return (
                   <div
                     class={[
                       "r-list-item",
-                      "r-list-item-store" + listHook?.store?.index,
-                      listHook.same(item) && "r-list-item-same",
+                      "r-list-item-store" + props.listHook?.store?.index,
+                      props.listHook.same(item) && "r-list-item-same",
                     ]}
                     key={index}
                     onClick={(event) => {
-                      if (listHook.onSelect(item, index)) return;
+                      if (props.listHook.onSelect(item, index)) return;
                       context.emit("change", item, index);
                     }}
                   >
                     {renderSlot(context.slots, "default", { index, item }, () => [
-                      <div> {listHook.formatterLabel(item)} </div>,
+                      <div> {props.listHook.formatterLabel(item)} </div>,
                     ])}
                   </div>
                 );

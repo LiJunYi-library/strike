@@ -12,51 +12,12 @@ import {
   onBeforeUnmount,
   ref,
   getCurrentInstance,
-  nextTick,
+  Transition,
   queuePostFlushCb,
 } from "vue";
 import "./index.scss";
 
-const hmrDirtyComponents = new Set();
-const isFunction = (val) => typeof val === "function";
-
-function resetShapeFlag(vnode) {
-  vnode.shapeFlag &= ~256;
-  vnode.shapeFlag &= ~512;
-}
-
-function getComponentName(Component, includeInferred = true) {
-  return isFunction(Component)
-    ? Component.displayName || Component.name
-    : Component.name || (includeInferred && Component.__name);
-}
-
-function isVNode(value) {
-  return value ? value.__v_isVNode === true : false;
-}
-
-function isSameVNodeType(n1, n2) {
-  if (
-    !!(process.env.NODE_ENV !== "production") &&
-    n2.shapeFlag & 6 &&
-    hmrDirtyComponents.has(n2.type)
-  ) {
-    n1.shapeFlag &= ~256;
-    n2.shapeFlag &= ~512;
-    return false;
-  }
-  return n1.type === n2.type && n1.key === n2.key;
-}
-const isSuspense = (type) => type.__isSuspense;
-const isAsyncWrapper = (i) => !!i.type.__asyncLoader;
-function getInnerChild(vnode) {
-  return vnode.shapeFlag & 128 ? vnode.ssContent : vnode;
-}
-const invokeArrayFns = (fns, arg) => {
-  for (let i = 0; i < fns.length; i++) {
-    fns[i](arg);
-  }
-};
+import { arrayInvokeFuns, isFunction } from "@rainbow_ljy/rainbow-js";
 
 const props = {
   listHook: Object,
@@ -69,6 +30,43 @@ const Context = defineComponent({
   __isKeepAlive: true,
   props,
   setup(props, context) {
+    const hmrDirtyComponents = new Set();
+
+    function resetShapeFlag(vnode) {
+      vnode.shapeFlag &= ~256;
+      vnode.shapeFlag &= ~512;
+    }
+
+    function getComponentName(Component, includeInferred = true) {
+      return isFunction(Component)
+        ? Component.displayName || Component.name
+        : Component.name || (includeInferred && Component.__name);
+    }
+
+    function isVNode(value) {
+      return value ? value.__v_isVNode === true : false;
+    }
+
+    function isSameVNodeType(n1, n2) {
+      if (
+        !!(process.env.NODE_ENV !== "production") &&
+        n2.shapeFlag & 6 &&
+        hmrDirtyComponents.has(n2.type)
+      ) {
+        n1.shapeFlag &= ~256;
+        n2.shapeFlag &= ~512;
+        return false;
+      }
+      return n1.type === n2.type && n1.key === n2.key;
+    }
+
+    const isSuspense = (type) => type.__isSuspense;
+
+    const isAsyncWrapper = (i) => !!i.type.__asyncLoader;
+
+    function getInnerChild(vnode) {
+      return vnode.shapeFlag & 128 ? vnode.ssContent : vnode;
+    }
     // eslint-disable-next-line
     const { listHook } = props;
     const RViewPageContext = inject("RViewPageContext") || {};
@@ -108,7 +106,7 @@ const Context = defineComponent({
       queuePostFlushCb(() => {
         instance2.isDeactivated = false;
         if (instance2.a) {
-          invokeArrayFns(instance2.a);
+          arrayInvokeFuns(instance2.a);
         }
       });
     };
@@ -118,7 +116,7 @@ const Context = defineComponent({
       if (parentSuspense) return;
       queuePostFlushCb(() => {
         if (instance2.da) {
-          invokeArrayFns(instance2.da);
+          arrayInvokeFuns(instance2.da);
         }
         instance2.isDeactivated = true;
       }, parentSuspense);

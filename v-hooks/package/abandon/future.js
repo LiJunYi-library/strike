@@ -1,5 +1,5 @@
 import { ref, reactive } from "vue";
-import { getPromiseConfig } from "./";
+import { getPromiseConfig } from "../promise";
 
 export function useFuture(fun, options = {}) {
   const queue = [];

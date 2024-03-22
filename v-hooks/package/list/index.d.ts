@@ -13,6 +13,7 @@ export declare function useSelect(options: any): any; // todo
 export declare function useAsyncSelect(options: any): any; // todo
 
 export declare function useRadio2(options: any): any; // use
+export declare function useRadio3(options: any): any; // use
 export declare function useAsyncRadio2(options: any): any; // use
 export declare function useMultiple2(options: any): any; // use
 export declare function useAsyncMultiple2(options: any): any; // use
@@ -24,8 +25,8 @@ export declare function usePaginationSelect(options: any): any; // todo
 export declare function useListPagination(options: any): any; // todo
 export declare function useAsyncPagination(options: any): any; // todo
 export declare function useAsyncPaginationSelect(options: any): any; // todo
-export declare function useAsyncListPagination(options: any): any;  // todo
-export declare function useFetchPagination(options: any): any;  // todo
+export declare function useAsyncListPagination(options: any): any; // todo
+export declare function useFetchPagination(options: any): any; // todo
 
 export declare function useFetchPagination2(options: any): any; // use
 
@@ -40,9 +41,9 @@ export declare function useAsyncListLoad(options: any): any; // todo
 
 /**
  *
- * 
- * 
- * 
+ *
+ *
+ *
  */
 export declare type FetchListHooks = PromiseHooks & {
   list: any[];

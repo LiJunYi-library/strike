@@ -36,7 +36,9 @@ const Context = defineComponent({
     const actItemHtml = null;
     const RPageViewContext = inject("RPageViewContext") || {};
 
-    onMounted(() => {});
+    onMounted(() => {
+      //
+    });
 
     watch(
       () => props.listHook.select,
@@ -52,7 +54,7 @@ const Context = defineComponent({
     );
 
     function scrollTo() {
-      let left = props.width * listHook.index;
+      const left = props.width * listHook.index;
       containerHtml.scrollTo({ left, behavior: props.behavior });
     }
 
@@ -77,21 +79,25 @@ const Context = defineComponent({
     function onScroll(event) {
       // console.log("onScroll");
       sLeft = containerHtml.scrollLeft;
-      let sapce = sLeft - prveSLeft;
+      const sapce = sLeft - prveSLeft;
       if (sapce < 0) onScrollRight(event, sLeft);
       if (sapce > 0) onScrollLeft(event, sLeft);
       prveSLeft = sLeft;
 
-      let index = Math.round(sLeft) / props.width;
+      const index = Math.round(sLeft) / props.width;
       if (!Number.isInteger(index)) return;
       // console.log(index, listHook.index);
       update(index);
       lock = false;
     }
 
-    function onScrollLeft(event, sLeft) {}
+    function onScrollLeft(event, sLeft) {
+      //
+    }
 
-    function onScrollRight(event, sLeft) {}
+    function onScrollRight(event, sLeft) {
+      //
+    }
 
     function renderContent() {
       const isUseHook = !RPageViewContext?.children?.length;

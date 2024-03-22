@@ -1,0 +1,18 @@
+.r-toast {
+  padding: 20px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  color: white;
+  border-radius: 8px;
+}
+
+.r-toast-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

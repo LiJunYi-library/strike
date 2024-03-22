@@ -3,6 +3,7 @@ import { usePromise, getPromiseConfig, useInterceptPromiseApply } from "../promi
 
 export * from "./radio";
 export * from "./radio2";
+export * from "./radio3";
 export * from "./multiple";
 export * from "./multiple2";
 export * from "./select";

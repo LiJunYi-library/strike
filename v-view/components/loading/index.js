@@ -53,8 +53,7 @@ export const loadingProps = {
 };
 
 export function useLoadingHoc(props, context, configs = {}) {
-  const { listHook } = props;
-  const loadHook = useLoading({ ...props, promiseHook: listHook });
+  const loadHook = useLoading({ ...props, promiseHook: props.listHook });
 
   function setRelative(bool = true) {
     if (!configs.parentHtml) return;
@@ -70,7 +69,7 @@ export function useLoadingHoc(props, context, configs = {}) {
     if (!loadHook.loading) return null;
     if (!props.loadingText) return null;
     setRelative(loadHook.loading);
-    return renderSlot(context.slots, "loading", listHook, () => [
+    return renderSlot(context.slots, "loading", props.listHook, () => [
       <div class={["r-c-loading r-loading"]}>
         <RILoading class="r-c-loading-icon r-loading-icon" />
         <div class={["r-c-loading-text r-loading-text"]}>{props.loadingText}</div>
@@ -80,22 +79,22 @@ export function useLoadingHoc(props, context, configs = {}) {
 
   function renderfinished() {
     if (loadHook.loading) return null;
-    if (!listHook.finished) return null;
-    if (!listHook.list || !listHook.list.length) return null;
+    if (!props.listHook.finished) return null;
+    if (!props.listHook.list || !props.listHook.list.length) return null;
     if (!props.finishedText) return null;
-    return renderSlot(context.slots, "finished", listHook, () => [
+    return renderSlot(context.slots, "finished", props.listHook, () => [
       <div class="r-c-finished r-finished">{props.finishedText}</div>,
     ]);
   }
 
   function renderEmpty() {
     if (loadHook.loading) return null;
-    if (!listHook.finished) return null;
-    if (listHook?.list?.length) return null;
+    if (!props.listHook.finished) return null;
+    if (props.listHook?.list?.length) return null;
     if (!props.emptyText && !props.emptySrc) return null;
-    return renderSlot(context.slots, "empty", listHook, () => [
+    return renderSlot(context.slots, "empty", props.listHook, () => [
       <div class="r-c-empty r-empty">
-        {renderSlot(context.slots, "emptyImg", listHook, () => [
+        {renderSlot(context.slots, "emptyImg", props.listHook, () => [
           props.emptySrc && (
             <img class={"r-c-empty-img r-empty-img"} fit="contain" src={props.emptySrc} />
           ),
@@ -107,8 +106,8 @@ export function useLoadingHoc(props, context, configs = {}) {
 
   function renderError() {
     if (loadHook.loading) return null;
-    if (!listHook.error) return null;
-    return renderSlot(context.slots, "error", listHook, () => [
+    if (!props.listHook.error) return null;
+    return renderSlot(context.slots, "error", props.listHook, () => [
       <div class="r-c-error r-error" onClick={() => context.emit("errorClick")}>
         <div class="r-c-error-text r-error-text">{props.errorText}</div>
       </div>,
@@ -119,7 +118,7 @@ export function useLoadingHoc(props, context, configs = {}) {
     if (!loadHook.begin) return null;
     return (
       <div class="r-c-begin r-begin">
-        {renderSlot(context.slots, "begin", listHook, () => [
+        {renderSlot(context.slots, "begin", props.listHook, () => [
           <div
             class="r-c-skelectons r-skelectons"
             style={{ padding: `0 ${props.sapceHorizontal}px` }}
@@ -153,14 +152,14 @@ export function useLoadingHoc(props, context, configs = {}) {
   };
 }
 
-export function useListLoadingHoc(listHook, props, context, configs = {}) {
-  const loadHook = useLoading({ ...props, promiseHook: listHook });
+export function useListLoadingHoc(aaaaa, props, context, configs = {}) {
+  const loadHook = useLoading({ ...props, promiseHook: props.listHook });
 
   function renderLoading() {
-    if (listHook.finished) return null;
-    if (listHook.error) return null;
+    if (props.listHook.finished) return null;
+    if (props.listHook.error) return null;
     if (!props.loadingText) return null;
-    const loadingVnode = renderSlot(context.slots, "loading", listHook, () => [
+    const loadingVnode = renderSlot(context.slots, "loading", props.listHook, () => [
       <div class={["r-c-loading r-loading"]}>
         <RILoading class="r-c-loading-icon r-loading-icon" />
         <div class={["r-c-loading-text r-loading-text"]}>{props.loadingText}</div>
@@ -175,7 +174,7 @@ export function useListLoadingHoc(listHook, props, context, configs = {}) {
       return loadingVnode;
     }
 
-    return renderSlot(context.slots, "load", listHook, () => [
+    return renderSlot(context.slots, "load", props.listHook, () => [
       <div class={["r-c-load r-load"]}>
         <div onClick={() => context.emit("loadClick")} class={["r-c-load-text r-load-text"]}>
           {props.loadText}
@@ -186,22 +185,22 @@ export function useListLoadingHoc(listHook, props, context, configs = {}) {
 
   function renderfinished() {
     if (loadHook.loading) return null;
-    if (!listHook.finished) return null;
-    if (!listHook.list || !listHook.list.length) return null;
+    if (!props.listHook.finished) return null;
+    if (!props.listHook.list || !props.listHook.list.length) return null;
     if (!props.finishedText) return null;
-    return renderSlot(context.slots, "finished", listHook, () => [
+    return renderSlot(context.slots, "finished", props.listHook, () => [
       <div class="r-c-finished r-finished">{props.finishedText}</div>,
     ]);
   }
 
   function renderEmpty() {
     if (loadHook.loading) return null;
-    if (!listHook.finished) return null;
-    if (listHook?.list?.length) return null;
+    if (!props.listHook.finished) return null;
+    if (props.listHook?.list?.length) return null;
     if (!props.emptyText && !props.emptySrc) return null;
-    return renderSlot(context.slots, "empty", listHook, () => [
+    return renderSlot(context.slots, "empty", props.listHook, () => [
       <div class="r-c-empty r-empty">
-        {renderSlot(context.slots, "emptyImg", listHook, () => [
+        {renderSlot(context.slots, "emptyImg", props.listHook, () => [
           props.emptySrc && (
             <img class={"r-c-empty-img r-empty-img"} fit="contain" src={props.emptySrc} />
           ),
@@ -213,8 +212,8 @@ export function useListLoadingHoc(listHook, props, context, configs = {}) {
 
   function renderError() {
     if (loadHook.loading) return null;
-    if (!listHook.error) return null;
-    return renderSlot(context.slots, "error", listHook, () => [
+    if (!props.listHook.error) return null;
+    return renderSlot(context.slots, "error", props.listHook, () => [
       <div class="r-c-error r-error" onClick={() => context.emit("errorClick")}>
         <div class="r-c-error-text r-error-text">{props.errorText}</div>
       </div>,
@@ -226,7 +225,7 @@ export function useListLoadingHoc(listHook, props, context, configs = {}) {
     if (!loadHook.begin) return null;
     return (
       <div class="r-c-begin r-begin">
-        {renderSlot(context.slots, "begin", listHook, () => [
+        {renderSlot(context.slots, "begin", props.listHook, () => [
           <div
             class="r-c-begin-skelectons r-begin-skelectons"
             style={{ "grid-template-columns": `repeat(${column}, 1fr)`, "grid-gap": `${space}px` }}
@@ -329,16 +328,16 @@ export const RLoadings = defineComponent({
   },
   setup(props, context) {
     // eslint-disable-next-line
-    const { loadingHook, promiseHook } = props;
+    // const { loadingHook, promiseHook } = props;
 
     const isLoading = computed(() => {
       const loadings = [];
 
-      if (promiseHook instanceof Array) loadings.push(...promiseHook);
-      else loadings.push(promiseHook);
+      if (props.promiseHook instanceof Array) loadings.push(...props.promiseHook);
+      else loadings.push(props.promiseHook);
 
-      if (loadingHook instanceof Array) loadings.push(...loadingHook);
-      else loadings.push(loadingHook);
+      if (props.loadingHook instanceof Array) loadings.push(...props.loadingHook);
+      else loadings.push(props.loadingHook);
 
       const load = loadings.some((el) => el?.loading === true);
       return load;
@@ -346,8 +345,8 @@ export const RLoadings = defineComponent({
 
     const isError = computed(() => {
       const errors = [];
-      if (promiseHook instanceof Array) errors.push(...promiseHook);
-      else errors.push(promiseHook);
+      if (props.promiseHook instanceof Array) errors.push(...props.promiseHook);
+      else errors.push(props.promiseHook);
       const error = errors.some((el) => el?.error === true);
       return error;
     });

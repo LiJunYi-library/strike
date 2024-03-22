@@ -196,7 +196,7 @@ export const RPopup = defineComponent({
       const cStyle = { ...style, zIndex: visible.value ? 2001 : 2000 };
       return [
         <ROverlay
-          style={style}
+          OverlayStyle={style}
           ref={(el) => (overlay.el = el)}
           onTouchstart={overlay.onTouchstart}
           onClick={overlay.onClick}

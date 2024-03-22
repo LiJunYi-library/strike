@@ -24,7 +24,9 @@ export const ROverlay = defineComponent({
     lazy: { type: Boolean, default: true },
     cache: { type: Boolean, default: true },
     destroy: { type: Boolean, default: false },
+    OverlayStyle: [Object, String],
   },
+  emits: ["update:visible", "update:visible", "closed", "touchstart", "click"],
   setup(props, context) {
     const visible = ref(props.visible);
     // eslint-disable-next-line
@@ -75,6 +77,7 @@ export const ROverlay = defineComponent({
           class={["r-overlay"]}
           ref={(ele) => (el = ele)}
           {...context.attrs}
+          style={props.OverlayStyle}
         >
           {renderSlot(context.slots, "default")}
         </div>

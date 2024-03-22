@@ -93,7 +93,7 @@ export const RPulldown = defineComponent({
             ])}
           </div>
           <RPopup
-            {...props}
+            teleport={props.teleport}
             {...context.attrs}
             left={getLeft()}
             top={getTop()}

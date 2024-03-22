@@ -11,35 +11,34 @@ export const RPulldownSelect = defineComponent({
   },
   emits: ["change", "beforeOpen", "close"],
   setup(props, context) {
-    // eslint-disable-next-line
-    const listHook = props.listHook;
+   
 
     function onChange(item, index, popCtx) {
       if (props.secondaryConfirm) return;
-      context.emit("change", listHook.value);
+      context.emit("change", props.listHook.value);
       popCtx.setVisible(false);
     }
 
     function onBeforeOpen() {
-      if (props.secondaryConfirm) listHook.save_changeContextToStore();
+      if (props.secondaryConfirm) props.listHook.save_changeContextToStore();
       context.emit("beforeOpen");
     }
 
     function onClose() {
-      if (props.secondaryConfirm) listHook.changeContextToProxy();
+      if (props.secondaryConfirm) props.listHook.changeContextToProxy();
       context.emit("close");
     }
 
     function confirm(popCtx) {
-      if (props.secondaryConfirm) listHook.restore_changeContextToProxy();
-      context.emit("change", listHook.value);
+      if (props.secondaryConfirm) props.listHook.restore_changeContextToProxy();
+      context.emit("change", props.listHook.value);
       popCtx.setVisible(false);
     }
 
     function reset(popCtx) {
-      listHook.reset();
-      if (props.secondaryConfirm) listHook.restore_changeContextToProxy();
-      context.emit("change", listHook.value);
+      props.listHook.reset();
+      if (props.secondaryConfirm) props.listHook.restore_changeContextToProxy();
+      context.emit("change", props.listHook.value);
       popCtx.setVisible(false);
     }
 
@@ -53,9 +52,9 @@ export const RPulldownSelect = defineComponent({
         <RPulldown {...context.attrs} onBeforeOpen={onBeforeOpen} onClose={onClose}>
           {{
             content: (popCtx) => (
-              <div class={["r-pulldown-text", revLabel(listHook.label) && "r-pulldown-text-act"]}>
+              <div class={["r-pulldown-text", revLabel(props.listHook.label) && "r-pulldown-text-act"]}>
                 {renderSlot(context.slots, "label", popCtx, () => [
-                  <div class="r-pulldown-label"> {revLabel(listHook.label) || props.label} </div>,
+                  <div class="r-pulldown-label"> {revLabel(props.listHook.label) || props.label} </div>,
                 ])}
                 <span class={["r-pulldown-icon", !popCtx.visible && "rote"]}>
                   {renderSlot(context.slots, "icon", popCtx, () => [

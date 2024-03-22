@@ -326,20 +326,4 @@ function useFetchHoc(request) {
 
 function createHttpFetch(request) {
   return {};
-  const get = request.create({ method: "get", contentType: "" });
-  const post = request.create({ method: "post", contentType: "application/json" });
-  const form = request.create((config) => {
-    const formData = new FormData();
-    const body = config.body;
-    for (const key in body) {
-      if (body.hasOwnProperty(key)) {
-        formData.append(key, body[key]);
-      }
-    }
-    config.body = formData;
-    config.method = "post";
-    return config;
-  });
-
-  return { get, post, form };
 }

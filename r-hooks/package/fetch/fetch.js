@@ -1,11 +1,10 @@
-import { isRef, ref } from "vue";
-import { useReactive } from "../../other";
+import { useState, useMemo } from "react";
 import { downloadFile, arrayEvents, arrayRemove, createOverload } from "@rainbow_ljy/rainbow-js";
 
 function getBody(config) {
   if (!config.body) return undefined;
   if (config.body instanceof Function) return config.body();
-  if (isRef(config.body)) return config.body.value;
+  // if (isRef(config.body)) return config.body.value;
   return config.body;
 }
 
@@ -34,7 +33,7 @@ function getHeaders(config) {
 function getParams(config) {
   if (!config.urlParams) return undefined;
   if (config.urlParams instanceof Function) return config.urlParams();
-  if (isRef(config.urlParams)) return config.urlParams.value;
+  // if (isRef(config.urlParams)) return config.urlParams.value;
   return config.urlParams;
 }
 
@@ -145,12 +144,13 @@ export function useFetchHOC(props = {}) {
     const errEvents = arrayEvents();
     const fetchEvents = arrayEvents();
 
-    const loading = ref(configs.loading);
-    const data = ref(configs.data);
-    const begin = ref(configs.begin);
-    const error = ref(configs.error);
-    const errorData = ref(configs.errorData);
-    const params = useReactive({
+    const [loading, setLoading] = useState(configs.loading);
+    const [data, setData] = useState(configs.data);
+    const [begin, setBegin] = useState(configs.begin);
+    const [error, setError] = useState(configs.error);
+    const [errorData, setErrorData] = useState(configs.errorData);
+    const memo = [loading, data, begin, error, errorData];
+    const params = {
       loading,
       data,
       begin,
@@ -158,6 +158,11 @@ export function useFetchHOC(props = {}) {
       errorData,
       errEvents,
       events,
+      setLoading,
+      setData,
+      setBegin,
+      setError,
+      setErrorData,
       send,
       nextSend,
       awaitSend,
@@ -166,13 +171,14 @@ export function useFetchHOC(props = {}) {
       awaitBeginSend,
       abort,
       abortAll,
-    });
+      useMemo: (factory) => useMemo(factory, memo),
+    };
 
     async function asyncSend(props3) {
       const config = { ...configs, ...props3 };
-      error.value = false;
-      errorData.value = undefined;
-      loading.value = true;
+      setError(false);
+      setErrorData(undefined);
+      setLoading(true);
       const curController = new AbortController();
       const signalPromise = new Promise((resolve) => {
         curController.signal.addEventListener("abort", () => {
@@ -206,10 +212,10 @@ export function useFetchHOC(props = {}) {
       }
 
       const success = (successData) => {
-        loading.value = false;
-        data.value = successData;
-        error.value = false;
-        errorData.value = undefined;
+        setLoading(false);
+        setData(successData);
+        setError(false);
+        setErrorData(undefined);
         fetchEvents.remove(current);
         events.invoke(successData);
         clearTimeout(current.timer);
@@ -217,9 +223,9 @@ export function useFetchHOC(props = {}) {
       };
 
       const fail = (failData) => {
-        loading.value = false;
-        error.value = true;
-        errorData.value = failData;
+        setLoading(false);
+        setError(true);
+        setErrorData(failData);
         fetchEvents.remove(current);
         errEvents.invoke(failData);
         clearTimeout(current.timer);
@@ -244,17 +250,17 @@ export function useFetchHOC(props = {}) {
             return reset
               .catch((mErr) => {
                 fail(mErr);
-                return Promise.reject(errorData.value);
+                return Promise.reject(errorData);
               })
               .then(async (mRes) => {
                 success(config.formatterData(mRes, d, res));
-                return Promise.resolve(data.value);
+                return Promise.resolve(data);
               });
           }
         }
 
         success(d);
-        return data.value;
+        return data;
       } catch (err) {
         fetchEvents.remove(current);
         let errorRes = err;
@@ -284,38 +290,38 @@ export function useFetchHOC(props = {}) {
     }
 
     function awaitSend(...arg) {
-      if (loading.value === true) throw errLoading;
+      if (loading === true) throw errLoading;
       return send(...arg);
     }
 
     async function beginSend(...arg) {
-      begin.value = true;
+      setBegin(true);
       try {
         return await send(...arg);
       } finally {
-        begin.value = false;
+        setBegin(false);
       }
     }
 
     async function nextBeginSend(...arg) {
-      begin.value = true;
+      setBegin(true);
       try {
         return await nextSend(...arg);
       } finally {
-        begin.value = false;
+        setBegin(false);
       }
     }
 
     function awaitBeginSend(...arg) {
-      if (loading.value === true) throw errLoading;
+      if (loading === true) throw errLoading;
       return beginSend(...arg);
     }
 
     function abort() {
       controller.abort();
       clearTimeout(timer);
-      loading.value = false;
-      begin.value = false;
+      setLoading(false);
+      setBegin(false);
     }
 
     function abortAll() {
@@ -323,8 +329,8 @@ export function useFetchHOC(props = {}) {
         item.controller.abort();
         clearTimeout(item.timer);
       });
-      loading.value = false;
-      begin.value = false;
+      setLoading(false);
+      setBegin(false);
     }
 
     return params;

@@ -7,3 +7,4 @@ export * from "./package/browser";
 export * from "./package/timer";
 export * from "./package/number";
 export * from "./package/def";
+export * from "./package/require";

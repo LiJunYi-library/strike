@@ -10,3 +10,4 @@ export * from "./package/timer";
 export * from "./package/number";
 export * from "./package/def";
 export * from "./other";
+export * from "./package/require";

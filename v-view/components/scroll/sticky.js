@@ -11,7 +11,6 @@ export const RScrollSticky = defineComponent({
   },
   setup(props, context) {
     let html;
-    const top = ref(props.top);
     const isChangeTop = ref(false);
     const isSticky = ref(false);
     const unStickyTop = ref(false);

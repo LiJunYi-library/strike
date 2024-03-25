@@ -15,10 +15,17 @@ export const RScrollFixed = defineComponent({
     const isChangeTop = ref(false);
     const scrollTop = ref(0);
 
+    function layout(sTop) {
+      scrollTop.value = sTop;
+      if (props.changeTop !== undefined) isChangeTop.value = sTop >= props.changeTop;
+    }
+
     const scrollController = useScrollController({
       onScroll(event, sTop) {
-        scrollTop.value = sTop;
-        if (props.changeTop !== undefined) isChangeTop.value = sTop >= props.changeTop;
+        layout(sTop);
+      },
+      onResize(event, sTop) {
+        layout(sTop);
       },
     });
 

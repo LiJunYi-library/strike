@@ -22,6 +22,9 @@ export const RScrollSticky = defineComponent({
       onScroll(event, sTop) {
         layoutTop(sTop);
       },
+      onResize(event, sTop) {
+        layoutTop(sTop);
+      },
     });
 
     function refHtml(ref) {
@@ -43,7 +46,7 @@ export const RScrollSticky = defineComponent({
     });
 
     return (vm) => {
-      let positionStyle = {
+      const positionStyle = {
         top: `${props.top}px`,
         bottom: `${props.bottom}px`,
       };

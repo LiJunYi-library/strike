@@ -176,7 +176,7 @@ export function useFetchHOC(props = {}) {
       useCallback: (callback) => useCallback(callback, memo),
     };
 
-    async function asyncSend(props3) {
+    async function send(props3) {
       const config = { ...configs, ...props3 };
       setError(false);
       setErrorData(undefined);
@@ -221,7 +221,7 @@ export function useFetchHOC(props = {}) {
         fetchEvents.remove(current);
         events.invoke(successData);
         clearTimeout(current.timer);
-        options.fetchQueue.remove(fetchPromise, config, params);
+        options.fetchQueue?.remove?.(fetchPromise, config, params);
       };
 
       const fail = (failData) => {
@@ -231,12 +231,12 @@ export function useFetchHOC(props = {}) {
         fetchEvents.remove(current);
         errEvents.invoke(failData);
         clearTimeout(current.timer);
-        options.fetchQueue.remove(fetchPromise, config, params);
+        options.fetchQueue?.remove?.(fetchPromise, config, params);
       };
 
       try {
         fetchPromise = fetch(URL, fetchConfig);
-        options.fetchQueue.push(fetchPromise, config, params);
+        options.fetchQueue?.push?.(fetchPromise, config, params);
         const res = await fetchPromise;
         const d = await config.formatterResponse(res, config);
         if (!res.ok) throw d;
@@ -267,7 +267,7 @@ export function useFetchHOC(props = {}) {
         fetchEvents.remove(current);
         let errorRes = err;
         if (err.code === 20) {
-          options.fetchQueue.del(fetchPromise, config, params);
+          options.fetchQueue?.del?.(fetchPromise, config, params);
           errorRes = await signalPromise;
         }
 
@@ -278,11 +278,6 @@ export function useFetchHOC(props = {}) {
           if (errReset) throw errReset;
         }
       }
-    }
-
-    function send(...arg) {
-      const asy = asyncSend(...arg);
-      return asy;
     }
 
     function nextSend(...arg) {

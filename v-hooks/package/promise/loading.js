@@ -2,14 +2,12 @@ import { computed } from "vue";
 import { useReactive } from "../../other";
 
 export function useLoading(props) {
-  const { loadingHook, promiseHook } = props;
-
   const hooks = computed(() => {
     const arr = [];
     (() => {
-      if (!promiseHook) return;
-      if (promiseHook instanceof Array) arr.push(...promiseHook);
-      else arr.push(promiseHook);
+      if (!props.promiseHook) return;
+      if (props.promiseHook instanceof Array) arr.push(...props.promiseHook);
+      else arr.push(props.promiseHook);
     })();
     return arr;
   });
@@ -20,15 +18,15 @@ export function useLoading(props) {
     const arr = [];
 
     (() => {
-      if (!promiseHook) return;
-      if (promiseHook instanceof Array) arr.push(...promiseHook);
-      else arr.push(promiseHook);
+      if (!props.promiseHook) return;
+      if (props.promiseHook instanceof Array) arr.push(...props.promiseHook);
+      else arr.push(props.promiseHook);
     })();
 
     (() => {
-      if (!loadingHook) return;
-      if (loadingHook instanceof Array) arr.push(...loadingHook);
-      else arr.push(loadingHook);
+      if (!props.loadingHook) return;
+      if (props.loadingHook instanceof Array) arr.push(...props.loadingHook);
+      else arr.push(props.loadingHook);
     })();
 
     return arr;

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { downloadFile, arrayEvents, arrayRemove, createOverload } from "@rainbow_ljy/rainbow-js";
 
 function getBody(config) {
@@ -158,6 +158,7 @@ export function useFetchHOC(props = {}) {
       errorData,
       errEvents,
       events,
+      memo,
       setLoading,
       setData,
       setBegin,
@@ -172,6 +173,7 @@ export function useFetchHOC(props = {}) {
       abort,
       abortAll,
       useMemo: (factory) => useMemo(factory, memo),
+      useCallback: (callback) => useCallback(callback, memo),
     };
 
     async function asyncSend(props3) {

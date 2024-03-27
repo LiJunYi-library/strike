@@ -133,18 +133,17 @@ export function useFetchHOC(props = {}) {
     ...props,
   };
 
+  const errLoading = { message: "loading", code: 41 };
+  const errTimeout = { message: "Request Timeout", code: 48 };
+  const errAbout = { message: "about", code: 20 };
+
   function useFetch(props2 = {}) {
     const configs = { ...options, ...props2 };
-
     let controller = new AbortController();
     let timer;
-    const errLoading = { message: "loading", code: 41 };
-    const errTimeout = { message: "Request Timeout", code: 48 };
-    const errAbout = { message: "about", code: 20 };
     const events = arrayEvents();
     const errEvents = arrayEvents();
     const fetchEvents = arrayEvents();
-
     const loading = ref(configs.loading);
     const data = ref(configs.data);
     const begin = ref(configs.begin);

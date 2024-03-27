@@ -10,7 +10,6 @@ import {
   defineComponent,
   inject,
 } from "vue";
-import { ElEmpty } from "element-plus";
 import { RResize } from "../../resize";
 
 /**
@@ -229,9 +228,7 @@ export const Hoc = (options = {}) => {
           >
             {emptyShow() && (
               <div class="chart-empty">
-                {renderSlot(ChartContext.slots, "empty", {}, () => [
-                  <ElEmpty description={props.emptyText} />,
-                ])}
+                {renderSlot(ChartContext.slots, "empty", {}, () => [<div>{props.emptyText}</div>])}
               </div>
             )}
 
@@ -284,6 +281,7 @@ export default Echarts;
   align-items: center;
 
   .chart-empty {
+    position: absolute;
     z-index: 20;
     width: 100%;
     height: 100%;

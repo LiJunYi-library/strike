@@ -21,7 +21,7 @@ export function requireVueFilesCom(vueFiles, config = {}) {
           element[Key] = content.default || {};
         }
         if (name !== "default" && props.useUnDefault) {
-          const k = [config.name, name].filter(Boolean).join("-");
+          const k = [config.name, name].filter(Boolean).join("");
           element[k] = content[name];
         }
       }

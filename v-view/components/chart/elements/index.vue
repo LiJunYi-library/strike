@@ -84,13 +84,13 @@ const defaultOption = () => ({
   series: [],
 });
 
-export const chartHoc = (options = {}) => {
+export const Hoc = (options = {}) => {
   const config = {
     props: {},
     ...options,
   };
   const defProps = {
-    option: { type: Object, default: () => defaultOption() },
+    option: { type: Object, default: (...arg) => defaultOption(...arg) },
     listHook: { type: Object, default: () => ({}) },
     options: { type: Object, default: () => ({}) },
     emptyText: { type: String, default: "暂无数据" },
@@ -270,7 +270,7 @@ export const chartHoc = (options = {}) => {
   });
 };
 
-const Echarts = chartHoc();
+const Echarts = Hoc();
 
 export default Echarts;
 </script>

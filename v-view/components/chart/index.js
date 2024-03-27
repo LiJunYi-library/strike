@@ -2,26 +2,31 @@ import { requireVueFilesCom } from "@rainbow_ljy/v-hooks";
 
 const elements = requireVueFilesCom(require.context("./elements", true, /\.(vue|tsx|jsx)$/), {
   name: "RChart",
-  useUnDefault: false,
 });
 
-console.log(Object.keys(elements).join(","));
+// console.log(elements);
+// console.log(Object.keys(elements).join(","));
 
 export const {
   RChartAnnular,
   RChartCake,
   RChartData,
+  RChartHoc,
+  RChartmerge,
   RChart,
   RChartLinear,
+  RChartSerieLinear,
   RChartSerieAnnular,
   RChartSerieAvg,
   RChartSerieCake,
   RChartSerieCount,
+  RChartSerieHoc,
   RChartSerie,
   RChartSerieMoney,
-  RChartSerieLinear,
   RChartSerieMoneyLinear,
   RChartSerieTreeCake,
+  RChartXaxiHoc,
   RChartXaxi,
+  RChartYaxiHoc,
   RChartYaxi,
 } = elements;

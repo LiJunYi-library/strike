@@ -1,5 +1,5 @@
 <script lang="jsx">
-import { chartHoc } from "./index.vue";
+import { Hoc } from "./index.vue";
 
 const option = () => ({
   title: {
@@ -14,7 +14,7 @@ const option = () => ({
   },
 });
 
-export default chartHoc({
+export default Hoc({
   props: {
     option: { type: Object, default: () => option() },
   },

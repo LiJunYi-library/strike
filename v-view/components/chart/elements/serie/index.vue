@@ -15,7 +15,7 @@ export const SerieHoc = (options = {}) => {
   return defineComponent({
     inheritAttrs: false,
     props: {
-      option: { type: Object, default: () => option() },
+      option: { type: Object, default: (...arg) => option(...arg) },
       property: { type: String, default: "" },
       formatter: Function,
       name: String,

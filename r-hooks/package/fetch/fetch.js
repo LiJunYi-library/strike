@@ -84,7 +84,7 @@ export function fetchQueue(props = {}) {
   return { queue, push, remove, del };
 }
 
-export function useFetchHOC(props = {}) {
+export function createFetchHook(props = {}) {
   const options = {
     formatterFile: async (res, config) => {
       const file = await res.blob();
@@ -178,9 +178,9 @@ export function useFetchHOC(props = {}) {
 
     async function send(props3) {
       const config = { ...configs, ...props3 };
-      setError(false);
-      setErrorData(undefined);
-      setLoading(true);
+      setError(() => false);
+      setErrorData(() => undefined);
+      setLoading(() => true);
       const curController = new AbortController();
       const signalPromise = new Promise((resolve) => {
         curController.signal.addEventListener("abort", () => {
@@ -214,10 +214,10 @@ export function useFetchHOC(props = {}) {
       }
 
       const success = (successData) => {
-        setLoading(false);
-        setData(successData);
-        setError(false);
-        setErrorData(undefined);
+        setLoading(() => false);
+        setData(() => successData);
+        setError(() => false);
+        setErrorData(() => undefined);
         fetchEvents.remove(current);
         events.invoke(successData);
         clearTimeout(current.timer);
@@ -225,9 +225,9 @@ export function useFetchHOC(props = {}) {
       };
 
       const fail = (failData) => {
-        setLoading(false);
-        setError(true);
-        setErrorData(failData);
+        setLoading(() => false);
+        setError(() => true);
+        setErrorData(() => failData);
         fetchEvents.remove(current);
         errEvents.invoke(failData);
         clearTimeout(current.timer);
@@ -292,20 +292,20 @@ export function useFetchHOC(props = {}) {
     }
 
     async function beginSend(...arg) {
-      setBegin(true);
+      setBegin(() => true);
       try {
         return await send(...arg);
       } finally {
-        setBegin(false);
+        setBegin(() => false);
       }
     }
 
     async function nextBeginSend(...arg) {
-      setBegin(true);
+      setBegin(() => true);
       try {
         return await nextSend(...arg);
       } finally {
-        setBegin(false);
+        setBegin(() => false);
       }
     }
 
@@ -317,8 +317,8 @@ export function useFetchHOC(props = {}) {
     function abort() {
       controller.abort();
       clearTimeout(timer);
-      setLoading(false);
-      setBegin(false);
+      setLoading(() => false);
+      setBegin(() => false);
     }
 
     function abortAll() {
@@ -326,8 +326,8 @@ export function useFetchHOC(props = {}) {
         item.controller.abort();
         clearTimeout(item.timer);
       });
-      setLoading(false);
-      setBegin(false);
+      setLoading(() => false);
+      setBegin(() => false);
     }
 
     return params;

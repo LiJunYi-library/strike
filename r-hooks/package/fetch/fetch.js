@@ -1,5 +1,6 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { downloadFile, arrayEvents, arrayRemove, createOverload } from "@rainbow_ljy/rainbow-js";
+import { ref, useMemoProxy } from "../utils/ref";
 
 function getBody(config) {
   if (!config.body) return undefined;
@@ -114,9 +115,10 @@ export function createFetchHook(props = {}) {
       return d;
     },
     formatterData: (d) => d,
-    interceptRequest: undefined,
-    interceptResponseSuccess: undefined,
-    interceptResponseError: undefined,
+    interceptRequest: () => undefined,
+    interceptResponseSuccess: () => undefined,
+    interceptResponseError: () => undefined,
+    downloadFile,
     urlParams: undefined,
     url: "",
     baseUrl: "",
@@ -132,207 +134,200 @@ export function createFetchHook(props = {}) {
     ...props,
   };
 
+  const errLoading = { message: "loading", code: 41 };
+  const errTimeout = { message: "Request Timeout", code: 48 };
+  const errAbout = { message: "about", code: 20 };
+
   function useFetch(props2 = {}) {
-    const configs = { ...options, ...props2 };
+    const [configs] = useState({ ...options, ...props2 });
+    const loading = ref(configs.loading);
+    const begin = ref(configs.begin);
+    const error = ref(configs.error);
+    const errorData = ref(configs.errorData);
+    const data = ref(configs.data);
+    const [events] = useState(arrayEvents());
+    const [errEvents] = useState(arrayEvents());
+    const [fetchEvents] = useState(arrayEvents());
+    const [init] = useState({
+      controller: new AbortController(),
+      timer: undefined,
+    });
 
-    let controller = new AbortController();
-    let timer;
-    const errLoading = { message: "loading", code: 41 };
-    const errTimeout = { message: "Request Timeout", code: 48 };
-    const errAbout = { message: "about", code: 20 };
-    const events = arrayEvents();
-    const errEvents = arrayEvents();
-    const fetchEvents = arrayEvents();
+    return useMemoProxy(() => {
+      const params = {
+        loading,
+        data,
+        begin,
+        error,
+        errorData,
+        errEvents,
+        events,
+        send,
+        nextSend,
+        awaitSend,
+        beginSend,
+        nextBeginSend,
+        awaitBeginSend,
+        abort,
+        abortAll,
+      };
 
-    const [loading, setLoading] = useState(configs.loading);
-    const [data, setData] = useState(configs.data);
-    const [begin, setBegin] = useState(configs.begin);
-    const [error, setError] = useState(configs.error);
-    const [errorData, setErrorData] = useState(configs.errorData);
-    const memo = [loading, data, begin, error, errorData];
-    const params = {
-      loading,
-      data,
-      begin,
-      error,
-      errorData,
-      errEvents,
-      events,
-      memo,
-      setLoading,
-      setData,
-      setBegin,
-      setError,
-      setErrorData,
-      send,
-      nextSend,
-      awaitSend,
-      beginSend,
-      nextBeginSend,
-      awaitBeginSend,
-      abort,
-      abortAll,
-      useMemo: (factory) => useMemo(factory, memo),
-      useCallback: (callback) => useCallback(callback, memo),
-    };
-
-    async function send(props3) {
-      const config = { ...configs, ...props3 };
-      setError(() => false);
-      setErrorData(() => undefined);
-      setLoading(() => true);
-      const curController = new AbortController();
-      const signalPromise = new Promise((resolve) => {
-        curController.signal.addEventListener("abort", () => {
-          resolve(curController.signal.reason);
+      async function send(props3) {
+        const config = { ...configs, ...props3 };
+        errorData.value = undefined;
+        error.value = false;
+        loading.value = true;
+        const curController = new AbortController();
+        const signalPromise = new Promise((resolve) => {
+          curController.signal.addEventListener("abort", () => {
+            resolve(curController.signal.reason);
+          });
         });
-      });
-      controller = curController;
-      const url = config.baseUrl + config.url + parseParams(getParams(config));
-      const headers = getHeaders(config);
-      const body = revBody(headers["Content-Type"], config);
-      const fetchConfig = {
-        url,
-        headers,
-        method: config.method,
-        signal: controller.signal,
-        body,
-      };
-      config?.interceptRequest?.(fetchConfig, config);
-      const URL = fetchConfig.url;
-      delete fetchConfig.url;
-      const current = { timer: undefined, controller: curController };
-      fetchEvents.push(current);
-      let fetchPromise;
+        init.controller = curController;
+        const url = config.baseUrl + config.url + parseParams(getParams(config));
+        const headers = getHeaders(config);
+        const body = revBody(headers["Content-Type"], config);
 
-      if (config.time) {
-        current.timer = setTimeout(() => {
-          console.log("setTimeout");
-          curController.abort(errTimeout);
-        }, config.time);
-        timer = current.timer;
-      }
+        const fetchConfig = {
+          url,
+          headers,
+          method: config.method,
+          signal: init.controller.signal,
+          body,
+        };
+        config?.interceptRequest?.(fetchConfig, config);
+        const URL = fetchConfig.url;
+        delete fetchConfig.url;
+        const current = { timer: undefined, controller: curController };
+        fetchEvents.push(current);
+        let fetchPromise;
 
-      const success = (successData) => {
-        setLoading(() => false);
-        setData(() => successData);
-        setError(() => false);
-        setErrorData(() => undefined);
-        fetchEvents.remove(current);
-        events.invoke(successData);
-        clearTimeout(current.timer);
-        options.fetchQueue?.remove?.(fetchPromise, config, params);
-      };
-
-      const fail = (failData) => {
-        setLoading(() => false);
-        setError(() => true);
-        setErrorData(() => failData);
-        fetchEvents.remove(current);
-        errEvents.invoke(failData);
-        clearTimeout(current.timer);
-        options.fetchQueue?.remove?.(fetchPromise, config, params);
-      };
-
-      try {
-        fetchPromise = fetch(URL, fetchConfig);
-        options.fetchQueue?.push?.(fetchPromise, config, params);
-        const res = await fetchPromise;
-        const d = await config.formatterResponse(res, config);
-        if (!res.ok) throw d;
-
-        if (config.isDownloadFile) {
-          const fileName = await config.formatterFileName(res, config);
-          downloadFile(d, fileName);
+        if (config.time) {
+          current.timer = setTimeout(() => {
+            console.log("setTimeout");
+            curController.abort(errTimeout);
+          }, config.time);
+          init.timer = current.timer;
         }
 
-        if (config.interceptResponseSuccess) {
-          const reset = config.interceptResponseSuccess(res, d, config);
-          if (reset instanceof Promise) {
-            return reset
-              .catch((mErr) => {
-                fail(mErr);
-                return Promise.reject(errorData);
-              })
-              .then(async (mRes) => {
-                success(config.formatterData(mRes, d, res));
-                return Promise.resolve(data);
-              });
+        const success = (successData) => {
+          loading.value = false;
+          data.value = successData;
+          error.value = false;
+          errorData.value = undefined;
+          fetchEvents.remove(current);
+          events.invoke(successData);
+          clearTimeout(current.timer);
+          options.fetchQueue?.remove?.(fetchPromise, config, params);
+          return successData;
+        };
+
+        const fail = (failData) => {
+          loading.value = false;
+          error.value = true;
+          errorData.value = failData;
+          fetchEvents.remove(current);
+          errEvents.invoke(failData);
+          clearTimeout(current.timer);
+          options.fetchQueue?.remove?.(fetchPromise, config, params);
+          return failData;
+        };
+
+        try {
+          fetchPromise = fetch(URL, fetchConfig);
+          options.fetchQueue?.push?.(fetchPromise, config, params);
+          const res = await fetchPromise;
+          const d = await config.formatterResponse(res, config);
+          if (!res.ok) throw d;
+
+          if (config.isDownloadFile) {
+            const fileName = await config.formatterFileName(res, config);
+            config.downloadFile(d, fileName);
+          }
+
+          if (config.interceptResponseSuccess) {
+            const reset = config.interceptResponseSuccess(res, d, config);
+            if (reset instanceof Promise) {
+              return reset
+                .catch((mErr) => {
+                  return Promise.reject(fail(mErr));
+                })
+                .then(async (mRes) => {
+                  return Promise.resolve(success(config.formatterData(mRes, d, res)));
+                });
+            }
+          }
+          return success(d);
+        } catch (err) {
+          fetchEvents.remove(current);
+          let errorRes = err;
+          if (err.code === 20) {
+            options.fetchQueue?.del?.(fetchPromise, config, params);
+            errorRes = await signalPromise;
+          }
+
+          if (errorRes.code !== 20) {
+            console.error("errorRes", errorRes);
+            const errReset = config.interceptResponseError(errorRes, config);
+            fail(errorRes);
+            if (errReset) throw errReset;
           }
         }
+      }
 
-        success(d);
-        return data;
-      } catch (err) {
-        fetchEvents.remove(current);
-        let errorRes = err;
-        if (err.code === 20) {
-          options.fetchQueue?.del?.(fetchPromise, config, params);
-          errorRes = await signalPromise;
+      function nextSend(...arg) {
+        init.controller?.abort?.();
+        clearTimeout(init.timer);
+        return send(...arg);
+      }
+
+      function awaitSend(...arg) {
+        if (loading.value === true) throw errLoading;
+        return send(...arg);
+      }
+
+      async function beginSend(...arg) {
+        begin.value = true;
+        try {
+          return await send(...arg);
+        } finally {
+          begin.value = false;
         }
+      }
 
-        if (errorRes.code !== 20) {
-          console.error("errorRes", errorRes);
-          const errReset = config.interceptResponseError(errorRes, config);
-          fail(errorRes);
-          if (errReset) throw errReset;
+      async function nextBeginSend(...arg) {
+        begin.value = true;
+        try {
+          return await nextSend(...arg);
+        } finally {
+          begin.value = false;
         }
       }
-    }
 
-    function nextSend(...arg) {
-      controller.abort();
-      clearTimeout(timer);
-      return send(...arg);
-    }
-
-    function awaitSend(...arg) {
-      if (loading === true) throw errLoading;
-      return send(...arg);
-    }
-
-    async function beginSend(...arg) {
-      setBegin(() => true);
-      try {
-        return await send(...arg);
-      } finally {
-        setBegin(() => false);
+      function awaitBeginSend(...arg) {
+        if (loading.value === true) throw errLoading;
+        return beginSend(...arg);
       }
-    }
 
-    async function nextBeginSend(...arg) {
-      setBegin(() => true);
-      try {
-        return await nextSend(...arg);
-      } finally {
-        setBegin(() => false);
+      function abort() {
+        init.controller.abort();
+        clearTimeout(init.timer);
+        loading.value = false;
+        begin.value = false;
       }
-    }
 
-    function awaitBeginSend(...arg) {
-      if (loading === true) throw errLoading;
-      return beginSend(...arg);
-    }
+      function abortAll() {
+        fetchEvents.invokes((item) => {
+          item.controller.abort();
+          clearTimeout(item.timer);
+        });
+        loading.value = false;
+        begin.value = false;
+      }
 
-    function abort() {
-      controller.abort();
-      clearTimeout(timer);
-      setLoading(() => false);
-      setBegin(() => false);
-    }
-
-    function abortAll() {
-      fetchEvents.invokes((item) => {
-        item.controller.abort();
-        clearTimeout(item.timer);
-      });
-      setLoading(() => false);
-      setBegin(() => false);
-    }
-
-    return params;
+      return params;
+    });
   }
-
   return useFetch;
 }
 

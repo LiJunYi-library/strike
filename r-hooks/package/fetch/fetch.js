@@ -217,6 +217,7 @@ export function createFetchHook(props = {}) {
           errorData.value = undefined;
           fetchEvents.remove(current);
           events.invoke(successData);
+          config?.onSuccess?.(successData);
           clearTimeout(current.timer);
           options.fetchQueue?.remove?.(fetchPromise, config, params);
           return successData;
@@ -228,6 +229,7 @@ export function createFetchHook(props = {}) {
           errorData.value = failData;
           fetchEvents.remove(current);
           errEvents.invoke(failData);
+          config?.onFail?.(failData);
           clearTimeout(current.timer);
           options.fetchQueue?.remove?.(fetchPromise, config, params);
           return failData;

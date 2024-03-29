@@ -210,12 +210,16 @@ function useListLoad2(props = {}) {
     total.value = 0;
     config.beforeBegin(params);
     return asyncHooks.nextBeginSend(...arg).then((res) => {
-      listData.value = config.setList(res, params);
+      listData.value = config.setList(res, params) || [];
       list.value = listData.value;
       currentPage.value = config.setCurrentPage(res, params);
       total.value = config.setTotal(res, params);
       finished.value = config.setFinished(res, params);
       config.fetchBeginCB(params);
+      if (listData.value.length === 0) return res;
+      if (list.value.length < pageSize.value) {
+        return awaitConcatSend(...arg);
+      }
       return res;
     });
   }
@@ -223,12 +227,16 @@ function useListLoad2(props = {}) {
   function awaitConcatSend(...arg) {
     if (finished.value === true) return;
     return asyncHooks.awaitSend(...arg).then((res) => {
-      listData.value = config.setList(res, params);
+      listData.value = config.setList(res, params) || [];
       list.value.push(...listData.value);
       currentPage.value = config.setCurrentPage(res, params);
       total.value = config.setTotal(res, params);
       finished.value = config.setFinished(res, params);
       config.fetchConcatCB(params);
+      if (listData.value.length === 0) return res;
+      if (list.value.length < pageSize.value) {
+        return awaitConcatSend(...arg);
+      }
       return res;
     });
   }

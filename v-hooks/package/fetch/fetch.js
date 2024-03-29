@@ -115,10 +115,11 @@ export function useFetchHOC(props = {}) {
       return d;
     },
     formatterData: (d) => d,
-    interceptRequest: undefined,
-    interceptResponseSuccess: undefined,
-    interceptResponseError: undefined,
+    interceptRequest: () => undefined,
+    interceptResponseSuccess: () => undefined,
+    interceptResponseError: () => undefined,
     urlParams: undefined,
+    body: undefined,
     url: "",
     baseUrl: "",
     time: 30000,
@@ -129,7 +130,7 @@ export function useFetchHOC(props = {}) {
     error: false,
     data: undefined,
     errorData: undefined,
-    fetchQueue: [],
+    fetchQueue: undefined,
     ...props,
   };
 

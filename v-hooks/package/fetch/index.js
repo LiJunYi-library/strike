@@ -25,7 +25,7 @@ function parseParams(object) {
 }
 
 function mergeRequestInit(source = {}, target = {}) {
-  let propertys = [
+  const propertys = [
     "body",
     "cache",
     "credentials",
@@ -40,7 +40,7 @@ function mergeRequestInit(source = {}, target = {}) {
     "signal",
     "window",
   ];
-  let newObj = {};
+  const newObj = {};
   propertys.forEach((key) => {
     const val = source[key] || target[key];
     if (val !== undefined) newObj[key] = val;
@@ -50,7 +50,7 @@ function mergeRequestInit(source = {}, target = {}) {
 
 function getFetchProps(...args) {
   let options = {};
-  let propertys = ["url", "method", "body", "contentType", "headers"];
+  const propertys = ["url", "method", "body", "contentType", "headers"];
   if (args && args.length === 1 && typeof args[0] === "object") {
     options = Object.assign(options, args[0]);
   } else {
@@ -58,9 +58,9 @@ function getFetchProps(...args) {
       if (args[index] !== undefined) options[key] = args[index];
     });
   }
-  let h = {};
+  const h = {};
   if (options.contentType) h["Content-Type"] = options.contentType;
-  let config = {
+  const config = {
     ...options,
     headers: {
       ...h,
@@ -110,6 +110,7 @@ function resolveRequestInit(options = {}) {
   ) {
     const formData = new FormData();
     for (const key in options.body) {
+      // eslint-disable-next-line no-prototype-builtins
       if (options.body.hasOwnProperty(key)) {
         formData.append(key, options.body[key]);
       }
@@ -139,7 +140,7 @@ function createHttpRequest(initprops = {}) {
     ...initprops,
   });
 
-  let _intercept = {
+  const _intercept = {
     request: () => undefined,
     success: () => undefined,
     error: () => undefined,
@@ -157,7 +158,7 @@ function createHttpRequest(initprops = {}) {
     };
 
     let timer;
-    let controller = new AbortController();
+    const controller = new AbortController();
 
     resolveRequestInit(config);
     const requestInit = mergeRequestInit(config, {
@@ -215,7 +216,7 @@ function createHttpRequest(initprops = {}) {
 
 function useFetchHoc(request) {
   function context(...props) {
-    let config = {
+    const config = {
       begin: false,
       loading: false,
       error: false,
@@ -251,7 +252,7 @@ function useFetchHoc(request) {
       loading.value = true;
       error.value = false;
       controller = new AbortController();
-      let sendConfig = getFetchProps(...arg);
+      const sendConfig = getFetchProps(...arg);
       pro = request({
         ...config,
         ...sendConfig,

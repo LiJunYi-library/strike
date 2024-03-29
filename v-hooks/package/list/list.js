@@ -1,4 +1,4 @@
-import { ref, reactive, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import { usePromise2, useLoading } from "../promise";
 import { useReactive } from "../../other";
 import { useSelect2 } from "./select2";

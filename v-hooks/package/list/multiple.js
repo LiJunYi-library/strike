@@ -75,7 +75,7 @@ function useMultiple(props = {}) {
   });
 
   
-  var isAllSelect = computed(() => {
+  const isAllSelect = computed(() => {
     return context.select.length === list.value.length;
   });
 
@@ -126,6 +126,7 @@ function useMultiple(props = {}) {
 
   params.proxy = reactive(params);
 
+  // eslint-disable-next-line no-var
   var context = params.proxy;
 
 

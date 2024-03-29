@@ -1,7 +1,8 @@
-import { ref, reactive } from "vue";
-import { usePromise } from "../promise";
+import { useState, useEffect, useMemo } from "react";
 import { getSelectProps } from "./select";
-
+import { ref, useProxy, refs, onCreat } from "../utils/ref";
+import { computeLoading } from "../promise";
+import { mergeHooks } from "../utils";
 export { useMultiple, useAsyncMultiple };
 
 function useMultiple(props = {}) {
@@ -31,7 +32,6 @@ function useMultiple(props = {}) {
     return add;
   };
   const isHave = (arr) => arr && arr.length > 0;
-
   function resolveProps(options = config, isChange = false) {
     const map = {
       indexItem: undefined,
@@ -57,7 +57,6 @@ function useMultiple(props = {}) {
     };
     return arg;
   }
-
   const initParms = resolveProps(config, true);
   const list = ref(initParms.list);
   const select = ref(initParms.select);
@@ -65,241 +64,203 @@ function useMultiple(props = {}) {
   const label = ref(initParms.label);
   const index = ref(initParms.index);
 
-  const store = reactive({
-    list: [],
-    select: [],
-    value: [],
-    label: [],
-    index: [],
-  });
-
-  const params = {
-    list,
-    select,
-    value,
-    label,
-    index,
-    store,
-    isMultiple,
-    formatterValue,
-    formatterLabel,
-    formatterDisabled,
-    save,
-    restore,
-    transformStore,
-    transformParams,
-    transform,
-    same,
-    onSelect,
-    reset,
-    updateList,
-    updateSelect,
-    updateValue,
-    updateLabel,
-    updateIndex,
-    resolveValue,
-    verifyValueInList,
-    updateListAndReset,
-    updateListToResolveValue,
-    invertSelect,
-    allSelect,
-    selectOfValue,
-    labelOfValue,
-    indexOfValue,
+  const isAllSelect = () => {
+    return select.value.length === list.value.length;
   };
 
-  params.proxy = reactive(params);
+  return onCreat(() => {
+    const params = useProxy({
+      list,
+      select,
+      value,
+      label,
+      index,
+      memos: refs(list, select, value, label, index),
+      isMultiple,
+      isAllSelect,
+      formatterValue,
+      formatterLabel,
+      formatterDisabled,
+      same,
+      onSelect,
+      reset,
+      updateList,
+      updateSelect,
+      updateValue,
+      updateLabel,
+      updateIndex,
+      resolveValue,
+      verifyValueInList,
+      updateListAndReset,
+      updateListToResolveValue,
+      invertSelect,
+      allSelect,
 
-  let context = params.proxy;
+      getSelectOfValue,
+      getLabelOfValue,
+      getIndexOfValue,
+    });
 
-  function save() {
-    // store.list = [...params.proxy.list];
-    store.select = [...params.proxy.select];
-    store.value = [...params.proxy.value];
-    store.label = [...params.proxy.label];
-    store.index = [...params.proxy.index];
-  }
-
-  function restore() {
-    // params.proxy.list = [...store.list];
-    params.proxy.select = [...store.select];
-    params.proxy.value = [...store.value];
-    params.proxy.label = [...store.label];
-    params.proxy.index = [...store.index];
-  }
-
-  function transformStore() {
-    context = store;
-  }
-
-  function transformParams() {
-    context = params.proxy;
-  }
-
-  function transform() {
-    if (context === params.proxy) return (context = store);
-    if (context === store) return (context = params.proxy);
-  }
-
-  function same(item, i) {
-    return context.select.some((val) => val === item);
-  }
-
-  function onSelect(item, i) {
-    const val = formatterValue(item);
-    const lab = formatterLabel(item);
-    if (same(item)) {
-      context.select = context.select.filter((v) => v !== item);
-      context.value = context.select.map((v) => formatterValue(v));
-      context.label = context.select.map((v) => formatterLabel(v));
-      context.index = context.value.filter((v) => v !== i);
-    } else {
-      context.select.push(item);
-      context.value.push(val);
-      context.label.push(lab);
-      context.index.push(i);
+    function same(item, i) {
+      return select.value.some((val) => val === item);
     }
-  }
 
-  function invertSelect() {
+    function onSelect(item, i) {
+      const val = formatterValue(item);
+      const lab = formatterLabel(item);
+      if (same(item)) {
+        select.value = select.value.filter((v) => v !== item);
+        value.value = select.value.map((v) => formatterValue(v));
+        label.value = select.value.map((v) => formatterLabel(v));
+        index.value = index.value.filter((v) => v !== i);
+      } else {
+        select.value = [...select.value, item];
+        value.value = [...select.value, val];
+        label.value = [...select.value, lab];
+        index.value = [...select.value, i];
+      }
+    }
     // 反选
-    context.select = list.value.filter((val) => !context.select.some((el) => el === val));
-    context.value = context.select.map((el) => formatterValue(el));
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
-  }
-
-  function allSelect() {
+    function invertSelect() {
+      select.value = list.value.filter((val) => !select.value.some((el) => el === val));
+      value.value = select.value.map((el) => formatterValue(el));
+      label.value = select.value.map((el) => formatterLabel(el));
+      index.value = list.value.reduce(reduceIndex(select.value), []);
+    }
     // 全选
-    context.select = [...list.value];
-    context.value = context.select.map((el) => formatterValue(el));
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.index = list.value.map((el, nth) => nth);
-  }
+    function allSelect() {
+      select.value = [...list.value];
+      value.value = select.value.map((el) => formatterValue(el));
+      label.value = select.value.map((el) => formatterLabel(el));
+      index.value = list.value.map((el, nth) => nth);
+    }
 
-  function reset() {
-    context.select = [];
-    context.value = [];
-    context.label = [];
-    context.index = [];
-  }
+    function reset() {
+      select.value = [];
+      value.value = [];
+      label.value = [];
+      index.value = [];
+    }
 
-  function updateList(li) {
-    list.value = revArray(li);
-  }
+    function updateList(li, values = {}) {
+      list.value = revArray(li);
+      const arg = { ...config, list: list.value, ...values };
+      const states = resolveProps(arg);
+      select.value = states.select;
+      value.value = states.value;
+      label.value = states.label;
+      index.value = states.index;
+    }
 
-  function updateSelect(val) {
-    context.select = revArray(val);
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.value = context.select.map((el) => formatterValue(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
-  }
+    function updateSelect(val) {
+      select.value = revArray(val);
+      label.value = select.value.map((el) => formatterLabel(el));
+      value.value = select.value.map((el) => formatterValue(el));
+      index.value = list.value.reduce(reduceIndex(select.value), []);
+    }
 
-  function updateValue(val) {
-    context.value = revArray(val);
-    context.select = filterForValue(list.value, context.value);
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
-  }
+    function updateValue(val) {
+      value.value = revArray(val);
+      select.value = filterForValue(list.value, value.value);
+      label.value = select.value.map((el) => formatterLabel(el));
+      index.value = list.value.reduce(reduceIndex(select.value), []);
+    }
 
-  function updateLabel(val) {
-    context.label = revArray(val);
-    context.select = filterForLabel(list.value, context.label);
-    context.value = context.select.map((el) => formatterValue(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
-  }
+    function updateLabel(val) {
+      label.value = revArray(val);
+      select.value = filterForLabel(list.value, label.value);
+      value.value = select.value.map((el) => formatterValue(el));
+      index.value = list.value.reduce(reduceIndex(select.value), []);
+    }
 
-  function updateIndex(val) {
-    context.index = revArray(val);
-    context.select = context.index.map((el) => list.value?.[el]);
-    context.value = context.select.map((el) => formatterValue(el));
-    context.label = context.select.map((el) => formatterLabel(el));
-  }
+    function updateIndex(val) {
+      index.value = revArray(val);
+      select.value = index.value.map((el) => list.value?.[el]);
+      value.value = select.value.map((el) => formatterValue(el));
+      label.value = select.value.map((el) => formatterLabel(el));
+    }
+    //  --  //
+    function getSelectOfValue(val) {
+      return filterForValue(list.value, val);
+    }
 
-  function selectOfValue(val) {
-    return filterForValue(list.value, val);
-  }
+    function getLabelOfValue(val) {
+      return getSelectOfValue(val).map((el) => formatterLabel(el));
+    }
 
-  function labelOfValue(val) {
-    return selectOfValue(val).map((el) => formatterLabel(el));
-  }
+    function getIndexOfValue(val) {
+      return list.value.reduce(reduceIndex(getSelectOfValue(val)), []);
+    }
+    //  --  //
+    function findValueArr() {
+      return list.value
+        .reduce(reduceItemForValue(select.value), [])
+        .map((el) => formatterValue(el));
+    }
 
-  function indexOfValue(val) {
-    return list.value.reduce(reduceIndex(selectOfValue(val)), []);
-  }
+    function verifyValueInList() {
+      return findValueArr()?.length > 0;
+    }
 
-  function findValueArr() {
-    return list.value
-      .reduce(reduceItemForValue(context.select), [])
-      .map((el) => formatterValue(el));
-  }
+    function resolveValue() {
+      const val = findValueArr();
+      if (val.length) {
+        updateValue(val);
+      } else {
+        reset();
+      }
+    }
 
-  function verifyValueInList() {
-    return findValueArr()?.length > 0;
-  }
+    function updateListToResolveValue(li) {
+      list.value = revArray(li);
+      resolveValue();
+    }
 
-  function resolveValue() {
-    const val = findValueArr();
-    if (val.length) {
-      updateValue(val);
-    } else {
+    function updateListAndReset(li) {
+      updateList(li);
       reset();
     }
-  }
 
-  function updateListToResolveValue(li) {
-    list.value = li;
-    resolveValue();
-  }
-
-  function updateListAndReset(li) {
-    updateList(li);
-    reset();
-  }
-
-  return params;
+    return params;
+  });
 }
 
 function useAsyncMultiple(props = {}) {
-  const config = {
+  const [config] = useState({
+    watchDataCb: ({ data, updateList }) => {
+      try {
+        updateList(data);
+      } catch (error) {
+        // console.warn(error);
+      }
+    },
     fetchCb: () => undefined,
     ...props,
-  };
-
-  const finished = ref(false);
-  const multipleHook = useMultiple(config);
-  const asyncHook = usePromise(config.fetchCb, {
-    before: () => {
-      finished.value = false;
-    },
-    then: (data) => {
-      multipleHook.updateListToResolveValue(data);
-      finished.value = true;
-    },
-    ...config,
   });
 
-  function beginSend(...arg) {
-    multipleHook.list.value = [];
-    return asyncHook.beginSend(...arg);
-  }
-  function nextBeginSend(...arg) {
-    multipleHook.list.value = [];
-    return asyncHook.nextBeginSend(...arg);
-  }
-  function awaitBeginSend(...arg) {
-    multipleHook.list.value = [];
-    return asyncHook.awaitBeginSend(...arg);
-  }
+  const multipleHooks = useMultiple(config);
+  const loadingHooks = computeLoading({
+    promiseHooks: config.asyncHooks,
+    loadingHooks: config.loadingHooks,
+  });
 
-  const params = {
-    ...multipleHook,
-    ...asyncHook,
-    finished,
-    beginSend,
-    nextBeginSend,
-    awaitBeginSend,
-  };
-  params.proxy = reactive(params);
-  return params;
+  const hooks = onCreat(() => {
+    const params = useProxy(mergeHooks(multipleHooks, config.asyncHooks, loadingHooks));
+    return params;
+  });
+
+  useMemo(() => {
+    config.successFun = () => {
+      config.watchDataCb(hooks);
+    };
+    config.asyncHooks?.events?.push?.(config.successFun);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      config.asyncHooks?.events?.remove?.(config.successFun);
+    };
+  }, []);
+
+  return hooks;
 }

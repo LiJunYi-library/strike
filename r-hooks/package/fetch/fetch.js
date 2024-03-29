@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { downloadFile, arrayEvents, arrayRemove, createOverload } from "@rainbow_ljy/rainbow-js";
-import { ref, useMemoProxy } from "../utils/ref";
+import { ref, useMemoProxy, refs } from "../utils/ref";
 
 function getBody(config) {
   if (!config.body) return undefined;
@@ -162,6 +162,7 @@ export function createFetchHook(props = {}) {
         errorData,
         errEvents,
         events,
+        memos: refs(loading, data, begin, error, errorData),
         send,
         nextSend,
         awaitSend,
@@ -204,7 +205,6 @@ export function createFetchHook(props = {}) {
 
         if (config.time) {
           current.timer = setTimeout(() => {
-            console.log("setTimeout");
             curController.abort(errTimeout);
           }, config.time);
           init.timer = current.timer;

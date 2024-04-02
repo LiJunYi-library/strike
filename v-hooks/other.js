@@ -54,17 +54,27 @@ export function useModelWatch(props, context, key) {
   return mRef;
 }
 
+function assign(target = {}, source = {}) {
+  for (const key in source) {
+    if (Object.hasOwnProperty.call(source, key)) {
+      const el = source[key];
+      if (el instanceof Array) target[key] = [...source[key]];
+      else target[key] = source[key];
+    }
+  }
+}
+
 export function createSaveContext(refs, argStores) {
   const states = reactive(refs);
   const stores = argStores || reactive({ ...states });
   const context = { stores, refs, states, getRefs: () => refs, SH: states };
 
   function save() {
-    Object.assign(context.stores, context.states);
+    assign(context.stores, context.states);
   }
 
   function restore() {
-    Object.assign(context.states, context.stores);
+    assign(context.states, context.stores);
   }
 
   function changeContextToStore() {

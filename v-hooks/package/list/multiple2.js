@@ -1,7 +1,7 @@
 import { ref, reactive, watch, computed } from "vue";
 import { usePromise2, useLoading } from "../promise";
 import { getSelectProps } from "./select";
-import { useReactive } from "../../other";
+import { useReactive, createSaveContext } from "../../other";
 
 export { useMultiple2, useAsyncMultiple2 };
 
@@ -60,47 +60,25 @@ function useMultiple2(props = {}) {
     return arg;
   }
 
-  let context;
   const initParms = resolveProps(config);
   const list = ref(initParms.list);
   const select = ref(initParms.select);
   const value = ref(initParms.value);
   const label = ref(initParms.label);
   const index = ref(initParms.index);
+  const contextHooks = createSaveContext({ value, select, label, index });
 
-  const store = reactive({
-    list: [],
-    select: [],
-    value: [],
-    label: [],
-    index: [],
-  });
-
-  const isAllSelect = computed(() => {
-    return context.select.length === list.value.length;
-  });
-
-  const params = useReactive({
+  const hooks = useReactive({
     list,
     select,
     value,
     label,
     index,
-    store,
     isMultiple,
     isAllSelect,
     formatterValue,
     formatterLabel,
     formatterDisabled,
-    save,
-    restore,
-    transformStore: changeContextToStore,
-    changeContextToStore,
-    transformParams: changeContextToProxy,
-    changeContextToProxy,
-    save_changeContextToStore,
-    restore_changeContextToProxy,
-    transform,
     same,
     onSelect,
     reset,
@@ -115,136 +93,99 @@ function useMultiple2(props = {}) {
     updateListToResolveValue,
     invertSelect,
     allSelect,
-
     selectOfValue,
     labelOfValue,
     indexOfValue,
     getSelectOfValue: selectOfValue,
     getLabelOfValue: labelOfValue,
     getIndexOfValue: indexOfValue,
-    getContext,
+    ...contextHooks,
   });
 
-  context = params;
-
-  function getContext() {
-    return context;
+  function isAllSelect() {
+    return hooks.context.SH.select.length === list.value.length;
   }
 
-  function save() {
-    store.select = [...params.select];
-    store.value = [...params.value];
-    store.label = [...params.label];
-    store.index = [...params.index];
-  }
-
-  function restore() {
-    params.select = [...store.select];
-    params.value = [...store.value];
-    params.label = [...store.label];
-    params.index = [...store.index];
-  }
-
-  function changeContextToStore() {
-    context = store;
-  }
-
-  function changeContextToProxy() {
-    context = params;
-  }
-
-  function save_changeContextToStore() {
-    save();
-    changeContextToStore();
-  }
-
-  function restore_changeContextToProxy() {
-    restore();
-    changeContextToProxy();
-  }
-
-  function transform() {
-    if (context === params) return (context = store);
-    if (context === store) return (context = params);
-  }
-
+  //
   function same(item, i) {
-    return context.select.some((val) => val === item);
+    return hooks.context.SH.select.some((val) => val === item);
   }
 
   function onSelect(item, i) {
     const val = formatterValue(item);
     const lab = formatterLabel(item);
     if (same(item)) {
-      context.select = context.select.filter((v) => v !== item);
-      context.value = context.select.map((v) => formatterValue(v));
-      context.label = context.select.map((v) => formatterLabel(v));
-      context.index = context.index.filter((v) => v !== i);
+      hooks.context.SH.select = hooks.context.SH.select.filter((v) => v !== item);
+      hooks.context.SH.value = hooks.context.SH.select.map((v) => formatterValue(v));
+      hooks.context.SH.label = hooks.context.SH.select.map((v) => formatterLabel(v));
+      hooks.context.SH.index = hooks.context.SH.index.filter((v) => v !== i);
     } else {
-      context.select.push(item);
-      context.value.push(val);
-      context.label.push(lab);
-      context.index.push(i);
+      hooks.context.SH.select.push(item);
+      hooks.context.SH.value.push(val);
+      hooks.context.SH.label.push(lab);
+      hooks.context.SH.index.push(i);
     }
   }
   // 反选
   function invertSelect() {
-    context.select = list.value.filter((val) => !context.select.some((el) => el === val));
-    context.value = context.select.map((el) => formatterValue(el));
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
+    hooks.context.SH.select = list.value.filter(
+      (val) => !hooks.context.SH.select.some((el) => el === val)
+    );
+    hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
+    hooks.context.SH.label = hooks.context.SH.select.map((el) => formatterLabel(el));
+    hooks.context.SH.index = list.value.reduce(reduceIndex(hooks.context.SH.select), []);
   }
   // 全选
   function allSelect() {
-    context.select = [...list.value];
-    context.value = context.select.map((el) => formatterValue(el));
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.index = list.value.map((el, nth) => nth);
+    hooks.context.SH.select = [...list.value];
+    hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
+    hooks.context.SH.label = hooks.context.SH.select.map((el) => formatterLabel(el));
+    hooks.context.SH.index = list.value.map((el, nth) => nth);
   }
 
   function reset() {
-    context.select = [];
-    context.value = [];
-    context.label = [];
-    context.index = [];
+    hooks.context.SH.select = [];
+    hooks.context.SH.value = [];
+    hooks.context.SH.label = [];
+    hooks.context.SH.index = [];
   }
 
   function updateList(li, values = {}) {
     list.value = revArray(li);
     const arg = { ...config, list: list.value, ...values };
     const parms = resolveProps(arg);
-    context.select = parms.select;
-    context.value = parms.value;
-    context.label = parms.label;
-    context.index = parms.index;
+    hooks.context.SH.select = parms.select;
+    hooks.context.SH.value = parms.value;
+    hooks.context.SH.label = parms.label;
+    hooks.context.SH.index = parms.index;
   }
 
   function updateSelect(val) {
-    context.select = revArray(val);
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.value = context.select.map((el) => formatterValue(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
+    hooks.context.SH.select = revArray(val);
+    hooks.context.SH.label = hooks.context.SH.select.map((el) => formatterLabel(el));
+    hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
+    hooks.context.SH.index = list.value.reduce(reduceIndex(hooks.context.SH.select), []);
   }
 
   function updateValue(val) {
-    context.value = revArray(val);
-    context.select = filterForValue(list.value, context.value);
-    context.label = context.select.map((el) => formatterLabel(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
+    hooks.context.SH.value = revArray(val);
+    hooks.context.SH.select = filterForValue(list.value, hooks.context.SH.value);
+    hooks.context.SH.label = hooks.context.SH.select.map((el) => formatterLabel(el));
+    hooks.context.SH.index = list.value.reduce(reduceIndex(hooks.context.SH.select), []);
   }
 
   function updateLabel(val) {
-    context.label = revArray(val);
-    context.select = filterForLabel(list.value, context.label);
-    context.value = context.select.map((el) => formatterValue(el));
-    context.index = list.value.reduce(reduceIndex(context.select), []);
+    hooks.context.SH.label = revArray(val);
+    hooks.context.SH.select = filterForLabel(list.value, hooks.context.SH.label);
+    hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
+    hooks.context.SH.index = list.value.reduce(reduceIndex(hooks.context.SH.select), []);
   }
 
   function updateIndex(val) {
-    context.index = revArray(val);
-    context.select = context.index.map((el) => list.value?.[el]);
-    context.value = context.select.map((el) => formatterValue(el));
-    context.label = context.select.map((el) => formatterLabel(el));
+    hooks.context.SH.index = revArray(val);
+    hooks.context.SH.select = hooks.context.SH.index.map((el) => list.value?.[el]);
+    hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
+    hooks.context.SH.label = hooks.context.SH.select.map((el) => formatterLabel(el));
   }
   //  --  //
   function selectOfValue(val) {
@@ -261,7 +202,7 @@ function useMultiple2(props = {}) {
   //  --  //
   function findValueArr() {
     return list.value
-      .reduce(reduceItemForValue(context.select), [])
+      .reduce(reduceItemForValue(hooks.context.SH.select), [])
       .map((el) => formatterValue(el));
   }
 
@@ -288,7 +229,7 @@ function useMultiple2(props = {}) {
     reset();
   }
 
-  return params;
+  return hooks;
 }
 
 function useAsyncMultiple2(props = {}) {

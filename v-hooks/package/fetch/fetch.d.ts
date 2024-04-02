@@ -1,5 +1,5 @@
 import { Ref, ComputedRef, UnwrapNestedRefs } from "vue";
-type ANY = unknown | object | any;
+type ANY = any;
 type FunReturnVal = () => ANY;
 
 type FetchQueue = {
@@ -16,10 +16,15 @@ type FetchQueueConfig = {
   onResponse: () => ANY;
 };
 
-interface FetchHOCConfig extends RequestInit {
+interface FetchConfig extends RequestInit {
+  url: string;
+  headers: ANY;
+}
+
+interface FetchHOCConfig<D = ANY> extends RequestInit {
   url?: string;
-  urlParams?: FunReturnVal | Ref | ComputedRef | UnwrapNestedRefs | object;
-  body?: FunReturnVal | Ref | ComputedRef | UnwrapNestedRefs | object;
+  urlParams?: ANY;
+  body?: ANY;
   baseUrl?: string = "";
   time?: number = 30000;
   isDownloadFile?: boolean = false;
@@ -30,35 +35,36 @@ interface FetchHOCConfig extends RequestInit {
   data?: ANY;
   errorData?: ANY;
   fetchQueue?: FetchQueue;
-  formatterFile?: (res: Response, config: ANY) => ANY;
-  formatterFileName?: (res: Response, config: ANY) => ANY;
-  formatterResponse?: (res: Response, config: ANY) => ANY;
+  initHeaders?: HeadersInit;
+  formatterFile?: (res: Response, config: this) => Promise<Blob>;
+  formatterFileName?: (res: Response, config: this) => string;
+  formatterResponse?: (res: Response, config: this) => ANY;
   formatterData?: (mRes: ANY, d: ANY, res: Response) => ANY;
-  interceptRequest?: (fetchConfig: ANY, config: ANY) => ANY;
-  interceptResponseSuccess?: (res: Response, data: ANY, config: ANY) => ANY;
-  interceptResponseError?: (errorRes: ANY, config: ANY) => ANY;
+  interceptRequest?: (fetchConfig: FetchConfig, config: this) => ANY;
+  interceptResponseSuccess?: (res: Response, data: D, config: this) => Promise<ANY>;
+  interceptResponseError?: (errorRes: ANY, config: this) => ANY;
 }
 
-type FetchApi = {
+type FetchApi<C = ANY, D = ANY, E = ANY> = {
   loading: boolean;
-  data: boolean;
+  data: D;
   begin: boolean;
   error: boolean;
-  errorData: boolean;
-  errEvents: boolean;
-  events: boolean;
-  send: boolean;
-  nextSend: boolean;
-  awaitSend: boolean;
-  beginSend: boolean;
-  nextBeginSend: boolean;
-  awaitBeginSend: boolean;
-  abort: boolean;
-  abortAll: boolean;
+  errorData: E;
+  errEvents: ArrayEvents<ANY>;
+  events: ArrayEvents<ANY>;
+  send: (config?: C) => Promise<D>;
+  nextSend: (config?: C) => Promise<D>;
+  awaitSend: (config?: C) => Promise<D>;
+  beginSend: (config?: C) => Promise<D>;
+  nextBeginSend: (config?: C) => Promise<D>;
+  awaitBeginSend: (config?: C) => Promise<D>;
+  abort: () => void;
+  abortAll: () => void;
 };
 
-interface UseFetch {
-  (options: FetchHOCConfig): FetchApi;
+interface UseFetch<T> {
+  (options: T): FetchApi<T>;
 }
 
 type AAAA = {
@@ -66,6 +72,6 @@ type AAAA = {
   get: () => any;
 };
 
-export declare function useFetchHOC(options: FetchHOCConfig): UseFetch;
+export declare function useFetchHOC<T extends FetchHOCConfig>(options: T): UseFetch<T>;
 export declare function fetchQueue(options: FetchQueueConfig): FetchQueue;
 export declare function createFetchApi(...options: ANY): AAAA;

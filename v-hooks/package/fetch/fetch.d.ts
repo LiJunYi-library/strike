@@ -16,7 +16,7 @@ type FetchQueueConfig = {
   onResponse: () => ANY;
 };
 
-type FetchHOCConfig = {
+interface FetchHOCConfig extends RequestInit {
   url?: string;
   urlParams?: FunReturnVal | Ref | ComputedRef | UnwrapNestedRefs | object;
   body?: FunReturnVal | Ref | ComputedRef | UnwrapNestedRefs | object;
@@ -34,10 +34,10 @@ type FetchHOCConfig = {
   formatterFileName?: (res: Response, config: ANY) => ANY;
   formatterResponse?: (res: Response, config: ANY) => ANY;
   formatterData?: (mRes: ANY, d: ANY, res: Response) => ANY;
-  interceptRequest?: (fetchConfig: RequestInit, config: ANY) => ANY;
+  interceptRequest?: (fetchConfig: ANY, config: ANY) => ANY;
   interceptResponseSuccess?: (res: Response, data: ANY, config: ANY) => ANY;
   interceptResponseError?: (errorRes: ANY, config: ANY) => ANY;
-};
+}
 
 type FetchApi = {
   loading: boolean;
@@ -57,11 +57,15 @@ type FetchApi = {
   abortAll: boolean;
 };
 
+interface UseFetch {
+  (options: FetchHOCConfig): FetchApi;
+}
+
 type AAAA = {
   post: () => any;
   get: () => any;
 };
 
-export declare function useFetchHOC(options: FetchHOCConfig): FetchApi;
+export declare function useFetchHOC(options: FetchHOCConfig): UseFetch;
 export declare function fetchQueue(options: FetchQueueConfig): FetchQueue;
 export declare function createFetchApi(...options: ANY): AAAA;

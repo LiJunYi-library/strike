@@ -1,4 +1,4 @@
-import { defineComponent, reactive, renderSlot, ref, computed } from "vue";
+import { defineComponent, computed } from "vue";
 
 export const RNumberRange = defineComponent({
   props: {
@@ -6,14 +6,18 @@ export const RNumberRange = defineComponent({
   },
   setup(props, context) {
     const min = computed({
-      get: () => props.listHook.getContext().min,
+      get: () => {
+        return props.listHook.context.SH.min;
+      },
       set: (val) => {
         props.listHook.updateMin(val);
       },
     });
 
     const max = computed({
-      get: () => props.listHook.getContext().max,
+      get: () => {
+        return props.listHook.context.SH.max;
+      },
       set: (val) => {
         props.listHook.updateMax(val);
       },

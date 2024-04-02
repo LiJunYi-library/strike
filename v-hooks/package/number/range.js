@@ -1,39 +1,6 @@
-import { ref, reactive, computed, watch } from "vue";
+import { ref, watchEffect } from "vue";
 import { useRadio2 } from "../list";
-import { useReactive } from "../../other";
-
-function RangeNumber(props = {}) {
-  const config = {
-    min: "",
-    max: "",
-    ...props,
-  };
-  const min = ref(config.min);
-  const max = ref(config.max);
-  function updateMin(value) {
-    min.value = value;
-  }
-
-  function updateMax(value) {
-    max.value = value;
-  }
-
-  function reset() {
-    min.value = "";
-    max.value = "";
-  }
-
-  function verifyChange() {
-    if (min.value && max.value && min.value * 1 > max.value * 1) {
-      const mi = min.value;
-      const ma = max.value;
-      min.value = Math.min(mi, ma);
-      max.value = Math.max(mi, ma);
-    }
-  }
-
-  return { min, max, updateMin, updateMax, reset, verifyChange };
-}
+import { useReactive, createSaveContext, mergeSaveContext } from "../../other";
 
 export function useRangeNumber(props = {}) {
   const config = {
@@ -42,180 +9,122 @@ export function useRangeNumber(props = {}) {
     ...props,
   };
 
-  let context;
   const min = ref(config.min);
   const max = ref(config.max);
-  const store = reactive({
-    min: "",
-    max: "",
-  });
 
-  const params = useReactive({
+  const contextHooks = createSaveContext({ min, max });
+
+  const hooks = useReactive({
     min,
     max,
-    store,
-    getContext,
-    save,
-    restore,
-    changeContextToStore,
-    changeContextToProxy,
-    save_changeContextToStore,
-    restore_changeContextToProxy,
-    transform,
-    reset,
     updateMin,
     updateMax,
+    getValues,
+    reset,
     verifyChange,
+    ...contextHooks,
   });
 
-  context = params;
-
-  function getContext() {
-    return context;
-  }
-
-  function save() {
-    store.min = params.min;
-    store.max = params.max;
-  }
-
-  function restore() {
-    params.min = store.min;
-    params.max = store.max;
-  }
-
-  function changeContextToStore() {
-    context = store;
-  }
-
-  function changeContextToProxy() {
-    context = params;
-  }
-
-  function save_changeContextToStore() {
-    save();
-    changeContextToStore();
-  }
-
-  function restore_changeContextToProxy() {
-    restore();
-    changeContextToProxy();
-  }
-
-  function transform() {
-    if (context === params) return (context = store);
-    if (context === store) return (context = params);
-  }
-
   function updateMin(value) {
-    context.min = value;
+    hooks.context.SH.min = value;
   }
 
   function updateMax(value) {
-    context.max = value;
+    hooks.context.SH.max = value;
+  }
+
+  function getValues() {
+    return [hooks.context.SH.min, hooks.context.SH.max];
   }
 
   function reset() {
-    context.min = "";
-    context.max = "";
+    hooks.context.SH.min = "";
+    hooks.context.SH.max = "";
   }
 
   function verifyChange() {
-    if (context.min && context.max && context.min * 1 > context.max * 1) {
-      const { min: mi, max: ma } = context;
-      context.min = Math.min(mi, ma);
-      context.max = Math.max(mi, ma);
+    const { SH } = hooks.context;
+    if (SH.min && SH.max && SH.min * 1 > SH.max * 1) {
+      const { min: mi, max: ma } = SH;
+      SH.min = Math.min(mi, ma);
+      SH.max = Math.max(mi, ma);
     }
   }
 
-  return params;
+  return hooks;
 }
 
 export function useRangeNumberList(config = {}) {
   const props = {
-    ...config,
     formatterMin: (item) => item?.min,
     formatterMax: (item) => item?.max,
+    joinStr: "-",
+    ...config,
   };
 
-  const list = useRadio2({
-    value: [props.min, props.max].join("-"),
-    formatterValue: (item) => [props.formatterMin(item), props.formatterMax(item)].join("-"),
+  const radio = useRadio2({
+    value: [props.min, props.max].join(props.joinStr),
+    formatterValue: (item) =>
+      [props.formatterMin(item), props.formatterMax(item)].join(props.joinStr),
     ...props,
   });
+  const rang = useRangeNumber({ ...props });
+  const contextHooks = mergeSaveContext(rang, radio);
 
-  const rang = useRangeNumber(props);
+  const hooks = useReactive({
+    ...rang.getProto(),
+    ...radio.getProto(),
+    updateMin,
+    updateMax,
+    reset,
+    verifyChange,
+    ...contextHooks,
+  });
+
   let lock = false;
 
-//  Object.assign(list.store, rang.store);
+  watchEffect(() => {
+    const item = radio?.context?.stores?.select;
+    updateMinMax(item);
+  });
 
-  watch(
-    () => list.select,
-    (item) => {
-      if (lock === true) {
-        lock = false;
-        return;
-      }
-      rang.updateMin(props.formatterMin(item));
-      rang.updateMax(props.formatterMax(item));
-    }
-  );
+  watchEffect(() => {
+    const item = radio?.context?.states?.select;
+    updateMinMax(item);
+  });
+
+  function updateMinMax(item) {
+    if (lock) return (lock = false);
+    const min = props.formatterMin(item);
+    const max = props.formatterMax(item);
+    if (min === rang.context.SH.min && max === rang.context.SH.max) return;
+    rang.updateMin(min);
+    rang.updateMax(max);
+  }
 
   function updateMin(value) {
-    rang.updateMin(value);
-    const values = [rang.min, rang.max].join("-");
     lock = true;
-    list.updateValue(values);
+    rang.updateMin(value);
+    radio.updateValue(rang.getValues().join(props.joinStr));
   }
 
   function updateMax(value) {
-    rang.updateMax(value);
-    const values = [rang.min, rang.max].join("-");
     lock = true;
-    list.updateValue(values);
+    rang.updateMax(value);
+    radio.updateValue(rang.getValues().join(props.joinStr));
   }
 
-  function save() {
-    rang.save();
-    list.save();
+  function reset() {
+    lock = true;
+    rang.reset();
+    radio.reset();
   }
 
-  function restore() {
-    rang.restore();
-    list.restore();
+  function verifyChange() {
+    lock = true;
+    rang.verifyChange();
+    radio.updateValue(rang.getValues().join(props.joinStr));
   }
 
-  function changeContextToStore() {
-    rang.changeContextToStore();
-    list.changeContextToStore();
-  }
-
-  function changeContextToProxy() {
-    rang.changeContextToProxy();
-    list.changeContextToProxy();
-  }
-
-  function save_changeContextToStore() {
-    rang.save_changeContextToStore();
-    list.save_changeContextToStore();
-  }
-
-  function restore_changeContextToProxy() {
-    rang.restore_changeContextToProxy();
-    list.restore_changeContextToProxy();
-  }
-
-  const params = useReactive({
-    ...rang.getProto(),
-    ...list.getProto(),
-    // updateMin,
-    // updateMax,
-    // save,
-    // restore,
-    // changeContextToStore,
-    // changeContextToProxy,
-    // save_changeContextToStore,
-    // restore_changeContextToProxy,
-  });
-  return params;
+  return hooks;
 }

@@ -1,7 +1,7 @@
-import { ref, reactive, watch } from "vue";
+import { ref, watch } from "vue";
 import { usePromise2, useLoading } from "../promise";
 import { getSelectProps } from "./select";
-import { useReactive } from "../../other";
+import { useReactive, createSaveContext } from "../../other";
 
 export { useRadio2, useAsyncRadio2 };
 
@@ -46,30 +46,8 @@ function useRadio2(props = {}) {
   const label = ref(initParms.label);
   const index = ref(initParms.index);
 
-  const store = reactive({
-    list: [],
-    select: null,
-    value: null,
-    label: null,
-    index: null,
-  });
-
-  const params = useReactive({
-    list,
-    select,
-    value,
-    label,
-    index,
-    store,
-    transform, // 废弃
-    transformStore: changeContextToStore, // 废弃
-    changeContextToStore,
-    transformParams: changeContextToProxy, // 废弃
-    changeContextToProxy,
-    save,
-    restore,
-    save_changeContextToStore,
-    restore_changeContextToProxy,
+  const contextHooks = createSaveContext({ value, select, label, index });
+  const methods = {
     onSelect,
     same,
     reset,
@@ -87,134 +65,122 @@ function useRadio2(props = {}) {
     updateListAndReset,
     updateListToResolveValue,
     getSelectOfValue,
-    selectOfValue: getSelectOfValue, // 废弃
     getLabelOfValue,
-    labelOfValue: getLabelOfValue, // 废弃
     getIndexOfValue,
-    indexOfValue: getIndexOfValue, // 废弃
     someValue,
-    getContext,
+  };
+
+  const hooks = useReactive({
+    list,
+    select,
+    value,
+    label,
+    index,
+    methods,
+    ...methods,
+    ...contextHooks,
   });
 
-  let context = params;
-
-  function getContext() {
-    return context;
-  }
-
-  function save() {
-    store.select = params.select;
-    store.value = params.value;
-    store.label = params.label;
-    store.index = params.index;
-  }
-
-  function restore() {
-    params.select = store.select;
-    params.value = store.value;
-    params.label = store.label;
-    params.index = store.index;
-  }
-
-  function changeContextToStore() {
-    context = store;
-  }
-
-  function changeContextToProxy() {
-    context = params;
-  }
-
-  function save_changeContextToStore() {
-    save();
-    changeContextToStore();
-  }
-
-  function restore_changeContextToProxy() {
-    restore();
-    changeContextToProxy();
-  }
-
-  function transform() {
-    if (context === params) return (context = store);
-    if (context === store) return (context = params);
-  }
-
   function same(item, i) {
-    return context.select === item;
+    return hooks.context.SH.select === item;
   }
 
   function onSelect(item, i) {
-    if (!config.Validator(context)) return;
+    if (!config.Validator(hooks)) return;
     if (config.cancelSame && same(item, i)) {
-      context.select = undefined;
-      context.index = undefined;
-      context.label = undefined;
-      context.value = undefined;
-      config.onChange(context);
+      hooks.context.SH.select = undefined;
+      hooks.context.SH.index = undefined;
+      hooks.context.SH.label = undefined;
+      hooks.context.SH.value = undefined;
+      config.onChange(hooks);
       return false;
     }
     if (same(item, i)) return true;
-    context.select = item;
-    context.index = i;
-    context.label = formatterLabel(item);
-    context.value = formatterValue(item);
-    config.onChange(context);
+    hooks.context.SH.select = item;
+    hooks.context.SH.index = i;
+    hooks.context.SH.label = formatterLabel(item);
+    hooks.context.SH.value = formatterValue(item);
+    config.onChange(hooks);
     return false;
   }
 
   function reset() {
-    context.select = undefined;
-    context.value = undefined;
-    context.label = undefined;
-    context.index = undefined;
+    hooks.context.SH.select = undefined;
+    hooks.context.SH.value = undefined;
+    hooks.context.SH.label = undefined;
+    hooks.context.SH.index = undefined;
   }
 
-  //  --  //
   function updateList(l, values = {}) {
     list.value = l;
-    context.list = l;
     const arg = { ...config, list: l, ...values };
-    const parms = resolveProps(arg);
-    context.select = parms.select;
-    context.value = parms.value;
-    context.label = parms.label;
-    context.index = parms.index;
+    const args = resolveProps(arg);
+    hooks.context.SH.select = args.select;
+    hooks.context.SH.value = args.value;
+    hooks.context.SH.label = args.label;
+    hooks.context.SH.index = args.index;
   }
 
   function updateValue(val) {
-    context.value = val;
-    context.select = list.value.find?.(findForValue(val));
-    context.label = formatterLabel(context.select);
-    context.index = findIndex(list.value, context.select);
+    hooks.context.SH.value = val;
+    hooks.context.SH.select = list.value.find?.(findForValue(val));
+    hooks.context.SH.label = formatterLabel(hooks.context.SH.select);
+    hooks.context.SH.index = findIndex(list.value, hooks.context.SH.select);
   }
 
   function updateLabel(val) {
-    context.label = val;
-    context.select = list.value.find(findForLabel(context.label));
-    context.value = formatterValue(context.select);
-    context.index = findIndex(list.value, context.select);
+    hooks.context.SH.label = val;
+    hooks.context.SH.select = list.value.find(findForLabel(hooks.context.SH.label));
+    hooks.context.SH.value = formatterValue(hooks.context.SH.select);
+    hooks.context.SH.index = findIndex(list.value, hooks.context.SH.select);
   }
 
   function updateIndex(val) {
-    context.index = val;
-    context.select = list.value[val];
-    context.value = formatterValue(context.select);
-    context.label = formatterLabel(context.select);
+    hooks.context.SH.index = val;
+    hooks.context.SH.select = list.value[val];
+    hooks.context.SH.value = formatterValue(hooks.context.SH.select);
+    hooks.context.SH.label = formatterLabel(hooks.context.SH.select);
   }
 
   function updateSelect(val) {
     if (typeof val === "function") {
-      context.select = list.value.find(val);
+      hooks.context.SH.select = list.value.find(val);
     } else {
-      context.select = val;
+      hooks.context.SH.select = val;
     }
 
-    context.index = findIndex(list.value, context.select);
-    context.value = formatterValue(context.select);
-    context.label = formatterLabel(context.select);
+    hooks.context.SH.index = findIndex(list.value, hooks.context.SH.select);
+    hooks.context.SH.value = formatterValue(hooks.context.SH.select);
+    hooks.context.SH.label = formatterLabel(hooks.context.SH.select);
+  }
+
+  function resolveValue() {
+    if (someValue(hooks.context.SH.value)) {
+      updateValue(hooks.context.SH.value);
+    } else {
+      reset();
+    }
+  }
+
+  function updateListToResolveValue(li) {
+    list.value = li;
+    resolveValue();
+  }
+
+  function updateListAndReset(li) {
+    list.value = li;
+    reset();
+  }
+
+  function resolveList(li) {
+    list.value = li;
+    const parms = resolveProps(hooks.context.SH);
+    hooks.context.SH.select = parms.select;
+    hooks.context.SH.value = parms.value;
+    hooks.context.SH.label = parms.label;
+    hooks.context.SH.index = parms.index;
   }
   //  --  ///
-
   function getSelectOfValue(val) {
     return list.value.find?.(findForValue(val));
   }
@@ -227,46 +193,15 @@ function useRadio2(props = {}) {
     return findIndex(list.value, getSelectOfValue(val));
   }
 
-  // -- //
   function someValue(val) {
     return list.value.some(findForValue(val));
   }
 
   function verifyValueInList() {
-    return list.value.some(findForValue(context.value));
+    return list.value.some(findForValue(hooks.context.SH.value));
   }
 
-  function resolveValue() {
-    if (someValue(context.value)) {
-      context.updateValue(context.value);
-    } else {
-      reset();
-    }
-  }
-
-  function updateListToResolveValue(li) {
-    list.value = li;
-    context.list = li;
-    resolveValue();
-  }
-
-  function updateListAndReset(li) {
-    list.value = li;
-    context.list = li;
-    context.reset();
-  }
-
-  function resolveList(li) {
-    list.value = li;
-    context.list = li;
-    const parms = resolveProps(context);
-    context.select = parms.select;
-    context.value = parms.value;
-    context.label = parms.label;
-    context.index = parms.index;
-  }
-
-  return params;
+  return hooks;
 }
 
 function useAsyncRadio2(props = {}) {

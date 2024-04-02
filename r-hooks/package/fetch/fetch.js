@@ -26,8 +26,9 @@ function revBody(contentType, config) {
 
 function getHeaders(config) {
   const headers_ = {};
-  if (config.headers) return config.headers;
   if (config.contentType) headers_["Content-Type"] = config.contentType;
+  if (config.headers instanceof Function) return config.headers(config);
+  if (config.headers) return config.headers;
   return headers_;
 }
 

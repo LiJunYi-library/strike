@@ -8,10 +8,11 @@ export const RNumberRangeList = defineComponent({
   },
   setup(props, context) {
     return () => {
+      const attrs = { ...context.attrs, class: "", style: "" };
       return (
         <div class={["r-number-range-list r-list-select-grid"]}>
-          <RListSelect listHook={props.listHook} ></RListSelect>
-          <RNumberRange listHook={props.listHook}></RNumberRange>
+          <RListSelect listHook={props.listHook} {...attrs}></RListSelect>
+          <RNumberRange listHook={props.listHook} {...attrs}></RNumberRange>
         </div>
       );
     };

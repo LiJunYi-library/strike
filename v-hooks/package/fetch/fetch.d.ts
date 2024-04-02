@@ -1,4 +1,3 @@
-import { Ref, ComputedRef, UnwrapNestedRefs } from "vue";
 type ANY = any;
 type FunReturnVal = () => ANY;
 
@@ -9,11 +8,11 @@ type FetchQueue = {
   del: (p: Promise) => void;
 };
 
-type FetchQueueConfig = {
-  onBegin: () => ANY;
-  onFinish: () => ANY;
-  onRequest: () => ANY;
-  onResponse: () => ANY;
+type FetchQueueConfig<C = ANY, H = ANY> = {
+  onBegin: (config?: C, hooks?: H) => ANY;
+  onFinish: (config?: C, hooks?: H) => ANY;
+  onRequest: (config?: C, hooks?: H) => ANY;
+  onResponse: (config?: C, hooks?: H) => ANY;
 };
 
 interface FetchConfig extends RequestInit {
@@ -45,7 +44,7 @@ interface FetchHOCConfig<D = ANY> extends RequestInit {
   interceptResponseError?: (errorRes: ANY, config: this) => ANY;
 }
 
-type FetchApi<C = ANY, D = ANY, E = ANY> = {
+type FetchHooks<C = ANY, D = ANY, E = ANY> = {
   loading: boolean;
   data: D;
   begin: boolean;
@@ -63,15 +62,29 @@ type FetchApi<C = ANY, D = ANY, E = ANY> = {
   abortAll: () => void;
 };
 
-interface UseFetch<T> {
-  (options: T): FetchApi<T>;
+interface UseFetch<C> {
+  (options: C): FetchHooks<C>;
 }
 
-type AAAA = {
-  post: () => any;
-  get: () => any;
+type FetchApi<C> = {
+  post:{
+    (url: string) : FetchHooks<C>;
+    (url: string, body: object) : FetchHooks<C>;
+    (url: string, body: () => object) : FetchHooks<C>;
+  },
+  get:{
+     (url: string) : FetchHooks<C>;
+     (url: string, urlParams: object) : FetchHooks<C>;
+     (url: string, urlParams: () => object): FetchHooks<C>;
+  }
 };
 
-export declare function useFetchHOC<T extends FetchHOCConfig>(options: T): UseFetch<T>;
-export declare function fetchQueue(options: FetchQueueConfig): FetchQueue;
-export declare function createFetchApi(...options: ANY): AAAA;
+export declare function useFetchHOC<C extends FetchHOCConfig>(options: C): UseFetch<C>;
+
+export declare function fetchQueue<C extends FetchHOCConfig>(
+  options: FetchQueueConfig<C, FetchHooks<C>>
+): FetchQueue;
+
+export declare function createFetchApi<C extends FetchHOCConfig>(
+  useFetch: UseFetch<C>
+): FetchApi<C>;

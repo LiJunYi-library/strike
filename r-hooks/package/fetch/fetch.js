@@ -25,11 +25,21 @@ function revBody(contentType, config) {
 }
 
 function getHeaders(config) {
-  const headers_ = {};
+  const headers_ = config.initHeaders || {};
   if (config.contentType) headers_["Content-Type"] = config.contentType;
   if (config.headers instanceof Function) return config.headers(config);
   if (config.headers) return config.headers;
   return headers_;
+}
+
+function assign(...args) {
+  const obj = {};
+  const initHeaders = {};
+  const initHeadersList = args.map((el) => el?.initHeaders ?? {});
+  Object.assign(obj, ...args);
+  Object.assign(initHeaders, ...initHeadersList);
+  obj.initHeaders = initHeaders;
+  return obj;
 }
 
 function getParams(config) {
@@ -140,7 +150,7 @@ export function createFetchHook(props = {}) {
   const errAbout = { message: "about", code: 20 };
 
   function useFetch(props2 = {}) {
-    const [configs] = useState({ ...options, ...props2 });
+    const [configs] = useState(assign(options, props2));
     const loading = ref(configs.loading);
     const begin = ref(configs.begin);
     const error = ref(configs.error);
@@ -175,7 +185,7 @@ export function createFetchHook(props = {}) {
       };
 
       async function send(props3) {
-        const config = { ...configs, ...props3 };
+        const config = assign(configs, props3);
         errorData.value = undefined;
         error.value = false;
         loading.value = true;

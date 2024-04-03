@@ -8,6 +8,7 @@ export const RScrollSticky = defineComponent({
     bottom: Number,
     changeTop: Number, // r-scroll-sticky-act 的高度
     fluctuate: { type: Number, default: 1 }, // 波动范围
+    slotsHaveScrollTop: Boolean, // 插槽传递时是否需要scrollTop参数 //会影响性能
   },
   setup(props, context) {
     let html;
@@ -15,6 +16,7 @@ export const RScrollSticky = defineComponent({
     const isSticky = ref(false);
     const unStickyTop = ref(false);
     const unStickyBottom = ref(false);
+    const scrollTop = ref(0);
 
     const scrollController = useScrollController({
       type: "sticky",
@@ -31,6 +33,7 @@ export const RScrollSticky = defineComponent({
     }
 
     function layoutTop(sTop) {
+      if (props.slotsHaveScrollTop) scrollTop.value = sTop;
       if (props.top === undefined) return;
       if (props.changeTop !== undefined) isChangeTop.value = sTop >= props.changeTop;
       const value = html.offsetTop - sTop;
@@ -73,6 +76,7 @@ export const RScrollSticky = defineComponent({
             unStickyTop: unStickyTop.value,
             unStickyBottom: unStickyBottom.value,
             isChangeTop: isChangeTop.value,
+            scrollTop: scrollTop.value,
           })}
         </div>
       );

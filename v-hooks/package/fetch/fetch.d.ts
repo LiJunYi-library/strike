@@ -1,26 +1,30 @@
 type ANY = any;
 type FunReturnVal = () => ANY;
 
-type FetchQueue = {
+export declare type FetchQueue = {
   queue: Promise[];
   push: (p: Promise, ...arg: ANY) => void;
   remove: (p: Promise) => void;
   del: (p: Promise) => void;
 };
 
-type FetchQueueConfig<C = ANY, H = ANY> = {
+export declare type FetchQueueConfig<C = ANY, H = ANY> = {
   onBegin: (config?: C, hooks?: H) => ANY;
   onFinish: (config?: C, hooks?: H) => ANY;
   onRequest: (config?: C, hooks?: H) => ANY;
   onResponse: (config?: C, hooks?: H) => ANY;
 };
 
-interface FetchConfig extends RequestInit {
-  url: string;
-  headers: ANY;
+export declare interface RequestHeaders {
+  [key: string]: ANY;
 }
 
-interface FetchHOCConfig<D = ANY> extends RequestInit {
+export declare interface FetchConfig extends RequestInit {
+  url: string;
+  headers: RequestHeaders;
+}
+
+export declare interface FetchHOCConfig<D = ANY> extends RequestInit {
   url?: string;
   urlParams?: ANY;
   body?: ANY;
@@ -44,7 +48,7 @@ interface FetchHOCConfig<D = ANY> extends RequestInit {
   interceptResponseError?: (errorRes: ANY, config: this) => ANY;
 }
 
-type FetchHooks<C = ANY, D = ANY, E = ANY> = {
+export declare type FetchHooks<C = ANY, D = ANY, E = ANY> = {
   loading: boolean;
   data: D;
   begin: boolean;
@@ -62,21 +66,23 @@ type FetchHooks<C = ANY, D = ANY, E = ANY> = {
   abortAll: () => void;
 };
 
-interface UseFetch<C> {
+export declare type FetchHook<D> = FetchHooks<this, D>;
+
+export declare interface UseFetch<C> {
   (options: C): FetchHooks<C>;
 }
 
-type FetchApi<C> = {
-  post:{
-    (url: string) : FetchHooks<C>;
-    (url: string, body: object) : FetchHooks<C>;
-    (url: string, body: () => object) : FetchHooks<C>;
-  },
-  get:{
-     (url: string) : FetchHooks<C>;
-     (url: string, urlParams: object) : FetchHooks<C>;
-     (url: string, urlParams: () => object): FetchHooks<C>;
-  }
+export declare type FetchApi<C> = {
+  post: {
+    (url: string): FetchHooks<C>;
+    (url: string, body: object): FetchHooks<C>;
+    (url: string, body: () => object): FetchHooks<C>;
+  };
+  get: {
+    (url: string): FetchHooks<C>;
+    (url: string, urlParams: object): FetchHooks<C>;
+    (url: string, urlParams: () => object): FetchHooks<C>;
+  };
 };
 
 export declare function useFetchHOC<C extends FetchHOCConfig>(options: C): UseFetch<C>;

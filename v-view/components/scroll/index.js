@@ -207,7 +207,9 @@ export const RScroll = defineComponent({
     return (vm) => {
       return (
         <div ref={onRef} class="r-scroll" onScroll={onScroll} onScrollend={onScrollend}>
-          <div ref={onContentRef}>{renderSlot(context.slots, "default")}</div>
+          <div class="r-scroll-content" ref={onContentRef}>
+            {renderSlot(context.slots, "default")}
+          </div>
         </div>
       );
     };

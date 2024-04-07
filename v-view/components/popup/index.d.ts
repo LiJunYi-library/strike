@@ -6,4 +6,8 @@ import { DefineComponent } from "vue";
  */
 export declare const RPopup: DefineComponent<any>;
 
+export declare function RPopupHoc(options: any): DefineComponent<any>;
+
+export declare const RPopupClose: DefineComponent<any>;
+
 export declare function useRPopup(params: any): any;

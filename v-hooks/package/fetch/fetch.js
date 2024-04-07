@@ -179,7 +179,19 @@ export function useFetchHOC(props = {}) {
       abortAll,
     });
 
-    async function send(props3) {
+    function send(...arg) {
+      return new Promise((resolve, reject) => {
+        asyncSend(...arg)
+          .then((...res) => {
+            resolve(...res);
+          })
+          .catch((err) => {
+            if (err) reject(err);
+          });
+      });
+    }
+
+    async function asyncSend(props3) {
       const config = assign(configs, props3);
       error.value = false;
       errorData.value = undefined;
@@ -282,6 +294,7 @@ export function useFetchHOC(props = {}) {
           fail(errorRes);
           if (errReset) throw errReset;
         }
+        throw undefined;
       }
     }
 

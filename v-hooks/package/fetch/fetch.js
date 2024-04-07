@@ -193,9 +193,6 @@ export function useFetchHOC(props = {}) {
 
     async function asyncSend(props3) {
       const config = assign(configs, props3);
-      error.value = false;
-      errorData.value = undefined;
-      loading.value = true;
       const curController = new AbortController();
       const signalPromise = new Promise((resolve) => {
         curController.signal.addEventListener("abort", () => {
@@ -252,6 +249,9 @@ export function useFetchHOC(props = {}) {
       };
 
       try {
+        error.value = false;
+        errorData.value = undefined;
+        loading.value = true;
         fetchPromise = fetch(URL, fetchConfig);
         options.fetchQueue?.push?.(fetchPromise, config, params);
         const res = await fetchPromise;
@@ -282,14 +282,17 @@ export function useFetchHOC(props = {}) {
         return data.value;
       } catch (err) {
         fetchEvents.remove(current);
+
         let errorRes = err;
+        const interceptCode = [20];
+
         if (err.code === 20) {
           options.fetchQueue?.del?.(fetchPromise, config, params);
           errorRes = await signalPromise;
         }
 
-        if (errorRes.code !== 20) {
-          console.error("errorRes", errorRes);
+        if (!interceptCode.some((num) => num === errorRes.code)) {
+          console.error(errorRes.code, "errorRes", errorRes);
           const errReset = config.interceptResponseError(errorRes, config);
           fail(errorRes);
           if (errReset) throw errReset;

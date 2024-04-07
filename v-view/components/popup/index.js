@@ -26,10 +26,12 @@ let prvePopup;
 
 export const RPopupHoc = (options = {}) => {
   const config = {
+    class: "",
     props: {},
     renderDefault: (props, context, ctx) => {
       return renderSlot(context.slots, "default", ctx);
     },
+    emits: [],
     ...options,
   };
   return defineComponent({
@@ -59,6 +61,7 @@ export const RPopupHoc = (options = {}) => {
       "closed",
       "prveClose",
       "currentClose",
+      ...config.emits,
     ],
     setup(props, context) {
       let lock = false;
@@ -224,7 +227,7 @@ export const RPopupHoc = (options = {}) => {
               <div
                 ref={(el) => (content.el = el)}
                 v-show={visible.value}
-                class={["r-popup", `r-popup-${props.position}`, props.popClass]}
+                class={["r-popup", `r-popup-${props.position}`, config.class, props.popClass]}
                 style={cStyle}
               >
                 <Transition name={"popup-" + props.position}>{renderContent(cStyle)}</Transition>

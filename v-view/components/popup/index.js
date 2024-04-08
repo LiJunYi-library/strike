@@ -27,9 +27,13 @@ let prvePopup;
 export const RPopupHoc = (options = {}) => {
   const config = {
     class: "",
+    overlayClass: "",
     props: {},
     renderDefault: (props, context, ctx) => {
       return renderSlot(context.slots, "default", ctx);
+    },
+    renderOverlayContent: (props, context, ctx) => {
+      return renderSlot(context.slots, "overlayContent");
     },
     emits: [],
     ...options,
@@ -50,6 +54,7 @@ export const RPopupHoc = (options = {}) => {
       bottom: { type: [Number, String], default: "" },
       position: { type: String, default: "bottom" }, // center top bottom right left
       popClass: { type: String, default: "" },
+      overlayClass: { type: String, default: "" },
       ...config.props,
     },
     emits: [
@@ -218,6 +223,7 @@ export const RPopupHoc = (options = {}) => {
         const cStyle = { ...style, zIndex: visible.value ? 2001 : 2000 };
         return [
           <ROverlay
+            class={[props.overlayClass, config.overlayClass]}
             OverlayStyle={style}
             ref={(el) => (overlay.el = el)}
             onTouchstart={overlay.onTouchstart}
@@ -229,7 +235,7 @@ export const RPopupHoc = (options = {}) => {
             cache={props.cache}
             destroy={props.destroy}
           >
-            {renderSlot(context.slots, "overlayContent")}
+            {config.renderOverlayContent(props, context, ctx)}
           </ROverlay>,
           <Teleport to={teleport.value} disabled={!teleport.value}>
             <Transition

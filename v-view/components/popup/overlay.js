@@ -1,19 +1,4 @@
-import {
-  defineComponent,
-  renderList,
-  renderSlot,
-  computed,
-  watch,
-  onMounted,
-  ref,
-  render,
-  nextTick,
-  withMemo,
-  isMemoSame,
-  onBeforeUnmount,
-  Teleport,
-  Transition,
-} from "vue";
+import { defineComponent, renderSlot, watch, ref, Teleport, Transition } from "vue";
 
 import "./index.scss";
 
@@ -25,6 +10,7 @@ export const ROverlay = defineComponent({
     cache: { type: Boolean, default: true },
     destroy: { type: Boolean, default: false },
     OverlayStyle: [Object, String],
+    overlayClass: { type: String, default: "" },
   },
   emits: ["update:visible", "update:visible", "closed", "touchstart", "click"],
   setup(props, context) {
@@ -74,7 +60,7 @@ export const ROverlay = defineComponent({
       return (
         <div
           v-show={visible.value}
-          class={["r-overlay"]}
+          class={["r-overlay", props.overlayClass]}
           ref={(ele) => (el = ele)}
           {...context.attrs}
           style={props.OverlayStyle}

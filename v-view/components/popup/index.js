@@ -1,17 +1,12 @@
 import {
   defineComponent,
-  renderList,
   renderSlot,
-  computed,
   watch,
   provide,
   inject,
   onMounted,
   ref,
   render,
-  nextTick,
-  withMemo,
-  isMemoSame,
   onBeforeUnmount,
   Teleport,
   reactive,
@@ -223,7 +218,7 @@ export const RPopupHoc = (options = {}) => {
         const cStyle = { ...style, zIndex: visible.value ? 2001 : 2000 };
         return [
           <ROverlay
-            class={[props.overlayClass, config.overlayClass]}
+            overlayClass={[props.overlayClass, config.overlayClass]}
             OverlayStyle={style}
             ref={(el) => (overlay.el = el)}
             onTouchstart={overlay.onTouchstart}

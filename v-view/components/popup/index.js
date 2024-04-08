@@ -61,6 +61,8 @@ export const RPopupHoc = (options = {}) => {
       "closed",
       "prveClose",
       "currentClose",
+      "click",
+      "contentClick",
       ...config.emits,
     ],
     setup(props, context) {
@@ -104,6 +106,7 @@ export const RPopupHoc = (options = {}) => {
         },
         onClick(event) {
           event.stopPropagation();
+          context.emit("contentClick", event);
         },
       });
 
@@ -201,6 +204,10 @@ export const RPopupHoc = (options = {}) => {
         );
       }
 
+      function onClick(...params) {
+        context.emit("click", ...params);
+      }
+
       return () => {
         const style = {
           left: props.left,
@@ -221,16 +228,25 @@ export const RPopupHoc = (options = {}) => {
             lazy={props.lazy}
             cache={props.cache}
             destroy={props.destroy}
-          ></ROverlay>,
+          >
+            {renderSlot(context.slots, "overlayContent")}
+          </ROverlay>,
           <Teleport to={teleport.value} disabled={!teleport.value}>
-            <Transition name="popVisible" onAfterLeave={onAfterLeave} onAfterEnter={onAfterEnter}>
+            <Transition
+              name={"popup-" + props.position}
+              onAfterLeave={onAfterLeave}
+              onAfterEnter={onAfterEnter}
+            >
               <div
+                onClick={onClick}
                 ref={(el) => (content.el = el)}
                 v-show={visible.value}
                 class={["r-popup", `r-popup-${props.position}`, config.class, props.popClass]}
                 style={cStyle}
               >
-                <Transition name={"popup-" + props.position}>{renderContent(cStyle)}</Transition>
+                <Transition name={"popup-content-" + props.position}>
+                  {renderContent(cStyle)}
+                </Transition>
               </div>
             </Transition>
           </Teleport>,

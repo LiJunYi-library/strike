@@ -80,97 +80,105 @@
   height: 100vh;
 }
 
-.popVisible-enter-active,
-.popVisible-leave-active,
 .popup-top-enter-active,
 .popup-top-leave-active,
 .popup-bottom-enter-active,
 .popup-bottom-leave-active,
-.popup-right-enter-active,
-.popup-right-leave-active,
 .popup-left-enter-active,
 .popup-left-leave-active,
+.popup-right-enter-active,
+.popup-right-leave-active,
 .popup-center-enter-active,
-.popup-center-leave-active {
+.popup-center-leave-active,
+.popup-content-top-enter-active,
+.popup-content-top-leave-active,
+.popup-content-bottom-enter-active,
+.popup-content-bottom-leave-active,
+.popup-content-right-enter-active,
+.popup-content-right-leave-active,
+.popup-content-left-enter-active,
+.popup-content-left-leave-active,
+.popup-content-center-enter-active,
+.popup-content-center-leave-active {
   transition: 0.3s;
 }
 
-.popup-top-enter-from {
+.popup-content-top-enter-from {
   transform: translateY(-99.9%);
 }
 
-.popup-top-enter-to {
+.popup-content-top-enter-to {
   transform: translateY(0);
 }
 
-.popup-top-leave-from {
+.popup-content-top-leave-from {
   transform: translateY(0);
 }
 
-.popup-top-leave-to {
+.popup-content-top-leave-to {
   transform: translateY(-100%);
 }
 
-.popup-bottom-enter-from {
+.popup-content-bottom-enter-from {
   transform: translateY(99.9%);
 }
 
-.popup-bottom-enter-to {
+.popup-content-bottom-enter-to {
   transform: translateY(0);
 }
 
-.popup-bottom-leave-from {
+.popup-content-bottom-leave-from {
   transform: translateY(0);
 }
 
-.popup-bottom-leave-to {
+.popup-content-bottom-leave-to {
   transform: translateY(100%);
 }
 
-.popup-left-enter-from {
+.popup-content-left-enter-from {
   transform: translateX(-99.9%);
 }
 
-.popup-left-enter-to {
+.popup-content-left-enter-to {
   transform: translateX(0);
 }
 
-.popup-left-leave-from {
+.popup-content-left-leave-from {
   transform: translateX(0);
 }
 
-.popup-left-leave-to {
+.popup-content-left-leave-to {
   transform: translateX(-100%);
 }
 
-.popup-right-enter-from {
+.popup-content-right-enter-from {
   transform: translateX(99.9%);
 }
 
-.popup-right-enter-to {
+.popup-content-right-enter-to {
   transform: translateX(0);
 }
 
-.popup-right-leave-from {
+.popup-content-right-leave-from {
   transform: translateX(0);
 }
 
-.popup-right-leave-to {
+.popup-content-right-leave-to {
   transform: translateX(100%);
 }
 
-.popup-center-enter-from {
+.popup-content-center-enter-from {
   opacity: 0;
 }
 
-.popup-center-enter-to {
+.popup-content-center-enter-to {
   opacity: 1;
 }
 
-.popup-center-leave-from {
+.popup-content-center-leave-from {
   opacity: 1;
 }
 
-.popup-center-leave-to {
+.popup-content-center-leave-to {
   opacity: 0;
 }

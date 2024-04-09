@@ -5,7 +5,7 @@ import { fetchQueue } from "@rainbow_ljy/v-hooks";
 import { arrayRemove } from "@rainbow_ljy/rainbow-js";
 import { RILoading } from "../icon";
 
-export const ToastHoc = (consfig = {}) => {
+export const RToastHoc = (consfig = {}) => {
   const option = {
     renderContent(props, context) {
       return (
@@ -52,7 +52,7 @@ export const ToastHoc = (consfig = {}) => {
   });
 };
 
-export const Toast = ToastHoc();
+export const RToast = RToastHoc();
 
 export function showToastHoc(node, props) {
   const div = document.createElement("div");
@@ -61,7 +61,7 @@ export function showToastHoc(node, props) {
 }
 
 export function showToast(props) {
-  const node = <Toast {...props}></Toast>;
+  const node = <RToast {...props}></RToast>;
   return showToastHoc(node, props);
 }
 
@@ -70,7 +70,7 @@ export function createToastHoc(node, props) {
   render(node, div);
 
   function show(props) {
-    const node = <Toast {...props}></Toast>;
+    const node = <RToast {...props}></RToast>;
     render(node, div);
     node.component.exposed.show();
   }
@@ -83,7 +83,7 @@ export function createToastHoc(node, props) {
 }
 
 export function createToast(props) {
-  const node = <Toast {...props}></Toast>;
+  const node = <RToast {...props}></RToast>;
   return createToastHoc(node, props);
 }
 

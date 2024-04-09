@@ -1,4 +1,5 @@
-import './styles/iconfont/iconfont.css'
+export * from "./global";
+import "./styles/iconfont/iconfont.css";
 import "./index.scss";
 export * from "./components";
 export * from "./directives";

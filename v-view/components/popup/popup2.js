@@ -5,13 +5,15 @@ import { RDialogHoc, useDialogQueue } from "./dialog";
 const dialogQueue = useDialogQueue({
   onPushed(prve, current) {
     const teleport = current?.teleport?.value || current?.vm?.$el?.parentElement || document.body;
-    const { renderOverlayContent, slots, style, onOverlayClick } = current;
+    const { renderOverlayContent, slots, style, onOverlayClick, props, config } = current;
+    const overlayClass = [props.overlayClass, config.overlayClass];
     current?.strengthenZIndex?.();
     prve?.weakenZIndex?.();
     prve?.close?.();
     RGlobal.overlay.show({
       teleport,
       slots,
+      overlayClass,
       overlayStyle: style?.value,
       renderOverlayContent,
       onClick: onOverlayClick,

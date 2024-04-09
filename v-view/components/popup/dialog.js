@@ -61,6 +61,41 @@ function useDocumentTouchstart(cb) {
 
 let dialogZIndex = 300000;
 
+const dialogQueue = useDialogQueue({
+  onPush(prve, current) {
+    const teleport = current?.teleport?.value || current?.vm?.$el?.parentElement || document.body;
+    const { renderOverlayContent, slots, style, onOverlayClick, props, config } = current;
+    const overlayClass = [props.overlayClass, config.overlayClass];
+    prve?.weakenZIndex?.();
+    RGlobal.overlay.show({
+      teleport,
+      slots,
+      renderOverlayContent,
+      overlayClass,
+      overlayStyle: style?.value,
+      onClick: onOverlayClick,
+    });
+  },
+  onRemove(prve, current) {
+    if (!prve) return;
+    const teleport = prve?.teleport?.value || prve?.vm?.$el?.parentElement || document.body;
+    const { renderOverlayContent, slots, style, onOverlayClick, props, config } = prve;
+    const overlayClass = [props.overlayClass, config.overlayClass];
+    prve?.strengthenZIndex?.();
+    RGlobal.overlay.show({
+      teleport,
+      slots,
+      overlayClass,
+      renderOverlayContent,
+      overlayStyle: style?.value,
+      onClick: onOverlayClick,
+    });
+  },
+  onFinish() {
+    RGlobal.overlay.hide();
+  },
+});
+
 export const RDialogHoc = (options = {}) => {
   const config = {
     class: "",
@@ -73,7 +108,7 @@ export const RDialogHoc = (options = {}) => {
       return null;
     },
     emits: [],
-    dialogQueue: [],
+    dialogQueue: dialogQueue,
     ...options,
   };
   return defineComponent({
@@ -132,6 +167,8 @@ export const RDialogHoc = (options = {}) => {
       useDocumentTouchstart(onDocumentTouchstart);
 
       const ctx = {
+        props,
+        config,
         visible,
         close,
         open,
@@ -198,6 +235,7 @@ export const RDialogHoc = (options = {}) => {
       }
 
       function onClick(event) {
+        event.stopPropagation();
         context.emit("click", event);
         context.emit("contentClick", event);
       }
@@ -270,38 +308,7 @@ export const RDialogHoc = (options = {}) => {
   });
 };
 
-const dialogQueue = useDialogQueue({
-  onPush(prve, current) {
-    const teleport = current?.teleport?.value || current?.vm?.$el?.parentElement || document.body;
-    const { renderOverlayContent, slots, style, onOverlayClick } = current;
-    prve?.weakenZIndex?.();
-    RGlobal.overlay.show({
-      teleport,
-      slots,
-      renderOverlayContent,
-      overlayStyle: style?.value,
-      onClick: onOverlayClick,
-    });
-  },
-  onRemove(prve, current) {
-    if (!prve) return;
-    const teleport = prve?.teleport?.value || prve?.vm?.$el?.parentElement || document.body;
-    const { renderOverlayContent, slots, style, onOverlayClick } = prve;
-    prve?.strengthenZIndex?.();
-    RGlobal.overlay.show({
-      teleport,
-      slots,
-      renderOverlayContent,
-      overlayStyle: style?.value,
-      onClick: onOverlayClick,
-    });
-  },
-  onFinish() {
-    RGlobal.overlay.hide();
-  },
-});
-
-export const RDialog = RDialogHoc({ dialogQueue });
+export const RDialog = RDialogHoc();
 
 export function useRDialog(node) {
   const div = document.createElement("div");

@@ -10,6 +10,7 @@ import {
 } from "vue";
 import "./index.scss";
 import { arrayRemove } from "@rainbow_ljy/rainbow-js";
+import { RGlobal } from "../../global";
 
 export class ScrollController {
   onScroll = () => 0;
@@ -102,6 +103,7 @@ export function useScrollController(props = {}) {
 export const RScroll = defineComponent({
   props: {
     scrollController: Object,
+    popupDisableScroll: { type: Boolean, default: true },
   },
   setup(props, context) {
     const { scrollController: SC } = props;
@@ -184,6 +186,8 @@ export const RScroll = defineComponent({
 
     if (SC) SC.addElement(RScrollContext);
 
+    if (props.popupDisableScroll) RGlobal.scrolls.push(RScrollContext);
+
     onMounted(() => {
       RScrollContext.children.forEach((el) => {
         el.onMounted(RScrollContext.element.scrollTop);
@@ -192,6 +196,7 @@ export const RScroll = defineComponent({
     });
 
     onBeforeUnmount(() => {
+      arrayRemove(RGlobal.scrolls, RScrollContext);
       if (SC) SC.removeElement(RScrollContext);
       resizeObserver?.disconnect?.();
     });

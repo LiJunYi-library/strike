@@ -204,6 +204,7 @@ export const RDialogHoc = (options = {}) => {
         config.dialogQueue.push(ctx);
         context.emit("open", ctx);
         props?.scrollController?.setCanScroll?.(false);
+        RGlobal.scrolls.forEach(el=> el?.setCanScroll?.(false))
       }
 
       function onClose() {
@@ -211,6 +212,7 @@ export const RDialogHoc = (options = {}) => {
         // console.log("onClose");
         config.dialogQueue.remove(ctx);
         props?.scrollController?.setCanScroll?.(true);
+        RGlobal.scrolls.forEach(el=> el?.setCanScroll?.(true))
       }
 
       function currentClose() {

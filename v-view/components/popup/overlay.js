@@ -24,6 +24,7 @@ export const ROverlay = defineComponent({
     isTouchStopPropagation: { type: Boolean, default: true },
     isClickStopPropagation: { type: Boolean, default: true },
     renderOverlayContent: { type: Function, default: () => null },
+    zIndex: [Number, String],
   },
   emits: ["update:visible", "update:visible", "closed", "touchstart", "click"],
   setup(props, context) {
@@ -81,7 +82,7 @@ export const ROverlay = defineComponent({
           class={["r-overlay", props.overlayClass]}
           onTouchstart={onTouchstart}
           onClick={onClick}
-          style={{ ...props.overlayStyle, zIndex: 300000 }}
+          style={{ ...props.overlayStyle, zIndex: props.zIndex || 300000 }}
         >
           {renderSlot(context.slots, "default")}
           {renderSlot(props.slots, "overlayContent")}
@@ -124,5 +125,14 @@ export function createOverlay() {
     node.component.exposed.close();
   }
 
-  return { show, hide };
+  function renderOverlay(config = {}) {
+    const props = {
+      RendererElement: div,
+      ...config,
+    };
+    node = <ROverlay {...props}></ROverlay>;
+    render(node, props.RendererElement);
+  }
+
+  return { show, hide, renderOverlay };
 }

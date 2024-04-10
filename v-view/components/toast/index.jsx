@@ -25,6 +25,7 @@ export const RToastHoc = (consfig = {}) => {
       visible: { type: Boolean, default: false },
       showLoadingIcon: { type: Boolean, default: true },
       iconClass: { type: String, default: "" },
+      timeOut: { type: Number, default: 3000 },
       ...option.props,
     },
     emits: ["onUpdate:visible"],

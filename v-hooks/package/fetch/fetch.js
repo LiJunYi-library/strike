@@ -141,6 +141,7 @@ export function useFetchHOC(props = {}) {
     error: false,
     data: undefined,
     errorData: undefined,
+    isPushQueue: true,
     fetchQueue: undefined,
     ...props,
   };
@@ -253,7 +254,7 @@ export function useFetchHOC(props = {}) {
         errorData.value = undefined;
         loading.value = true;
         fetchPromise = fetch(URL, fetchConfig);
-        options.fetchQueue?.push?.(fetchPromise, config, params);
+        if (config.isPushQueue) options.fetchQueue?.push?.(fetchPromise, config, params);
         const res = await fetchPromise;
         const d = await config.formatterResponse(res, config);
         if (!res.ok) throw d;

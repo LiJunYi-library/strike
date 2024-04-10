@@ -17,41 +17,6 @@ import {
 import { arrayRemove } from "@rainbow_ljy/rainbow-js";
 import { RGlobal } from "../../global";
 
-export function useDialogQueue(props = {}) {
-  const options = {
-    onBegin: () => undefined,
-    onFinish: () => undefined,
-    onPush: () => undefined,
-    onRemove: () => undefined,
-    onPushed: () => undefined,
-    ...props,
-  };
-  const queue = [];
-
-  function push(current) {
-    const prve = queue.at(-1);
-    if (queue.length === 0) options.onBegin(prve, current);
-    options.onPush(prve, current);
-    queue.push(current);
-    options.onPushed(prve, current);
-  }
-
-  function del(current) {
-    arrayRemove(queue, current);
-    const prve = queue.at(-1);
-    options.onRemove(prve, current);
-  }
-
-  function remove(current) {
-    arrayRemove(queue, current);
-    const prve = queue.at(-1);
-    options.onRemove(prve, current);
-    if (queue.length === 0) options.onFinish(prve, current);
-  }
-
-  return { queue, push, remove, del };
-}
-
 function useDocumentTouchstart(cb) {
   document.addEventListener("touchstart", cb);
   onBeforeUnmount(() => {
@@ -59,42 +24,7 @@ function useDocumentTouchstart(cb) {
   });
 }
 
-let dialogZIndex = 300000;
-
-const dialogQueue = useDialogQueue({
-  onPush(prve, current) {
-    const teleport = current?.teleport?.value || current?.vm?.$el?.parentElement || document.body;
-    const { renderOverlayContent, slots, style, onOverlayClick, props, config } = current;
-    const overlayClass = [props.overlayClass, config.overlayClass];
-    prve?.weakenZIndex?.();
-    RGlobal.overlay.show({
-      teleport,
-      slots,
-      renderOverlayContent,
-      overlayClass,
-      overlayStyle: style?.value,
-      onClick: onOverlayClick,
-    });
-  },
-  onRemove(prve, current) {
-    if (!prve) return;
-    const teleport = prve?.teleport?.value || prve?.vm?.$el?.parentElement || document.body;
-    const { renderOverlayContent, slots, style, onOverlayClick, props, config } = prve;
-    const overlayClass = [props.overlayClass, config.overlayClass];
-    prve?.strengthenZIndex?.();
-    RGlobal.overlay.show({
-      teleport,
-      slots,
-      overlayClass,
-      renderOverlayContent,
-      overlayStyle: style?.value,
-      onClick: onOverlayClick,
-    });
-  },
-  onFinish() {
-    RGlobal.overlay.hide();
-  },
-});
+const dialogZIndex = 300000;
 
 export const RDialogHoc = (options = {}) => {
   const config = {
@@ -107,8 +37,21 @@ export const RDialogHoc = (options = {}) => {
     renderOverlayContent: () => {
       return null;
     },
+    createOpen({ visible, context, ctx, renderOverlay, props }) {
+      function open(isEmit = true) {
+        visible.value = true;
+        if (isEmit) context.emit("update:visible", true);
+        // console.log("onOpen");
+        context.emit("beforeOpen");
+        RGlobal.zIndexQueue.push(ctx);
+        context.emit("open", ctx);
+        renderOverlay();
+        props?.scrollController?.setCanScroll?.(false);
+        RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(false));
+      }
+      return open;
+    },
     emits: [],
-    dialogQueue: dialogQueue,
     ...options,
   };
   return defineComponent({
@@ -134,6 +77,7 @@ export const RDialogHoc = (options = {}) => {
       "beforeOpen",
       "open",
       "opened",
+      "beforeClose",
       "close",
       "closed",
       "prveClose",
@@ -144,52 +88,90 @@ export const RDialogHoc = (options = {}) => {
       ...config.emits,
     ],
     setup(props, context) {
-      dialogZIndex = dialogZIndex + 1;
       const zIndex = ref(dialogZIndex);
-      const visible = ref(props.visible);
+      const visible = ref(false);
       const slots = context.slots;
       const { renderOverlayContent } = config;
       let isRender = false;
       let ele;
+
       const teleport = computed(() => {
         if (isRef(props.teleport)) return props.teleport.value;
         if (typeof props.teleport === "object") return props.teleport;
         return document.querySelector(props.teleport);
       });
-      watch(
-        () => props.visible,
-        () => {
-          if (visible.value === props.visible) return;
-          visible.value = props.visible;
-          props.visible ? onOpen() : onClose();
-        }
-      );
-      useDocumentTouchstart(onDocumentTouchstart);
+
+      const style = computed(() => ({
+        left: props.left,
+        right: props.right,
+        top: props.top,
+        bottom: props.bottom,
+        zIndex: zIndex.value,
+      }));
 
       const ctx = {
         props,
         config,
         visible,
-        close,
-        open,
-        strengthenZIndex,
-        weakenZIndex,
         zIndex,
         teleport,
         slots,
+        style,
+        close,
         renderOverlayContent,
         currentClose,
         onOverlayClick,
+        setZIndex,
+        renderOverlay,
       };
-
       provide("RPopupContext", ctx);
 
-      function strengthenZIndex() {
-        zIndex.value = zIndex.value + 100000;
+      const open = config.createOpen({ visible, context, ctx, renderOverlay, props });
+
+      ctx.open = open;
+
+      watch(
+        () => props.visible,
+        (newVal) => {
+          if (visible.value === newVal) return;
+          newVal ? open(false) : close(false);
+        }
+      );
+
+      useDocumentTouchstart(onDocumentTouchstart);
+
+      if (props.visible) open(false);
+
+      function renderOverlay() {
+        RGlobal.overlay.renderOverlay({
+          teleport: ctx?.teleportEl?.value || ctx?.vm?.$el?.parentElement || document.body,
+          overlayClass: [ctx?.props.overlayClass, ctx?.config.overlayClass],
+          slots: ctx?.slots,
+          renderOverlayContent: ctx?.renderOverlayContent,
+          onClick: ctx?.onOverlayClick,
+          visible: ctx?.visible?.value,
+          zIndex: ctx?.zIndex?.value - 1,
+          overlayStyle: ctx?.style?.value,
+        });
       }
 
-      function weakenZIndex() {
-        zIndex.value = zIndex.value - 100000;
+      function close(isEmit = true) {
+        visible.value = false;
+        if (isEmit) context.emit("update:visible", false);
+        context.emit("close", ctx);
+        RGlobal.zIndexQueue.remove(ctx);
+        props?.scrollController?.setCanScroll?.(true);
+        RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(true));
+        const last = RGlobal.zIndexQueue.queue.at(-1);
+        last ? last.renderOverlay() : renderOverlay();
+      }
+
+      onBeforeUnmount(() => {
+        RGlobal.zIndexQueue.remove(ctx);
+      });
+
+      function setZIndex(_zIndex) {
+        zIndex.value = _zIndex;
       }
 
       function onDocumentTouchstart() {
@@ -198,42 +180,13 @@ export const RDialogHoc = (options = {}) => {
         close();
       }
 
-      function onOpen() {
-        // console.log("onOpen");
-        context.emit("beforeOpen");
-        config.dialogQueue.push(ctx);
-        context.emit("open", ctx);
-        props?.scrollController?.setCanScroll?.(false);
-        RGlobal.scrolls.forEach(el=> el?.setCanScroll?.(false))
-      }
-
-      function onClose() {
-        context.emit("close", ctx);
-        // console.log("onClose");
-        config.dialogQueue.remove(ctx);
-        props?.scrollController?.setCanScroll?.(true);
-        RGlobal.scrolls.forEach(el=> el?.setCanScroll?.(true))
-      }
-
       function currentClose() {
         context.emit("currentClose", ctx);
-        // console.log("onCurrentClose");
-      }
-
-      function close() {
-        visible.value = false;
-        context.emit("update:visible", false);
-        onClose();
+        console.log("onCurrentClose");
       }
 
       function onOverlayClick() {
         if (props.closeOnClickOverlay) close();
-      }
-
-      function open() {
-        visible.value = true;
-        context.emit("update:visible", true);
-        onOpen();
       }
 
       function onClick(event) {
@@ -248,12 +201,10 @@ export const RDialogHoc = (options = {}) => {
 
       function onAfterEnter(...params) {
         context.emit("opened", ...params);
-        // console.log("onopened");
       }
 
       function onAfterLeave(...params) {
         context.emit("closed", ...params);
-        // console.log("onclosed");
         if (props.destroy) ele?.remove?.();
       }
 
@@ -272,16 +223,6 @@ export const RDialogHoc = (options = {}) => {
           </div>
         );
       }
-
-      const style = computed(() => ({
-        left: props.left,
-        right: props.right,
-        top: props.top,
-        bottom: props.bottom,
-        zIndex: zIndex.value,
-      }));
-
-      ctx.style = style;
 
       return (vm) => {
         ctx.vm = vm;
@@ -332,12 +273,24 @@ useRDialog.create = (config = {}) => {
   const appContext = config.appContext;
   const div = config.RendererElement || document.createElement("div");
 
-  function create(node) {
-    if (!node.appContext) node.appContext = appContext;
-    render(node, div);
-    instance = node;
-    node.component.exposed.open();
-    create.close = node.component.exposed.close;
+  function handleVNode(VNode) {
+    if (!VNode.appContext) VNode.appContext = appContext;
+    render(VNode, div);
+    instance = VNode;
+    VNode.component.exposed.open();
+    create.close = VNode.component.exposed.close;
   }
+
+  function create(node) {
+    if (node instanceof Function) {
+      return new Promise((resolve, reject) => {
+        const VNode = node(resolve, reject);
+        handleVNode(VNode);
+      });
+    }
+
+    handleVNode(node);
+  }
+
   return create;
 };

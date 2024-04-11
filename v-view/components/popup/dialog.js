@@ -37,20 +37,11 @@ export const RDialogHoc = (options = {}) => {
     renderOverlayContent: () => {
       return null;
     },
-    createOpen({ visible, context, ctx, renderOverlay, props }) {
-      function open(isEmit = true) {
-        visible.value = true;
-        if (isEmit) context.emit("update:visible", true);
-        // console.log("onOpen");
-        context.emit("beforeOpen");
-        RGlobal.zIndexQueue.push(ctx);
-        context.emit("open", ctx);
-        renderOverlay();
-        props?.scrollController?.setCanScroll?.(false);
-        RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(false));
-      }
-      return open;
-    },
+    beforeOpen: () => undefined,
+    open: () => undefined,
+    beforeClose: () => undefined,
+    close: () => undefined,
+    beforeUnmount: () => undefined,
     emits: [],
     ...options,
   };
@@ -117,6 +108,7 @@ export const RDialogHoc = (options = {}) => {
         teleport,
         slots,
         style,
+        open,
         close,
         renderOverlayContent,
         currentClose,
@@ -125,10 +117,6 @@ export const RDialogHoc = (options = {}) => {
         renderOverlay,
       };
       provide("RPopupContext", ctx);
-
-      const open = config.createOpen({ visible, context, ctx, renderOverlay, props });
-
-      ctx.open = open;
 
       watch(
         () => props.visible,
@@ -144,7 +132,7 @@ export const RDialogHoc = (options = {}) => {
 
       function renderOverlay() {
         RGlobal.overlay.renderOverlay({
-          teleport: ctx?.teleportEl?.value || ctx?.vm?.$el?.parentElement || document.body,
+          teleport: ctx?.teleport?.value || ctx?.vm?.$el?.parentElement || document.body,
           overlayClass: [ctx?.props.overlayClass, ctx?.config.overlayClass],
           slots: ctx?.slots,
           renderOverlayContent: ctx?.renderOverlayContent,
@@ -155,19 +143,40 @@ export const RDialogHoc = (options = {}) => {
         });
       }
 
+      function open(isEmit = true) {
+        config.beforeOpen(ctx);
+        context.emit("beforeOpen");
+        visible.value = true;
+        if (isEmit) context.emit("update:visible", true);
+        // console.log("onOpen");
+        RGlobal.zIndexQueue.push(ctx);
+        RGlobal.overlayQueue.push(ctx);
+        config.open(ctx);
+        context.emit("open", ctx);
+        renderOverlay();
+        props?.scrollController?.setCanScroll?.(false);
+        RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(false));
+      }
+
       function close(isEmit = true) {
+        config.beforeClose(ctx);
+        context.emit("beforeClose", ctx);
         visible.value = false;
         if (isEmit) context.emit("update:visible", false);
         context.emit("close", ctx);
         RGlobal.zIndexQueue.remove(ctx);
+        RGlobal.overlayQueue.remove(ctx);
+        config.close(ctx);
         props?.scrollController?.setCanScroll?.(true);
         RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(true));
-        const last = RGlobal.zIndexQueue.queue.at(-1);
+        const last = RGlobal.overlayQueue.queue.at(-1);
         last ? last.renderOverlay() : renderOverlay();
       }
 
       onBeforeUnmount(() => {
         RGlobal.zIndexQueue.remove(ctx);
+        RGlobal.overlayQueue.remove(ctx);
+        config.beforeUnmount(ctx);
       });
 
       function setZIndex(_zIndex) {
@@ -177,6 +186,7 @@ export const RDialogHoc = (options = {}) => {
       function onDocumentTouchstart() {
         if (!props.closeOnClickEmpty) return;
         if (!visible.value) return;
+        // console.log("onDocumentTouchstart");
         close();
       }
 

@@ -4,24 +4,17 @@ import { RDialogHoc } from "./dialog";
 
 export const RPopupHoc = (options = {}) =>
   RDialogHoc({
-    createOpen({ visible, context, ctx, renderOverlay, props }) {
-      function open(isEmit = true) {
-        const prve = RGlobal.zIndexQueue.queue.at(0);
-        if (prve) prve?.close?.();
-    
-        visible.value = true;
-        if (isEmit) context.emit("update:visible", true);
-        // console.log("onOpen");
-        context.emit("beforeOpen");
-        RGlobal.zIndexQueue.push(ctx);
-        context.emit("open", ctx);
-        renderOverlay();
-        props?.scrollController?.setCanScroll?.(false);
-        RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(false));
-      }
-      return open;
+    open(ctx) {
+      const prve = RGlobal.popupQueue.queue.at(0);
+      RGlobal.popupQueue.push(ctx);
+      if (prve) prve?.close?.();
     },
-
+    close(ctx) {
+      RGlobal.popupQueue.remove(ctx);
+    },
+    beforeUnmount(ctx) {
+      RGlobal.popupQueue.remove(ctx);
+    },
     ...options,
   });
 

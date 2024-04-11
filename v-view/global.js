@@ -3,7 +3,7 @@ import { arrayRemove } from "@rainbow_ljy/rainbow-js";
 
 const zIndex = 300000;
 
-function usezIndexQueue(props = {}) {
+function useQueue(props = {}) {
   const options = {
     onBegin: () => undefined,
     onFinish: () => undefined,
@@ -16,18 +16,11 @@ function usezIndexQueue(props = {}) {
 
   const queue = [];
 
-  function upZIndex() {
-    queue.forEach((ele, index) => {
-      ele?.setZIndex(zIndex + index * 2);
-    });
-  }
-
   function push(current) {
-    if (queue.length === 0) options.onBegin(queue);
-    options.onPush(queue);
+    if (queue.length === 0) options.onBegin(queue, current);
+    options.onPush(queue, current);
     queue.push(current);
-    upZIndex();
-    options.onPushed(queue);
+    options.onPushed(queue, current);
   }
 
   function change(current) {
@@ -35,18 +28,29 @@ function usezIndexQueue(props = {}) {
   }
 
   function remove(current) {
-    options.onRemove(queue);
+    options.onRemove(queue, current);
     arrayRemove(queue, current);
-    upZIndex();
-    options.onRemoved(queue);
-    if (queue.length === 0) options.onFinish(queue);
+    options.onRemoved(queue, current);
+    if (queue.length === 0) options.onFinish(queue, current);
   }
 
   return { queue, push, remove, change };
 }
 
+function upZIndex(queue) {
+  queue.forEach((ele, index) => {
+    ele?.setZIndex?.(zIndex + index * 2);
+  });
+}
+
 export const RGlobal = {
   scrolls: [],
   overlay: createOverlay(),
-  zIndexQueue: usezIndexQueue(),
+  zIndexQueue: useQueue({ onPushed: upZIndex, onRemoved: upZIndex }),
+  overlayQueue: useQueue(),
+  popupQueue: useQueue({
+    onFinish(queue, current) {
+      current.currentClose();
+    },
+  }),
 };

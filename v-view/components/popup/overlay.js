@@ -28,7 +28,7 @@ export const ROverlay = defineComponent({
   },
   emits: ["update:visible", "update:visible", "closed", "touchstart", "click"],
   setup(props, context) {
-    console.log("ROverlay 创建", props);
+    // console.log("ROverlay 创建", props);
 
     const visible = ref(props.visible);
     let isRender = false;

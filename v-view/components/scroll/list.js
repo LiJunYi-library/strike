@@ -57,7 +57,20 @@ const mProps = {
     default: true,
   },
 
-  listHook: Object,
+  listHook: {
+    type: Object,
+    default: () => ({}),
+  },
+
+  list: {
+    type: Array,
+    default: () => [],
+  },
+
+  isUseHook: {
+    type: Boolean,
+    default: true,
+  },
 
   loadingHook: [Object, Array],
 };
@@ -65,11 +78,9 @@ const mProps = {
 export const RScrollList = defineComponent({
   props: mProps,
   setup(props, context) {
-    // eslint-disable-next-line
-    const { listHook } = props;
     let bottomHtml;
     let isobserver = false;
-    const loadHook = useLoading({ ...props, promiseHook: listHook });
+    const loadHook = useLoading({ ...props, promiseHook: props.listHook });
     const spaceStyle = { height: props.sapceHeight + "px" };
 
     const observerBottom = new IntersectionObserver(([entries]) => {
@@ -86,7 +97,7 @@ export const RScrollList = defineComponent({
     function renderLoading(props, context) {
       if (!loadHook.loading) return null;
       if (!props.loadingText) return null;
-      return renderSlot(context.slots, "loading", listHook, () => [
+      return renderSlot(context.slots, "loading", props.listHook, () => [
         <div class={"list-loading"}>
           <RILoading class="r-loadings-icon" />
           <div class={["r-loadings-text"]}>{props.loadingText}</div>
@@ -98,7 +109,7 @@ export const RScrollList = defineComponent({
       if (!loadHook.begin) return null;
       return (
         <div class="r-list-begin">
-          {renderSlot(context.slots, "begin", listHook, () => [
+          {renderSlot(context.slots, "begin", props.listHook, () => [
             <div class="r-list-skelectons" style={{ padding: `0 ${props.sapceHorizontal}px` }}>
               {renderList(props.skelectonCount, (item, index) => {
                 return [
@@ -116,22 +127,22 @@ export const RScrollList = defineComponent({
 
     function renderfinished() {
       if (loadHook.loading) return null;
-      if (!listHook.finished) return null;
-      if (!listHook.list || !listHook.list.length) return null;
+      if (!props.listHook.finished) return null;
+      if (!props.listHook.list || !props.listHook.list.length) return null;
       if (!props.finishedText) return null;
-      return renderSlot(context.slots, "finished", listHook, () => [
+      return renderSlot(context.slots, "finished", props.listHook, () => [
         <div class="list-finished">{props.finishedText}</div>,
       ]);
     }
 
     function renderEmpty() {
       if (loadHook.loading) return null;
-      if (!listHook.finished) return null;
-      if (listHook?.list?.length) return null;
+      if (!props.listHook.finished) return null;
+      if (props.listHook?.list?.length) return null;
       if (!props.emptyText && !props.emptySrc) return null;
-      return renderSlot(context.slots, "empty", listHook, () => [
+      return renderSlot(context.slots, "empty", props.listHook, () => [
         <div class="list-empty">
-          {renderSlot(context.slots, "emptyImg", listHook, () => [
+          {renderSlot(context.slots, "emptyImg", props.listHook, () => [
             props.emptySrc && <img width={100} fit="contain" src={props.emptySrc} />,
           ])}
           {props.emptyText && <div class={" list-empty-text"}>{props.emptyText}</div>}
@@ -141,8 +152,8 @@ export const RScrollList = defineComponent({
 
     function renderError() {
       if (loadHook.loading) return null;
-      if (!listHook.error) return null;
-      return renderSlot(context.slots, "error", listHook, () => [
+      if (!props.listHook.error) return null;
+      return renderSlot(context.slots, "error", props.listHook, () => [
         <div class={"list-error"}>
           <div>{props.errorText}</div>
           <div
@@ -158,7 +169,8 @@ export const RScrollList = defineComponent({
 
     function renderContent() {
       if (loadHook.begin) return null;
-      return renderList(listHook.list, (item, index) => {
+      const listData = props.isUseHook ? props.listHook.list : props.list;
+      return renderList(listData || [], (item, index) => {
         return [
           index !== 0 && <div class="r-list-space" style={spaceStyle}></div>,
           renderSlot(context.slots, "default", { item, index }),

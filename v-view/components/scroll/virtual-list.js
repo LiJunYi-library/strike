@@ -86,7 +86,7 @@ export const RScrollVirtualList = defineComponent({
   },
   setup(props, context) {
     // eslint-disable-next-line
-    const { listHook, bothEndsHeight, space, avgHeight, columnNum } = props;
+    const { bothEndsHeight, space, avgHeight, columnNum } = props;
     let node;
     let bottomHtml;
     let isobserver = false;
@@ -99,15 +99,15 @@ export const RScrollVirtualList = defineComponent({
     const recycleHeight = () => window.innerHeight * 2; // 有些浏览器初始拿innerHeight有时为0;
     const recycleNum = Math.floor(recycleHeight() / (avgHeight + space)) * columnNum;
     const offsetH = computed(() => {
-      if (!listHook.list.length) return 0;
+      if (!props.listHook.list.length) return 0;
       return (
-        (avgHeight + space) * Math.ceil(listHook.list.length / columnNum) -
+        (avgHeight + space) * Math.ceil(props.listHook.list.length / columnNum) -
         space +
         bothEndsHeight * 2
       );
     });
     const itemWidth = `calc( ${100 / columnNum}% - ${((columnNum - 1) * space) / columnNum}px )`; //${};
-    const loadComs = useListLoadingHoc(listHook, props, context);
+    const loadComs = useListLoadingHoc(props.listHook, props, context);
 
     const scrollController = useScrollController({
       onScroll(event, sTop) {
@@ -142,14 +142,16 @@ export const RScrollVirtualList = defineComponent({
       return div;
     }
 
-    function diff() {}
+    function diff() {
+      //
+    }
 
     function renderItems(sTop, index, addH = 0, pList = []) {
       if (index < 0) return pList;
-      if (index >= listHook.list.length) return pList;
+      if (index >= props.listHook.list.length) return pList;
       if (scrollController.getOffsetTop(node) - sTop + addH > recycleHeight()) return pList;
       arrayLoop(columnNum, (i) => {
-        if (index >= listHook.list.length) return pList;
+        if (index >= props.listHook.list.length) return pList;
         const nth = Math.floor(index / columnNum);
         let top = nth * (avgHeight + space) + bothEndsHeight + "px";
         if (nth === 0) top = bothEndsHeight + "px";
@@ -198,7 +200,7 @@ export const RScrollVirtualList = defineComponent({
         div.style.width = width;
         div.style.height = height;
         render(
-          <ListItem item={listHook.list[nth]} index={nth} slots={context.slots}></ListItem>,
+          <ListItem item={props.listHook.list[nth]} index={nth} slots={context.slots}></ListItem>,
           div
         );
         node.appendChild(div);

@@ -26,3 +26,4 @@ export class ScrollController {
 }
 
 export * from "./scroll-page";
+export * from "./message";

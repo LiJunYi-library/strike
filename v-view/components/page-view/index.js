@@ -24,8 +24,6 @@ const props = {
 const Context = defineComponent({
   props,
   setup(props, context) {
-    // eslint-disable-next-line
-    const { listHook } = props;
     const itemsHtml = [];
     let parentHtml = null;
     let containerHtml = null;
@@ -54,7 +52,7 @@ const Context = defineComponent({
     );
 
     function scrollTo() {
-      const left = props.width * listHook.index;
+      const left = props.width * props.listHook.index;
       containerHtml.scrollTo({ left, behavior: props.behavior });
     }
 
@@ -69,10 +67,10 @@ const Context = defineComponent({
 
     function update(index) {
       // console.log("update",lock);
-      if (index === listHook.index) return;
+      if (index === props.listHook.index) return;
       if (lock === true) return;
       isTriggerWatch = false;
-      listHook.updateIndex(index);
+      props.listHook.updateIndex(index);
       context.emit("change", index);
     }
 
@@ -86,7 +84,7 @@ const Context = defineComponent({
 
       const index = Math.round(sLeft) / props.width;
       if (!Number.isInteger(index)) return;
-      // console.log(index, listHook.index);
+      // console.log(index, props.listHook.index);
       update(index);
       lock = false;
     }
@@ -101,37 +99,13 @@ const Context = defineComponent({
 
     function renderContent() {
       const isUseHook = !RPageViewContext?.children?.length;
-      const listRenderData = isUseHook ? listHook.list : RPageViewContext.children;
+      const listRenderData = isUseHook ? props.listHook.list : RPageViewContext.children;
       const same = (item, index) => {
-        if (isUseHook) return listHook.same(item);
-        return listHook.index === index;
+        if (isUseHook) return props.listHook.same(item);
+        return props.listHook.index === index;
       };
 
       return renderList(listRenderData, (item, index) => {
-        // if (props.lazy) {
-        //   if (same(item, index)) item.rViewPageIscache = true;
-        //   if (!item.rViewPageIscache) {
-        //     return (
-        //       <div
-        //         style={{ width: props.width + "px" }}
-        //         key={index}
-        //         ref={(el) => (itemsHtml[index] = el)}
-        //         class={["r-page-view-item", same(item, index) && "r-page-view-item-same"]}
-        //       ></div>
-        //     );
-        //   }
-        // }
-
-        // if (!props.cache && !same(item, index)) {
-        //   return (
-        //     <div
-        //       style={{ width: props.width + "px" }}
-        //       key={index}
-        //       ref={(el) => (itemsHtml[index] = el)}
-        //       class={["r-page-view-item", same(item, index) && "r-page-view-item-same"]}
-        //     ></div>
-        //   );
-        // }
 
         return (
           <div
@@ -161,7 +135,7 @@ const Context = defineComponent({
             ref={(el) => (parentHtml = el)}
             class={["r-page-view-list"]}
             style={{
-              width: props.width * (listHook?.list?.length ?? 0) + "px",
+              width: props.width * (props.listHook?.list?.length ?? 0) + "px",
             }}
           >
             {renderContent()}

@@ -151,11 +151,11 @@ export const RDialogHoc = (options = {}) => {
         // console.log("onOpen");
         RGlobal.zIndexQueue.push(ctx);
         RGlobal.overlayQueue.push(ctx);
+        RGlobal.disabledScrollQueue.push(ctx);
         config.open(ctx);
         context.emit("open", ctx);
         renderOverlay();
         props?.scrollController?.setCanScroll?.(false);
-        RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(false));
       }
 
       function close(isEmit = true) {
@@ -168,7 +168,6 @@ export const RDialogHoc = (options = {}) => {
         RGlobal.overlayQueue.remove(ctx);
         config.close(ctx);
         props?.scrollController?.setCanScroll?.(true);
-        RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(true));
         const last = RGlobal.overlayQueue.queue.at(-1);
         last ? last.renderOverlay() : renderOverlay();
       }
@@ -176,6 +175,7 @@ export const RDialogHoc = (options = {}) => {
       onBeforeUnmount(() => {
         RGlobal.zIndexQueue.remove(ctx);
         RGlobal.overlayQueue.remove(ctx);
+        RGlobal.disabledScrollQueue.remove(ctx);
         config.beforeUnmount(ctx);
       });
 
@@ -215,6 +215,7 @@ export const RDialogHoc = (options = {}) => {
 
       function onAfterLeave(...params) {
         context.emit("closed", ...params);
+        RGlobal.disabledScrollQueue.remove(ctx);
         if (props.destroy) ele?.remove?.();
       }
 

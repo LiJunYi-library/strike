@@ -295,7 +295,8 @@ export const RLoading = defineComponent({
     return () => {
       const SLOTS = props.slots || context.slots;
       if (props.loadingHook.begin === true) {
-        return (
+        if (SLOTS?.begin) return SLOTS.begin();
+        return [
           <div class={["r-loading", props.loadingClass]}>
             {props.skelectonCount
               ? renderList(props.skelectonCount, (item, index) => {
@@ -306,8 +307,8 @@ export const RLoading = defineComponent({
                   );
                 })
               : renderSlot(SLOTS, "loading", props.loadingHook, () => [<RILoading />])}
-          </div>
-        );
+          </div>,
+        ];
       }
       return renderSlot(context.slots, "default");
     };

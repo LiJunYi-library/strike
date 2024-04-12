@@ -67,8 +67,7 @@ const Context = defineComponent({
     function getInnerChild(vnode) {
       return vnode.shapeFlag & 128 ? vnode.ssContent : vnode;
     }
-    // eslint-disable-next-line
-    const { listHook } = props;
+
     const RViewPageContext = inject("RViewPageContext") || {};
 
     const instance = getCurrentInstance();
@@ -168,13 +167,13 @@ const Context = defineComponent({
     const getTranslateX = () => {
       if (!containerHtml) return 0;
       const width = containerHtml.offsetWidth;
-      const nth = listHook.index;
+      const nth = props.listHook.index;
       const x = nth * -width; // 反过来 nth * width - (listHook.list.length - 1) * width
       return x;
     };
 
     function renderActItem({ item, index }) {
-      if (!listHook.same(item)) return null;
+      if (!props.listHook.same(item)) return null;
 
       const children = RViewPageContext.slots?.item?.({ item, index });
       const rawVNode = children[0];
@@ -231,17 +230,17 @@ const Context = defineComponent({
           <div
             ref={(el) => (parentHtml = el)}
             style={{
-              width: props.width * (listHook?.list?.length ?? 0) + "px",
+              width: props.width * (props.listHook?.list?.length ?? 0) + "px",
               transform: `translateX(${getTranslateX()}px)`,
             }}
             class={["r-view-page-list", parentHtml && "r-view-page-list-transition"]}
           >
-            {renderList(listHook.list, (item, index) => {
+            {renderList(props.listHook.list, (item, index) => {
               return (
                 <div
                   style={{ width: props.width + "px" }}
                   key={index}
-                  class={["r-view-page-item2", listHook.same(item) && "r-view-page-item-same2"]}
+                  class={["r-view-page-item2", props.listHook.same(item) && "r-view-page-item-same2"]}
                 >
                   {renderActItem({ item, index })}
                 </div>

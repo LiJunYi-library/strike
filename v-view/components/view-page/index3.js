@@ -30,8 +30,7 @@ const props = {
 const Context = defineComponent({
   props,
   setup(props, context) {
-    // eslint-disable-next-line
-    const { listHook } = props;
+
     const RViewPageContext = inject("RViewPageContext") || {};
 
     const instance = getCurrentInstance();
@@ -46,22 +45,22 @@ const Context = defineComponent({
     const getTranslateX = () => {
       if (!containerHtml) return 0;
       const width = containerHtml.offsetWidth;
-      const nth = listHook.index;
+      const nth = props.listHook.index;
       const x = nth * -width; // 反过来 nth * width - (listHook.list.length - 1) * width
       return x;
     };
 
     return (vm) => {
       pendingCacheKey = null;
-      console.log(listHook.list);
-      const items = listHook.list.map((item, index) =>
+      console.log(props.listHook.list);
+      const items = props.listHook.list.map((item, index) =>
         RViewPageContext?.slots?.item?.({ item, index })
       );
       console.log(items);
       return (
         <div class={"r-view-page"} ref={(el) => (containerHtml = el)}>
           {/* <Transition name="viewPAge"> */}
-          <KeepAlive>{items[listHook.index]}</KeepAlive>
+          <KeepAlive>{items[props.listHook.index]}</KeepAlive>
           {/* </Transition> */}
         </div>
       );

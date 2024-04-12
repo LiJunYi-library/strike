@@ -18,12 +18,11 @@ export const RDropdownSelect = defineComponent({
     label: { type: [String, Number], default: "" },
   },
   setup(props, context) {
-    const listHook = props.listHook;
 
     function onClick(item, index, closed) {
-      if (listHook.same(item, index)) return;
-      listHook.onSelect(item, index);
-      context.emit("change", listHook.value);
+      if (props.listHook.same(item, index)) return;
+      props.listHook.onSelect(item, index);
+      context.emit("change", props.listHook.value);
       closed();
     }
     return () => {
@@ -31,9 +30,9 @@ export const RDropdownSelect = defineComponent({
         <RDropdown {...context.attrs}>
           {{
             content: (ctx) => (
-              <div class={["r-dropdown-text", listHook.label && "r-dropdown-text-act"]}>
+              <div class={["r-dropdown-text", props.listHook.label && "r-dropdown-text-act"]}>
                 {renderSlot(context.slots, "label", ctx, () => [
-                  <div class="r-dropdown-label"> {listHook.label || props.label} </div>,
+                  <div class="r-dropdown-label"> {props.listHook.label || props.label} </div>,
                 ])}
                 <span class={["r-dropdown-icon", !ctx.look && "rote"]}>
                   {renderSlot(context.slots, "icon", ctx, () => [
@@ -46,18 +45,18 @@ export const RDropdownSelect = defineComponent({
             default: ({ closed }) => (
               <div class="r-dropdown-select">
                 <div class="r-dropdown-select-list">
-                  {renderList(listHook.list, (item, index) => {
+                  {renderList(props.listHook.list, (item, index) => {
                     return renderSlot(context.slots, "default", { item, index }, () => [
                       <div
                         onClick={() => onClick(item, index, closed)}
                         class={[
                           "r-dropdown-select-list-item",
-                          listHook.same(item, index) && "r-dropdown-select-list-item-act",
+                          props.listHook.same(item, index) && "r-dropdown-select-list-item-act",
                         ]}
                         key={index}
                       >
                         {renderSlot(context.slots, "item", { item, index }, () => [
-                          listHook.formatterLabel(item, index),
+                          props.listHook.formatterLabel(item, index),
                         ])}
                       </div>,
                     ]);

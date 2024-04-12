@@ -111,7 +111,7 @@ export const RVirtualScrollList = defineComponent({
   },
   setup(props, context) {
     // eslint-disable-next-line
-    const { listHook, space, avgHeight } = props;
+    const {  space, avgHeight } = props;
     // debugger
     const recycle = [];
     const tasks = [];
@@ -124,9 +124,9 @@ export const RVirtualScrollList = defineComponent({
     let offsetT = 0;
     let startIndex = 0;
     let endIndex = 0;
-    let gap = ref(0);
-    let height = computed(() => {
-      let h = avgHeight * listHook.list.length;
+    const gap = ref(0);
+    const height = computed(() => {
+      const h = avgHeight * props.listHook.list.length;
       return h + gap.value;
     });
 
@@ -175,12 +175,12 @@ export const RVirtualScrollList = defineComponent({
 
     function renderItems(cHeight = 0, addH = 0, sTop) {
       if (cHeight <= addH) return;
-      if (endIndex >= listHook.list.length) return;
+      if (endIndex >= props.listHook.list.length) return;
       const div = getRecycleDiv(endIndex);
       div.style.top = offsetB + "px";
       div.top = offsetB;
       div.endIndex = endIndex;
-      render(<ListItem item={listHook.list[endIndex]} slots={context.slots}></ListItem>, div);
+      render(<ListItem item={props.listHook.list[endIndex]} slots={context.slots}></ListItem>, div);
       node.appendChild(div);
       offsetB = offsetB + div.offsetHeight + space;
       addH = addH + div.offsetHeight + space;
@@ -204,7 +204,7 @@ export const RVirtualScrollList = defineComponent({
       startIndex--;
       console.log("upRenderItems", startIndex, endIndex);
       const div = getRecycleDiv(startIndex);
-      render(<ListItem item={listHook.list[startIndex]} slots={context.slots}></ListItem>, div);
+      render(<ListItem item={props.listHook.list[startIndex]} slots={context.slots}></ListItem>, div);
       node.insertBefore(div, node.firstChild);
       div.bottom = offsetT;
       offsetT = offsetT - div.offsetHeight - space;

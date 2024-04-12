@@ -23,8 +23,6 @@ const Active = defineComponent({
     htmls: Object,
   },
   setup(props, context) {
-    // eslint-disable-next-line vue/no-setup-props-destructure
-    const { listHook } = props;
     const offset = ref({});
     let actItemHtml = null;
     const isTransition = ref(true);
@@ -32,7 +30,7 @@ const Active = defineComponent({
     function getOffset() {
       const { itemsHtml, parentHtml, scrollHtml } = props.htmls;
       let offset = {};
-      actItemHtml = itemsHtml[listHook.index];
+      actItemHtml = itemsHtml[props.listHook.index];
       if (!actItemHtml) return offset;
       const activeOffset = actItemHtml.getBoundingClientRect();
       const parentOffset = parentHtml.getBoundingClientRect();
@@ -76,13 +74,13 @@ const Active = defineComponent({
     );
 
     onMounted(() => {
-      if (listHook.select) loyout();
+      if (props.listHook.select) loyout();
     });
 
     context.expose({ loyout, transitionLoyout });
 
     return () => {
-      if (!listHook.select) return null;
+      if (!props.listHook.select) return null;
       return (
         <div
           style={{
@@ -92,7 +90,7 @@ const Active = defineComponent({
           }}
           class={["r-tab-item-active", isTransition.value && "r-tab-item-active-transition"]}
         >
-          {renderSlot(context.slots, "default", listHook, () => [
+          {renderSlot(context.slots, "default", props.listHook, () => [
             <div class="r-tab-item-active-line" />,
           ])}
         </div>
@@ -112,8 +110,6 @@ RTab = defineComponent({
     },
   },
   setup(props, context) {
-    // eslint-disable-next-line vue/no-setup-props-destructure
-    const { listHook } = props;
     let activeNode;
     const htmls = {
       itemsHtml: [],
@@ -144,7 +140,7 @@ RTab = defineComponent({
       }
 
       if (props.clickStop) event.stopPropagation();
-      if (listHook.onSelect(item, index)) return;
+      if (props.listHook.onSelect(item, index)) return;
       context.emit("change", item, index);
     }
 
@@ -154,19 +150,19 @@ RTab = defineComponent({
           <div class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
             <RLoading
               skelectonCount={props.skelectonCount}
-              loadingHook={listHook}
+              loadingHook={props.listHook}
               loadingClass="r-tab-list"
               slots={context.slots}
             >
               <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
-                {renderList(listHook.list, (item, index) => {
+                {renderList(props.listHook.list, (item, index) => {
                   if (context?.slots?.item) return context?.slots?.item({ index, item });
                   return (
                     <div
                       class={[
                         "r-tab-item",
-                        "r-tab-item" + listHook.formatterValue(item),
-                        listHook.same(item) && "r-tab-item-same",
+                        "r-tab-item" + props.listHook.formatterValue(item),
+                        props.listHook.same(item) && "r-tab-item-same",
                       ]}
                       ref={(el) => {
                         htmls.itemsHtml[index] = el;
@@ -175,12 +171,12 @@ RTab = defineComponent({
                       onClick={(event) => tabItemClick(event, item, index)}
                     >
                       {renderSlot(context.slots, "default", { index, item }, () => [
-                        <div> {listHook.formatterLabel(item)} </div>,
+                        <div> {props.listHook.formatterLabel(item)} </div>,
                       ])}
                     </div>
                   );
                 })}
-                <Active listHook={listHook} htmls={htmls} ref={(el) => (activeNode = el)}>
+                <Active listHook={props.listHook} htmls={htmls} ref={(el) => (activeNode = el)}>
                   {{
                     default: (...arg) => context.slots?.active?.(...arg),
                   }}
@@ -206,9 +202,6 @@ function RTabHoc(config = {}) {
       listHook: Object,
     },
     setup(props, context) {
-      // eslint-disable-next-line
-      const { listHook } = props;
-
       const htmls = {
         itemsHtml: [],
         parentHtml: null,
@@ -218,7 +211,7 @@ function RTabHoc(config = {}) {
       const ActiveNode = withMemo(
         [],
         () => (
-          <Active listHook={listHook} htmls={htmls}>
+          <Active listHook={props.listHook} htmls={htmls}>
             {{
               default: (...arg) => context.slots?.active?.(...arg),
             }}
@@ -234,7 +227,7 @@ function RTabHoc(config = {}) {
         }
 
         if (props.clickStop) event.stopPropagation();
-        if (listHook.onSelect(item, index)) return;
+        if (props.listHook.onSelect(item, index)) return;
         context.emit("change", item, index);
       }
 
@@ -243,17 +236,17 @@ function RTabHoc(config = {}) {
           <div class="r-tab">
             <div class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
               <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
-                {renderList(listHook.list, (item, index) => {
+                {renderList(props.listHook.list, (item, index) => {
                   if (context?.slots?.item) return context?.slots?.item({ index, item });
                   return (
                     <div
-                      class={["r-tab-item", listHook.same(item) && "r-tab-item-same"]}
+                      class={["r-tab-item", props.listHook.same(item) && "r-tab-item-same"]}
                       ref={(el) => (htmls.itemsHtml[index] = el)}
                       key={index}
                       onClick={(event) => tabItemClick(event, item, index)}
                     >
                       {renderSlot(context.slots, "default", { index, item }, () => [
-                        <div> {listHook.formatterLabel(item)} </div>,
+                        <div> {props.listHook.formatterLabel(item)} </div>,
                       ])}
                     </div>
                   );

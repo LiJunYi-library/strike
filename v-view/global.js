@@ -53,4 +53,12 @@ export const RGlobal = {
       current.currentClose();
     },
   }),
+  disabledScrollQueue: useQueue({
+    onBegin() {
+      RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(false));
+    },
+    onFinish(queue, current) {
+      RGlobal.scrolls.forEach((el) => el?.setCanScroll?.(true));
+    },
+  }),
 };

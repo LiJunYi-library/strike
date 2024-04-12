@@ -24,8 +24,6 @@ const props = {
 const Context = defineComponent({
   props,
   setup(props, context) {
-    // eslint-disable-next-line
-    const { listHook } = props;
     const itemsHtml = [];
     let parentHtml = null;
     let containerHtml = null;
@@ -42,7 +40,7 @@ const Context = defineComponent({
       getTranslateX() {
         if (!containerHtml) return;
         const width = containerHtml.offsetWidth;
-        const nth = listHook.index;
+        const nth = props.listHook.index;
         const x = nth * -width; // 反过来 nth * width - (listHook.list.length - 1) * width
         return x;
       },
@@ -54,9 +52,9 @@ const Context = defineComponent({
     });
 
     function renderListHookItem() {
-      return renderList(listHook.list, (item, index) => {
+      return renderList(props.listHook.list, (item, index) => {
         if (props.lazy) {
-          if (listHook.same(item)) item.rViewPageIscache = true;
+          if (props.listHook.same(item)) item.rViewPageIscache = true;
           if (!item.rViewPageIscache) return null;
         }
 
@@ -67,7 +65,7 @@ const Context = defineComponent({
               top: "0px",
               width: props.width + "px",
             }}
-            class={["r-view-page-item", listHook.same(item) && "r-view-page-item-same"]}
+            class={["r-view-page-item", props.listHook.same(item) && "r-view-page-item-same"]}
             ref={(el) => (itemsHtml[index] = el)}
             key={index}
           >
@@ -79,10 +77,10 @@ const Context = defineComponent({
 
     function renderContent() {
       const isUseHook = !RViewPageContext?.children?.length;
-      const listRenderData = isUseHook ? listHook.list : RViewPageContext.children;
+      const listRenderData = isUseHook ? props.listHook.list : RViewPageContext.children;
       const same = (item, index) => {
-        if (isUseHook) return listHook.same(item);
-        return listHook.index === index;
+        if (isUseHook) return props.listHook.same(item);
+        return props.listHook.index === index;
       };
       // console.log(listRenderData);
 
@@ -137,7 +135,7 @@ const Context = defineComponent({
           <div
             ref={(el) => (parentHtml = el)}
             style={{
-              width: props.width * (listHook?.list?.length ?? 0) + "px",
+              width: props.width * (props.listHook?.list?.length ?? 0) + "px",
               transform: `translateX(${opt.getTranslateX()}px)`,
             }}
             class={["r-view-page-list", parentHtml && "r-view-page-list-transition"]}

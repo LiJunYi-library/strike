@@ -30,8 +30,6 @@ let event;
 const Context = defineComponent({
   props,
   setup(props, context) {
-    // eslint-disable-next-line
-    const { listHook } = props;
     const RScrollPageContext = inject("RScrollPageContext") || {};
     let isTriggerWatch = true;
     let isHandActuated = false;
@@ -51,16 +49,16 @@ const Context = defineComponent({
           const max = ele.html.offsetTop - props.offsetTop + ele.html.offsetHeight;
 
           if (index === 0 && sTop <= min) {
-            if (listHook.index === index) return;
+            if (props.listHook.index === index) return;
             isTriggerWatch = false;
-            listHook.updateIndex(index);
+            props.listHook.updateIndex(index);
             context.emit("change", index);
           }
 
           if (sTop > min && sTop < max) {
-            if (listHook.index === index) return;
+            if (props.listHook.index === index) return;
             isTriggerWatch = false;
-            listHook.updateIndex(index);
+            props.listHook.updateIndex(index);
             context.emit("change", index);
           }
         });
@@ -85,7 +83,7 @@ const Context = defineComponent({
     );
 
     function scrollTo() {
-      const currentItem = RScrollPageContext.children[listHook.index];
+      const currentItem = RScrollPageContext.children[props.listHook.index];
       if (!currentItem) return;
       const currentHtml = currentItem.html;
       if (!currentHtml) return;
@@ -106,11 +104,11 @@ const Context = defineComponent({
 
     function renderContent() {
       const isUseHook = !RScrollPageContext?.children?.length;
-      const listRenderData = isUseHook ? listHook.list : RScrollPageContext.children;
+      const listRenderData = isUseHook ? props.listHook.list : RScrollPageContext.children;
 
       const same = (item, index) => {
-        if (isUseHook) return listHook.same(item);
-        return listHook.index === index;
+        if (isUseHook) return props.listHook.same(item);
+        return props.listHook.index === index;
       };
 
       return renderList(listRenderData, (item, index) => {

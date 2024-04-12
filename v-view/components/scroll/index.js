@@ -103,7 +103,7 @@ export function useScrollController(props = {}) {
 export const RScroll = defineComponent({
   props: {
     scrollController: Object,
-    popupDisableScroll: { type: Boolean, default: true },
+    popupDisableScroll: { type: Boolean, default: false },
   },
   setup(props, context) {
     const { scrollController: SC } = props;
@@ -230,3 +230,4 @@ export * from "./virtual-list";
 export * from "./virtual-list2";
 export * from "./virtual-scroll-list";
 export * from "./scroll-page";
+export * from "./message";

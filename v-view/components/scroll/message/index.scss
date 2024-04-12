@@ -1,0 +1,25 @@
+.r-scroll-message {
+  position: fixed;
+}
+
+.r-scroll-message-bottom-enter-active,
+.r-scroll-message-bottom-leave-active {
+  transition: 0.3s;
+  transition-timing-function: linear;
+}
+
+.r-scroll-message-bottom-enter-from {
+  transform: translateY(100vh);
+}
+
+.r-scroll-message-bottom-enter-to {
+  transform: translateY(0);
+}
+
+.r-scroll-message-bottom-leave-from {
+  transform: translateY(0);
+}
+
+.r-scroll-message-bottom-leave-to {
+  transform: translateY(100vh);
+}

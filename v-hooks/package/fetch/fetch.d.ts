@@ -46,6 +46,8 @@ export declare interface FetchHOCConfig<D = ANY> extends RequestInit {
   interceptRequest?: (fetchConfig: FetchConfig, config: this) => ANY;
   interceptResponseSuccess?: (res: Response, data: D, config: this) => Promise<ANY>;
   interceptResponseError?: (errorRes: ANY, config: this) => ANY;
+  onRequest?: (fetchConfig: FetchConfig, config: this) => ANY;
+  onResponse?: (res: Response, config: this) => ANY;
 }
 
 export declare type FetchHooks<C = ANY, D = ANY, E = ANY> = {

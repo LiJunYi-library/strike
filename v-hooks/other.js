@@ -27,8 +27,9 @@ export function mergeSaveContext(...args) {
   return contextHooks;
 }
 
-export function useModelWatch(props, context, key) {
+export function useModelWatch(props, context, key, change) {
   let value = props[key];
+
   const mRef = customRef((track, trigger) => {
     return {
       get() {
@@ -44,10 +45,11 @@ export function useModelWatch(props, context, key) {
   });
 
   watch(
-    () => value,
+    () => props[key],
     (newVal) => {
       if (mRef.value === newVal) return;
       mRef.value = newVal;
+      change?.(newVal);
     }
   );
 

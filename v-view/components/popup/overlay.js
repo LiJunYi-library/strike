@@ -125,13 +125,9 @@ export function createOverlay() {
     node.component.exposed.close();
   }
 
-  function renderOverlay(config = {}) {
-    const props = {
-      RendererElement: div,
-      ...config,
-    };
+  function renderOverlay(props = {}) {
     node = <ROverlay {...props}></ROverlay>;
-    render(node, props.RendererElement);
+    render(node, props.RendererElement || div);
   }
 
   return { show, hide, renderOverlay };

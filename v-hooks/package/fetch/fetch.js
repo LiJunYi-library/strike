@@ -129,6 +129,8 @@ export function useFetchHOC(props = {}) {
     interceptRequest: () => undefined,
     interceptResponseSuccess: () => undefined,
     interceptResponseError: () => undefined,
+    onRequest: () => undefined,
+    onResponse: () => undefined,
     urlParams: undefined,
     body: undefined,
     url: "",
@@ -253,6 +255,7 @@ export function useFetchHOC(props = {}) {
         error.value = false;
         errorData.value = undefined;
         loading.value = true;
+        config.onRequest(fetchConfig, config);
         fetchPromise = fetch(URL, fetchConfig);
         if (config.isPushQueue) options.fetchQueue?.push?.(fetchPromise, config, params);
         const res = await fetchPromise;
@@ -264,6 +267,7 @@ export function useFetchHOC(props = {}) {
           downloadFile(d, fileName);
         }
 
+        config.onResponse(res, config);
         if (config.interceptResponseSuccess) {
           const reset = config.interceptResponseSuccess(res, d, config);
           if (reset instanceof Promise) {
@@ -282,6 +286,7 @@ export function useFetchHOC(props = {}) {
         success(d);
         return data.value;
       } catch (err) {
+        config.onResponse(err, config);
         fetchEvents.remove(current);
 
         let errorRes = err;

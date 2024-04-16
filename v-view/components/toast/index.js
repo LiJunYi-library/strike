@@ -1,8 +1,7 @@
-import { defineComponent, Teleport, render, reactive, renderSlot, ref } from "vue";
+import { defineComponent, Teleport, render, reactive, renderSlot } from "vue";
 import "./index.scss";
 import { useModelWatch } from "@rainbow_ljy/v-hooks";
-import { fetchQueue } from "@rainbow_ljy/v-hooks";
-import { useQueue, arrayRemove } from "@rainbow_ljy/rainbow-js";
+import { useQueue } from "@rainbow_ljy/rainbow-js";
 import { RILoading } from "../icon";
 
 export const RToastHoc = (consfig = {}) => {
@@ -88,10 +87,11 @@ export function createRToast() {
   }
 
   function show(props = {}) {
-    RToastQueue.push(props);
+    const config = { ...props };
+    RToastQueue.push(config);
     setTimeout(() => {
-      close(props);
-    }, props.ms || 1000);
+      close(config);
+    }, config.ms || 1000);
   }
 
   function open(props = {}) {

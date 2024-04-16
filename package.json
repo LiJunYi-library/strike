@@ -89,6 +89,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-native": "^0.73.5",
+    "react-native-webview": "^13.8.4",
     "react-scripts": "^5.0.1",
     "vant": "^4.8.1",
     "vue": "^3.4.21",

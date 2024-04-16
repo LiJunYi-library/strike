@@ -67,6 +67,9 @@ importers:
       react-native:
         specifier: ^0.73.5
         version: 0.73.5(@babel/core@7.20.2)(@babel/preset-env@7.20.2)(react@18.2.0)
+      react-native-webview:
+        specifier: ^13.8.4
+        version: 13.8.4(react-native@0.73.5)(react@18.2.0)
       react-scripts:
         specifier: ^5.0.1
         version: 5.0.1(@babel/plugin-syntax-flow@7.23.3)(@babel/plugin-transform-react-jsx@7.23.4)(eslint@8.39.0)(node-sass@9.0.0)(react@18.2.0)(sass@1.62.1)(typescript@5.0.4)(vue-template-compiler@2.7.14)(webpack-cli@5.0.2)
@@ -13349,6 +13352,18 @@ packages:
 
   /react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+
+  /react-native-webview@13.8.4(react-native@0.73.5)(react@18.2.0):
+    resolution: {integrity: sha512-dFoM9EfkAb++ZzycZyKRnjZtNUn85cf6bWp1iBlkgyNml7ULzR1gfaPT3qESoA3K1RfTmf5Xhw0M2In2A3a3wg==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+    dependencies:
+      escape-string-regexp: 2.0.0
+      invariant: 2.2.4
+      react: 18.2.0
+      react-native: 0.73.5(@babel/core@7.20.2)(@babel/preset-env@7.20.2)(react@18.2.0)
+    dev: false
 
   /react-native@0.73.5(@babel/core@7.20.2)(@babel/preset-env@7.20.2)(react@18.2.0):
     resolution: {integrity: sha512-iHgDArmF4CrhL0qTj+Rn+CBN5pZWUL9lUGl8ub+V9Hwu/vnzQQh8rTMVSwVd2sV6N76KjpE5a4TfIAHkpIHhKg==}

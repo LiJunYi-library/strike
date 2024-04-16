@@ -10,9 +10,9 @@ export const RToastHoc = (consfig = {}) => {
       return (
         <div class={["r-toast-content"]}>
           {props.iconClass && <i class={[props.iconClass]}></i>}
-          {props.loading && renderSlot(context.slots, "icon", {}, () => [<RILoading />])}
-          {props.loadingText && <div>{props.loadingText} </div>}
-          {props.text && <div>{props.text} </div>}
+          {props.loading && renderSlot(context.slots, "icon", {}, () => [<RILoading class="r-toast-loading" />])}
+          {props.loadingText && <div class="r-toast-loadingText">{props.loadingText} </div>}
+          {props.text && <div class="r-toast-text">{props.text} </div>}
           {renderSlot(context.slots, "default")}
         </div>
       );

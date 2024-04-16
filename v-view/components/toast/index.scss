@@ -1,18 +1,30 @@
 .r-toast {
-  padding: 20px;
+  padding: 10px 12px;
   position: fixed;
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   z-index: 6000000;
   color: white;
   border-radius: 8px;
 }
 
 .r-toast-content {
+  max-width: 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  font-family: PingFangSC, PingFang SC;
+  font-weight: 400;
+  font-size: 16px;
+  color: #ffffff;
+  line-height: 22px;
+  text-align: center;
+  font-style: normal;
+  .r-toast-contentr-toast-loadingText {
+  }
+  .r-toast-text {
+  }
 }

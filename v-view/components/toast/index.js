@@ -27,6 +27,7 @@ export const RToastHoc = (consfig = {}) => {
       loading: { type: Boolean, default: false },
       iconClass: { type: String, default: "" },
       timeOut: { type: Number, default: 3000 },
+      ms: { type: Number, default: 3000 },
       ...option.props,
     },
     emits: ["onUpdate:visible"],
@@ -91,7 +92,7 @@ export function createRToast() {
     RToastQueue.push(config);
     setTimeout(() => {
       close(config);
-    }, config.ms || 1000);
+    }, config.ms || 3000);
   }
 
   function open(props = {}) {

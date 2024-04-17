@@ -11,15 +11,29 @@ type useIntersectionObserverConfig = {
 };
 export function useIntersectionObserver(props: useIntersectionObserverConfig): IntersectionObserver;
 
-type useLocalStorageRefConfig = {
+interface useLocalStorageRefConfig<T> {
+  key?: string;
+  defaultValue?: T;
   isListener?: boolean;
-  onListener: (event: StorageEvent) => void;
-};
+  onListener?: (event: StorageEvent) => void;
+  onChange?: (event: StorageEvent) => void;
+}
+
+export declare function useLocalStorageRef<T>(config?: useLocalStorageRefConfig<T>): Ref<T>;
+export declare function useLocalStorageRef<T>(key: string, defaultValue?: T): Ref<T>;
 export declare function useLocalStorageRef<T>(
   key: string,
   defaultValue?: T,
-  config?: useLocalStorageRefConfig
+  config?: useLocalStorageRefConfig<T>
 ): Ref<T>;
+
+interface useDateLocalStorageRefConfig extends useLocalStorageRefConfig {
+  formatterTime: (date: Date) => string;
+}
+
+export declare function useDateLocalStorageRef<T>(config?: useDateLocalStorageRefConfig<T>): Ref<T>;
+
+export declare function useDateLocalStorageRef<T>(key: string, defaultValue?: T): Ref<T>;
 
 export declare function useCookie<T>(key: string, defaultValue?: T): Ref<T>;
 

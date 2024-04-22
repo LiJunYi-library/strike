@@ -1,21 +1,12 @@
 packages:
   # all packages in subdirs of components/
-  - 'firm/**'
-  - 'element-plus-lib/**'
-  - 'element-library/**'
-  - 'element-ui-lib/**'
-  - 'element-ui-lib2/**'
-  - 'rainbow-cli/**'
-  - 'rainbow-css/**'
-  - 'rainbow-js/**'
-  - 'rainbow-ui/**'
-  - 'rainbow-utils/**'
-  - 'rainbow-view/**'
-  - 'r-hooks/**'
-  - 'v-hooks/**'
-  - 'v-view/**'
-  
- 
-
-
- 
+  - "rainbow-cli/**"
+  - "rainbow-scss/**"
+  - "rainbow-js/**"
+  - "rainbow-view/**"
+  - "react/r-hooks/**"
+  - "react/r-view/**"
+  - "vue/v-cli/**"
+  - "vue/v-hooks/**"
+  - "vue/v-library/**"
+  - "vue/v-view/**"

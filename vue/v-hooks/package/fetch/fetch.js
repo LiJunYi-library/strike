@@ -13,14 +13,15 @@ function revBody(contentType, config) {
   const _body = getBody(config);
   if (!_body) return undefined;
   if (typeof _body !== "object") return _body;
-  const formDataType = ["multipart/form-data", "form-data"];
-  if (!formDataType.includes(contentType)) return JSON.stringify(_body);
+  const formDataType = "form";
   const formData = new FormData();
   for (const key in _body) {
     if (Object.prototype.hasOwnProperty.call(_body, key)) {
       formData.append(key, _body[key]);
     }
   }
+  if (config.isFormData) return formData;
+  if (!contentType.includes(formDataType)) return JSON.stringify(_body);
   return formData;
 }
 
@@ -115,14 +116,13 @@ export function useFetchHOC(props = {}) {
         return d;
       }
       const resContentType = res.headers.get("Content-Type");
-      switch (resContentType) {
-        default:
-          d = await res.text();
-          break;
-        case "application/json":
-          d = await res.json();
-          break;
+
+      if (resContentType.includes("application/json")) {
+        d = await res.json();
+        return d;
       }
+
+      d = await res.text();
       return d;
     },
     formatterData: (d) => d,

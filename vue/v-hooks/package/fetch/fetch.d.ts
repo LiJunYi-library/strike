@@ -35,8 +35,10 @@ export declare interface FetchHOCConfig<D = ANY> extends RequestInit {
   loading?: boolean = false;
   begin?: boolean = false;
   error?: boolean = false;
+  isFormData?: boolean;
   data?: ANY;
   errorData?: ANY;
+  contentType?: string;
   fetchQueue?: FetchQueue;
   initHeaders?: HeadersInit;
   formatterFile?: (res: Response, config: this) => Promise<Blob>;

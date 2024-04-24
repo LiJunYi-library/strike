@@ -1,7 +1,12 @@
-export function useResizeObserver(el: any, cb: ResizeObserverCallback): ResizeObserver;
+export function useResizeObserver(
+  el: any,
+  cb: ResizeObserverCallback,
+  time?: number
+): ResizeObserver;
 export function useResizeObserver(
   el: () => HTMLElement,
-  cb: ResizeObserverCallback
+  cb: ResizeObserverCallback,
+  time?: number
 ): ResizeObserver;
 
 type useIntersectionObserverConfig = {

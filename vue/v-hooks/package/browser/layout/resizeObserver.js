@@ -1,21 +1,16 @@
-import {
-  defineComponent,
-  renderSlot,
-  computed,
-  onMounted,
-  onBeforeUnmount,
-  inject,
-  reactive,
-  ref,
-  customRef,
-  watch,
-  isRef,
-} from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
+import { timerDebounced } from "@rainbow_ljy/rainbow-js";
 
-export function useResizeObserver(el, cb) {
+export function useResizeObserver(el, cb, time = false) {
+  let resizeCallback = cb;
+
+  if (typeof time === "number" && time >= 0) {
+    resizeCallback = timerDebounced(cb, time);
+  }
+
   let resizeObserver;
   try {
-    resizeObserver = new ResizeObserver(cb);
+    resizeObserver = new ResizeObserver(resizeCallback);
   } catch (error) {
     //
   }

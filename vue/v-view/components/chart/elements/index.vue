@@ -19,12 +19,19 @@ import { RResize } from "../../resize";
  * @param {*} options assignKeys
  * @return target
  */
-export function merge(target = {}, source = {}) {
+export function merge(target = {}, source = {}, options = { assignKeys: [] }) {
+  let assignKeys = options.assignKeys || [];
   for (const key in source) {
     if (Object.hasOwnProperty.call(source, key)) {
       const targetEle = target[key];
       const sourceEle = source[key];
+      //
       (() => {
+        if (assignKeys.includes(key)) {
+          target[key] = sourceEle;
+          return;
+        }
+
         if (!sourceEle) {
           target[key] = sourceEle;
           return;
@@ -41,7 +48,7 @@ export function merge(target = {}, source = {}) {
         }
 
         if (typeof targetEle === "object" && typeof sourceEle === "object") {
-          merge(targetEle, sourceEle);
+          merge(targetEle, sourceEle, options);
         }
       })();
     }
@@ -51,7 +58,6 @@ export function merge(target = {}, source = {}) {
 
 function formatter(params = []) {
   return params.reduce((add, el) => {
-    // console.log(params);
     return add + `<div>${el.marker} ${el.seriesName} ${el.value}</div>`;
   }, "");
 }
@@ -150,9 +156,7 @@ export const Hoc = (options = {}) => {
           if (el?.props?.property || el?.props?.formatter) config.data = data;
           return config;
         });
-        // eslint-disable-next-line
         props.option.xAxis = optionXAxis;
-        // console.log(props.option.yAxis);
       }
 
       function habdlerYAxis() {
@@ -166,9 +170,7 @@ export const Hoc = (options = {}) => {
           if (el?.props?.property || el?.props?.formatter) config.data = data;
           return config;
         });
-        // eslint-disable-next-line
         props.option.yAxis = optionYAxis;
-        // console.log(props.option.yAxis);
       }
 
       function habdlerSeries() {
@@ -183,12 +185,9 @@ export const Hoc = (options = {}) => {
           if (el?.props?.property || el?.props?.formatter) config.data = data;
           if (el.props.name !== undefined) config.name = el.props.name;
           if (el.props.data !== undefined) config.data = el.props.data;
-          // console.log(el.props);
           return config;
         });
-        // eslint-disable-next-line
         props.option.series = optionSerie;
-        // console.log(props.option.series);
       }
 
       function onResize(offset) {
@@ -196,7 +195,6 @@ export const Hoc = (options = {}) => {
       }
 
       function setOption() {
-        // console.log(props.option);
         if (props.option) chart?.setOption?.(props.option);
       }
 

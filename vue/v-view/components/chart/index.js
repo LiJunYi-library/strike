@@ -5,10 +5,11 @@ const elements = requireVueFilesCom(require.context("./elements", true, /\.(vue|
 });
 
 // console.log(elements);
-// console.log(Object.keys(elements).join(","));
+console.log(Object.keys(elements).join(","));
 
 export const {
   RChartAnnular,
+  RChartBubble,
   RChartCake,
   RChartData,
   RChartHoc,
@@ -18,6 +19,7 @@ export const {
   RChartSerieLinear,
   RChartSerieAnnular,
   RChartSerieAvg,
+  RChartSerieBubble,
   RChartSerieCake,
   RChartSerieCount,
   RChartSerieHoc,
@@ -25,8 +27,10 @@ export const {
   RChartSerieMoney,
   RChartSerieMoneyLinear,
   RChartSerieTreeCake,
+  RChartXaxiBubble,
   RChartXaxiHoc,
   RChartXaxi,
+  RChartYaxiBubble,
   RChartYaxiHoc,
   RChartYaxi,
 } = elements;

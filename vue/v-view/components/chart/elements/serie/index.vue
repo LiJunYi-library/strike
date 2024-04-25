@@ -1,5 +1,6 @@
 <script lang="jsx">
 import { onBeforeUnmount, provide, reactive, renderSlot, inject, defineComponent } from "vue";
+import { merge } from "../index.vue";
 
 const option = () => ({
   type: "bar",
@@ -30,10 +31,7 @@ export const SerieHoc = (options = {}) => {
       const serie = reactive({
         props,
         context: SerieContext,
-        attrs: {
-          ...props.option,
-          ...ctx.attrs,
-        },
+        attrs: merge(props.option, ctx.attrs),
       });
 
       provide("SerieContext", SerieContext);
@@ -44,7 +42,6 @@ export const SerieHoc = (options = {}) => {
 
       onBeforeUnmount(() => {
         ChartContext.series = ChartContext?.series.filter((el) => el !== serie);
-        // console.log("onBeforeUnmount SerieContext", SerieContext);
       });
 
       return () => {

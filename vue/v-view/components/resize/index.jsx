@@ -1,20 +1,5 @@
 import { useResizeObserver } from "@rainbow_ljy/v-hooks";
-import {
-  defineComponent,
-  renderList,
-  renderSlot,
-  computed,
-  watch,
-  onMounted,
-  ref,
-  render,
-  nextTick,
-  withMemo,
-  isMemoSame,
-  onBeforeUnmount,
-  Teleport,
-  Transition,
-} from "vue";
+import { defineComponent, renderSlot } from "vue";
 
 export const RResize = defineComponent({
   props: {

@@ -1,13 +1,6 @@
 <script lang="jsx">
-import {
-  onMounted,
-  onBeforeUnmount,
-  ref,
-  renderSlot,
-  inject,
-  reactive,
-  defineComponent,
-} from "vue";
+import { onBeforeUnmount, inject, reactive, defineComponent } from "vue";
+import { merge } from "../index.vue";
 
 const option = (props) => {
   return {
@@ -44,10 +37,7 @@ export function XaxiHoc(options = {}) {
     setup(props, ctx) {
       const xAxi = reactive({
         props,
-        attrs: {
-          ...props.option,
-          ...ctx.attrs,
-        },
+        attrs: merge(props.option, ctx.attrs),
       });
 
       const ChartContext = inject("ChartContext") || {};

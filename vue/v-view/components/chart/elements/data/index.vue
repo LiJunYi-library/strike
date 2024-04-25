@@ -7,12 +7,9 @@ export default defineComponent({
     formatter: Function,
   },
   setup(props, ctx) {
-    const data = reactive({
-      attrs: ctx.attrs,
-    });
+    const data = reactive({ attrs: ctx.attrs });
 
     const SerieContext = inject("SerieContext") || {};
-    // console.log("SerieContext", SerieContext);
 
     SerieContext?.data.push(data);
 

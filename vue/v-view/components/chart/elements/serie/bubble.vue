@@ -13,9 +13,7 @@ const option = () => ({
   markLine: {
     silent: true,
     lineStyle: {
-      normal: {
-        color: "#01fef9",
-      },
+      color: "#01fef9",
     },
     data: [
       {

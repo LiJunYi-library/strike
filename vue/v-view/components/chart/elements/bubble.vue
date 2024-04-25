@@ -17,7 +17,7 @@ const option = () => ({
     extraCssText: "white-space: normal; word-break: break-all;width:200px",
     formatter(params) {
       let result = "";
-      params?.[0]?.data?.[3]?.forEach?.(function (item) {
+      params?.[0]?.data?.value?.[3]?.forEach?.(function (item) {
         result += `${item}</br>`;
       });
       return result;

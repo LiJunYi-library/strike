@@ -11,7 +11,7 @@ const option = () => ({
     color: "rgba(95,112,132,1)",
     fontSize: "12",
     formatter(value) {
-      return `${value.toFixed(2)}%`;
+      return `${value}%`;
     },
   },
 });

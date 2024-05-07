@@ -5,7 +5,7 @@ const elements = requireVueFilesCom(require.context("./elements", true, /\.(vue|
 });
 
 // console.log(elements);
-console.log(Object.keys(elements).join(","));
+// console.log(Object.keys(elements).join(","));
 
 export const {
   RChartAnnular,

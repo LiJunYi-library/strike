@@ -266,17 +266,15 @@ export const RDialog = RDialogHoc();
 
 export function useRDialog(node) {
   const div = document.createElement("div");
-
   if (node instanceof Function) {
     return new Promise((resolve, reject) => {
       const VNode = node(resolve, reject);
       render(VNode, div);
-      VNode.component.exposed.open();
+      VNode?.component?.exposed?.open?.();
     });
   }
-
   render(node, div);
-  node.component.exposed.open();
+  node?.component?.exposed?.open?.();
 }
 
 useRDialog.create = (config = {}) => {
@@ -288,8 +286,8 @@ useRDialog.create = (config = {}) => {
     if (!VNode.appContext) VNode.appContext = appContext;
     render(VNode, div);
     instance = VNode;
-    VNode.component.exposed.open();
-    create.close = VNode.component.exposed.close;
+    VNode?.component?.exposed?.open?.();
+    create.close = VNode?.component?.exposed?.close;
   }
 
   function create(node) {

@@ -1,6 +1,6 @@
 {
-  "name": "@rainbow_ljy/element-library",
-  "version": "1.0.11",
+  "name": "@rainbow_ljy/v-library",
+  "version": "1.0.79",
   "description": "",
   "private": false,
   "typings": "index.d.ts",

@@ -62,7 +62,7 @@ export function useDialogCreate(config = {}) {
       render(node, div);
       return;
     }
-
+    if (!node.props) node.props = {};
     node.props.getRef = (el) => {
       ref = el;
       Object.assign(create, el);
@@ -76,7 +76,8 @@ export function useDialogCreate(config = {}) {
 export function useDialog(node, appContext) {
   const div = document.createElement("div");
   node.appContext = appContext;
-  node.props.rootNode = div;
+  if (node.props) node.props.rootNode = div;
+  else node.props = { rootNode: div };
   render(node, div);
   document.body.appendChild(div);
 }

@@ -33,10 +33,11 @@ export const RScrollSticky = defineComponent({
     }
 
     function layoutTop(sTop) {
+      if (!html) return;
       if (props.slotsHaveScrollTop) scrollTop.value = sTop;
       if (props.top === undefined) return;
       if (props.changeTop !== undefined) isChangeTop.value = sTop >= props.changeTop;
-      const value = html.offsetTop - sTop;
+      const value = scrollController.getOffsetTop(html) - sTop;
       isSticky.value = value - props.fluctuate <= props.top && props.top <= value + props.fluctuate;
       unStickyTop.value = value - props.fluctuate > props.top;
       unStickyBottom.value = value + props.fluctuate < props.top;

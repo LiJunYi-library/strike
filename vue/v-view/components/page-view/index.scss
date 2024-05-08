@@ -1,19 +1,18 @@
 .r-page-view {
-  --page-width: 100vw;
-  width: var(--page-width);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  // scroll-snap-type: x mandatory;
 
-  &::-webkit-scrollbar {
-    display: none;
+  .r-page-view-win {
+    overflow: clip;
+    transition: 0.25s;
   }
 
   .r-page-view-list {
-    display: inline-flex;
+    // scroll-snap-type: x mandatory;
+  }
+
+  .r-page-view-list-flex {
+    display: flex;
     flex-wrap: nowrap;
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   .r-page-view-list-transition {
@@ -21,41 +20,14 @@
   }
 
   .r-page-view-item {
-    width: var(--page-width);
-    min-height: 400px;
-    scroll-snap-align: start end;
-    scroll-snap-stop: always;
-    background: linear-gradient(90deg,  cyan, pink);
-  }
-  
-  .r-page-view-item-same {
-    z-index: 5;
-  }
-}
-
-.r-page-view-compatibility {
-  --page-width: 100vw;
-  width: var(--page-width);
-  &::-webkit-scrollbar {
-    display: none;
+    // scroll-snap-align: start end;
+    // scroll-snap-stop: always;
+    min-height: 1px;
+    background: linear-gradient(135deg, cyan, pink, rgb(64, 255, 0));
+    float: left;
   }
 
-  .r-page-view-list {
-    display: block;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-  .r-page-view-list-transition {
-    transition: 0.25s;
-  }
-  .r-page-view-item {
-    width: var(--page-width);
-    min-height: 400px;
-    display: none;
-  }
   .r-page-view-item-same {
     z-index: 5;
-    display: block;
   }
 }

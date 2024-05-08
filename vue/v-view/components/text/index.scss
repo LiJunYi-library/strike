@@ -1,0 +1,14 @@
+.r-text-fold {
+  transition: 0.2s;
+  line-height: 18px;
+  .r-text-content {
+    vertical-align: middle;
+  }
+
+  .iconfont {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 3px;
+    font-size: 12px;
+  }
+}

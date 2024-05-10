@@ -18,14 +18,11 @@ const props = {
   listHook: Object,
   lazy: Boolean,
   cache: { type: Boolean, default: true },
-  width: { type: Number, default: window.innerWidth },
+  width: { type: [Number, String], default: '' },
   offsetTop: { type: Number, default: 0 },
   behavior: { type: String, default: "instant" }, // smooth  instant
   isTriggerScroll: Boolean, // 初始触发定位
 };
-
-const events = [];
-let event;
 
 const Context = defineComponent({
   props,
@@ -45,8 +42,9 @@ const Context = defineComponent({
         }
 
         RScrollPageContext.children.forEach((ele, index) => {
-          const min = ele.html.offsetTop - props.offsetTop;
-          const max = ele.html.offsetTop - props.offsetTop + ele.html.offsetHeight;
+          const min = scrollController.getOffsetTop(ele.html) - props.offsetTop;
+          const max =
+            scrollController.getOffsetTop(ele.html) - props.offsetTop + ele.html.offsetHeight;
 
           if (index === 0 && sTop <= min) {
             if (props.listHook.index === index) return;
@@ -79,7 +77,7 @@ const Context = defineComponent({
           return;
         }
         scrollTo();
-      }
+      },
     );
 
     function scrollTo() {
@@ -89,10 +87,10 @@ const Context = defineComponent({
       if (!currentHtml) return;
       lock = true;
       isHandActuated = true;
-      let top = currentHtml.offsetTop - props.offsetTop;
+      let top = scrollController.getOffsetTop(currentHtml) - props.offsetTop;
 
       if (typeof currentItem.props.offsetTop === "number") {
-        top = currentHtml.offsetTop - currentItem.props.offsetTop;
+        top = scrollController.getOffsetTop(currentHtml) - currentItem.props.offsetTop;
       }
 
       if (typeof currentItem.props.scrollTop === "number") {
@@ -101,6 +99,11 @@ const Context = defineComponent({
 
       scrollController.context.element.scrollTo({ top: top, behavior: props.behavior });
     }
+
+    const width = computed(() => {
+      if (typeof props.width === "number") return props.width + "px";
+      return props.width;
+    });
 
     function renderContent() {
       const isUseHook = !RScrollPageContext?.children?.length;
@@ -117,7 +120,7 @@ const Context = defineComponent({
             ref={(html) => {
               item.html = html;
             }}
-            style={{ width: props.width + "px" }}
+            style={{ width: width.value }}
             key={index}
             class={["r-scroll-page-item", same(item, index) && "r-scroll-page-item-same"]}
           >

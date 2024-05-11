@@ -90,6 +90,7 @@ const props = {
   cache: { type: Boolean, default: true },
   width: { type: Number, default: window.innerWidth },
   behavior: { type: String, default: "smooth" }, // smooth  instant
+  collect: { type: Array, default: () => [] },
 };
 
 const Context = defineComponent({
@@ -101,14 +102,13 @@ const Context = defineComponent({
     const RPageViewContext = inject("RPageViewContext") || {};
     const containerHtml = ref();
     const actHtml = ref();
+    const children = computed(() => props.collect.map((el) => el.component).filter(Boolean));
     const width = computed(() => containerHtml.value?.getBoundingClientRect?.()?.width);
     const height = computed(() => (props.flex ? "" : actHtml.value?.offsetHeight));
     const parentW = computed(() => width.value * (props.listHook?.list?.length ?? 0) + "px");
     const translateX = ref(width.value * -props.listHook.index + delta.value);
-    const isUseHook = computed(() => !RPageViewContext?.children?.length);
-    const listRenderData = computed(() =>
-      isUseHook.value ? props.listHook.list : RPageViewContext.children
-    );
+    const isUseHook = computed(() => !children.value?.length);
+    const listRenderData = computed(() => (isUseHook.value ? props.listHook.list : children.value));
     const minTranslateX = computed(() => (listRenderData.value.length - 1) * -width.value);
     const maxTranslateX = computed(() => 0);
     let parentHtml = null;
@@ -229,9 +229,8 @@ const Context = defineComponent({
 
     function renderItem(isUseHook, same, item, index) {
       if (Math.abs(props.listHook.index - index) > 1) return null;
-      return isUseHook
-        ? renderSlot(RPageViewContext.slots, "item", { item, index })
-        : renderSlot(item.slots, "default");
+      if (isUseHook) return renderSlot(RPageViewContext.slots, "item", { item, index });
+      return item.slots?.default?.();
     }
 
     function renderContent() {
@@ -255,9 +254,6 @@ const Context = defineComponent({
     }
 
     return (vm) => {
-      // console.log("rrrrrrrrrrrrrr");
-      //  onTouchmove={onTouchMove}
-      // onTouchstart={onTouchStart}
       // onScroll={onScroll}
       // onScrollend={onScrollend}
       return (
@@ -286,7 +282,6 @@ const Context = defineComponent({
         </div>
       );
     };
-    //  transform: `translateX(${translateX.value}px)`
   },
 });
 
@@ -297,33 +292,19 @@ export const RPageView = defineComponent({
       context: ctx,
       slots: ctx.slots,
       attrs: ctx.attrs,
-      children: [],
       element: null,
     });
     provide("RPageViewContext", RPageViewContext);
 
     return () => {
-      return [renderSlot(ctx.slots, "default"), <Context {...ctx.attrs} {...props}></Context>];
+      const collect = ctx.slots?.default?.();
+      return [collect, <Context {...ctx.attrs} {...props} collect={collect}></Context>];
     };
   },
 });
 
 export const RPageViewItem = defineComponent({
   setup(props, context) {
-    const RPageViewContext = inject("RPageViewContext") || {};
-
-    const item = reactive({
-      context: context,
-      slots: context.slots,
-      attrs: context.attrs,
-    });
-
-    RPageViewContext?.children?.push?.(item);
-
-    onBeforeUnmount(() => {
-      RPageViewContext?.children?.filter?.((el) => el !== item);
-    });
-
     return () => {
       return null;
     };

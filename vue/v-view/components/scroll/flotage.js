@@ -47,7 +47,7 @@ export const RScrollFlotage = defineComponent({
         prveTop = sTop;
         top.value = tY;
 
-        const value = html.offsetTop - sTop;
+        const value = scrollController.getOffsetTop(html) - sTop;
         isSticky.value =
           value - props.fluctuate <= props.top && props.top <= value + props.fluctuate;
         unStickyTop.value = value - props.fluctuate > props.top;

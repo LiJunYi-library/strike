@@ -5,7 +5,6 @@ import {
   computed,
   reactive,
   onMounted,
-  getCurrentInstance,
   onBeforeUpdate,
   onUpdated,
   provide,
@@ -15,18 +14,6 @@ import {
   ref,
 } from "vue";
 import { useScrollController } from "../index";
-import "./index.scss";
-
-function arraySortByList(list = [], arr = [], formatter) {
-  const oldList = [...list];
-  const newList = [];
-  arr.forEach((ele, index) => {
-    const nth = oldList.findIndex((item, itemIndex) => formatter(item, ele, itemIndex, index));
-    const value = oldList[nth];
-    if (value) newList.push(value);
-  });
-  return newList;
-}
 
 const props = {
   listHook: Object,
@@ -36,7 +23,6 @@ const props = {
   offsetTop: { type: Number, default: 0 },
   keyExtractor: { type: Function, default: ({ index }) => index },
   behavior: { type: String, default: "instant" }, // smooth  instant
-  isTriggerScroll: Boolean, // 初始触发定位
   defaultNodes: { type: Array, default: () => [] },
 };
 
@@ -58,18 +44,13 @@ const Context = defineComponent({
     const child = computed(() => children.value[props.listHook.index]);
     const scrollController = useScrollController({
       onScroll(event, sTop) {
-        console.log('onScroll',offsets.value);
-        const index = offsets.value.findIndex((val) => val.top <= sTop && sTop < val.bottom);
-        if (index === -1) {
-          return;
-        }
-        if (props.listHook.index === index) return;
-        lock = true;
-        props.listHook.updateIndex(index);
-        context.emit("change", index);
+        layout(sTop);
       },
       onMounted() {
         scrollTo();
+      },
+      onResize(entries, sTop) {
+        layout(sTop);
       },
     });
 
@@ -84,6 +65,17 @@ const Context = defineComponent({
         })
         .filter(Boolean),
     );
+
+    function layout(sTop) {
+      const index = offsets.value.findIndex((val) => val.top <= sTop && sTop < val.bottom);
+      if (index === -1) {
+        return;
+      }
+      if (props.listHook.index === index) return;
+      lock = true;
+      props.listHook.updateIndex(index);
+      context.emit("change", index);
+    }
 
     function scrollTo() {
       const cProps = child.value?.props ?? {};

@@ -138,7 +138,7 @@ const Context = defineComponent({
     }
 
     function onTransitionEnd(event) {
-      console.log("onTransitionEnd");
+      // console.log("onTransitionEnd");
       isTransition.value = false;
     }
 
@@ -254,6 +254,7 @@ const Context = defineComponent({
     }
 
     return (vm) => {
+      // console.log("rrrrrrr");
       // onScroll={onScroll}
       // onScrollend={onScrollend}
       return (

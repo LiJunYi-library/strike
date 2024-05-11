@@ -13,12 +13,13 @@ import {
 } from "vue";
 import { ScrollController, useScrollController } from "../index";
 import "./index.scss";
+export * from "./index2";
 
 const props = {
   listHook: Object,
   lazy: Boolean,
   cache: { type: Boolean, default: true },
-  width: { type: [Number, String], default: '' },
+  width: { type: [Number, String], default: "" },
   offsetTop: { type: Number, default: 0 },
   behavior: { type: String, default: "instant" }, // smooth  instant
   isTriggerScroll: Boolean, // 初始触发定位
@@ -176,7 +177,7 @@ export const RScrollPageItem = defineComponent({
     RScrollPageContext?.children?.push?.(item);
 
     onBeforeUnmount(() => {
-      RScrollPageContext?.children?.filter?.((el) => el !== item);
+      RScrollPageContext.children = RScrollPageContext?.children?.filter?.((el) => el !== item);
     });
 
     return () => {

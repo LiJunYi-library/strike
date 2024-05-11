@@ -104,7 +104,7 @@ const Context = defineComponent({
     const actHtml = ref();
     const children = computed(() => props.collect.map((el) => el.component).filter(Boolean));
     const width = computed(() => containerHtml.value?.getBoundingClientRect?.()?.width);
-    const height = computed(() => (props.flex ? "" : actHtml.value?.offsetHeight));
+    const height = ref("");
     const parentW = computed(() => width.value * (props.listHook?.list?.length ?? 0) + "px");
     const translateX = ref(width.value * -props.listHook.index + delta.value);
     const isUseHook = computed(() => !children.value?.length);
@@ -119,6 +119,22 @@ const Context = defineComponent({
       if (x > maxTranslateX.value) return true;
       if (x < minTranslateX.value) return true;
       return false;
+    });
+    let obser;
+    let animationFrameId;
+
+    try {
+      obser = new ResizeObserver((entries) => {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(() => {
+          if (height.value === actHtml.value?.offsetHeight) return;
+          height.value = props.flex ? "" : actHtml.value?.offsetHeight;
+        });
+      });
+    } catch (error) {}
+
+    onBeforeUnmount(() => {
+      obser?.disconnect?.();
     });
 
     onMounted(() => {
@@ -224,6 +240,8 @@ const Context = defineComponent({
 
     function getItemsHtml(el, same, item, index) {
       itemsHtml[index] = el;
+      obser?.unobserve?.(el);
+      obser?.observe?.(el);
       if (same(item, index)) actHtml.value = el;
     }
 

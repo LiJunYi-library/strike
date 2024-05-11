@@ -9,6 +9,14 @@
     // scroll-snap-type: x mandatory;
   }
 
+  .clearfix::after {
+    content: "";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    height: 0;
+  }
+
   .r-page-view-list-flex {
     display: flex;
     flex-wrap: nowrap;

@@ -61,6 +61,8 @@ export class ScrollController {
 export function useScrollController(props = {}) {
   const RScrollContext = inject("RScrollContext") || {};
   const controller = reactive({
+    onScrollTop: () => undefined,
+    onScrollBottom: () => undefined,
     onScroll: () => undefined,
     onScrollend: () => undefined,
     onFlotage: () => undefined,
@@ -109,6 +111,7 @@ export const RScroll = defineComponent({
     const { scrollController: SC } = props;
     const RScrollContext = reactive({
       element: null,
+      scrollTop: 0,
       contentElement: null,
       otherElement: [],
       children: [],
@@ -133,24 +136,49 @@ export const RScroll = defineComponent({
         RScrollContext.isHandActuated = false;
         return;
       }
-      // console.log("-------------onScroll");
+
       if (SC) SC.currentElement = RScrollContext;
+
       if (SC) SC.otherElements = SC.elements.filter((el) => el !== SC.currentElement);
+
       scrollTop = RScrollContext.element.scrollTop;
+
+      RScrollContext.scrollTop = scrollTop;
+
       const maxTop = RScrollContext.element.scrollHeight - RScrollContext.element.offsetHeight;
+
       if (scrollTop < 0) scrollTop = 0;
+
       if (scrollTop > maxTop) scrollTop = maxTop;
 
       const space = scrollTop - prveTop;
+
       event.space = space;
+
       event.scrollTop = scrollTop;
+
+      if (space > 0) {
+        // console.log("向下滚动 onScrollBottom");
+        RScrollContext.children.forEach((el) => {
+          el.onScrollBottom(event, scrollTop);
+        });
+      }
+
+      if (space < 0) {
+        // console.log("向上滚动 onScrollTop");
+        RScrollContext.children.forEach((el) => {
+          el.onScrollTop(event, scrollTop);
+        });
+      }
 
       RScrollContext.children.forEach((el) => {
         el.onScroll(event, scrollTop);
       });
 
       if (SC) SC.dispatchScroll(event);
+
       context.emit("scrollChange", scrollTop);
+
       prveTop = scrollTop;
     }
 
@@ -160,24 +188,30 @@ export const RScroll = defineComponent({
       });
     }
 
-    RScrollContext.scrollTo = (top) => {
-      RScrollContext.isHandActuated = true;
+    RScrollContext.scrollTo = (top, isHandActuated = true) => {
+      RScrollContext.isHandActuated = isHandActuated;
       if (typeof top === "number") {
         RScrollContext.element.scrollTop = top;
+        scrollTop = top;
+        RScrollContext.scrollTop = scrollTop;
         prveTop = top;
       }
       if (typeof top === "object") {
         RScrollContext.element.scrollTo(top);
         prveTop = top.top;
+        scrollTop = top.top;
+        RScrollContext.scrollTop = scrollTop;
       }
     };
 
-    RScrollContext.scrollAdd = (space) => {
-      RScrollContext.isHandActuated = true;
+    RScrollContext.scrollAdd = (space, isHandActuated = true) => {
+      RScrollContext.isHandActuated = isHandActuated;
       let st = RScrollContext.element.scrollTop + space;
       if (st < 0) st = 0;
       RScrollContext.element.scrollTop = st;
+      scrollTop = st;
       prveTop = st;
+      RScrollContext.scrollTop = scrollTop;
     };
 
     RScrollContext.setCanScroll = (bool = true) => {
@@ -231,3 +265,4 @@ export * from "./virtual-list2";
 export * from "./virtual-scroll-list";
 export * from "./scroll-page";
 export * from "./message";
+export * from "./top";

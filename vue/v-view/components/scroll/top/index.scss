@@ -1,0 +1,32 @@
+.scroll-top {
+  position: fixed;
+  z-index: 5;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0px 2px 7px 0px rgba(0, 0, 0, 0.13);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  .text {
+    width: 20px;
+    height: 14px;
+    font-size: 10px;
+    font-weight: 400;
+    color: #666666;
+    line-height: 14px;
+  }
+
+  .scroll-top-icon {
+    width: 18px;
+    font-size: 18px;
+    transition: 0.2s;
+  }
+
+  .scroll-top-icon-act {
+    transform: rotate(-180deg);
+  }
+}

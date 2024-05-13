@@ -44,6 +44,7 @@ export const RScrollTop = defineComponent({
     const onOff = ref(false);
     let oldTop = 0;
     const offsetY = ref();
+    let lock = false;
 
     const defP = computed(() => {
       if (!html.value) return {};
@@ -95,6 +96,7 @@ export const RScrollTop = defineComponent({
 
     const scrollController = useScrollController({
       onScroll(event, sTop) {
+        if (lock) return (lock = false);
         oldTop = sTop;
         offsetY.value = undefined;
         onOff.value = false;
@@ -103,6 +105,7 @@ export const RScrollTop = defineComponent({
 
     function goTop(Y) {
       offsetY.value = Y;
+      lock = true;
       scrollController.context.scrollTo({ top: 0, behavior: props.behavior }, false);
       onOff.value = true;
       context.emit("scrollTop", 0);
@@ -110,6 +113,7 @@ export const RScrollTop = defineComponent({
 
     function goBack() {
       offsetY.value = undefined;
+      lock = true;
       scrollController.context.scrollTo({ top: oldTop, behavior: props.behavior }, false);
       onOff.value = false;
       context.emit("scrollBack", oldTop);

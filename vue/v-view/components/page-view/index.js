@@ -240,8 +240,10 @@ const Context = defineComponent({
 
     function getItemsHtml(el, same, item, index) {
       itemsHtml[index] = el;
-      obser?.unobserve?.(el);
-      obser?.observe?.(el);
+      if (el) {
+        obser?.unobserve?.(el);
+        obser?.observe?.(el);
+      }
       if (same(item, index)) actHtml.value = el;
     }
 

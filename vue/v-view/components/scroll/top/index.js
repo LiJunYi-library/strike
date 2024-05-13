@@ -18,14 +18,10 @@ export const ScrollTop = defineComponent({
     visibleRight: [Number, String],
     visibleTop: [Number, String],
     visibleBottom: [Number, String],
+    horizontal: { type: [String], default: "right" },
+    vertical: { type: [String], default: "bottom" },
 
-    // horizontal: { type: [String], default: "right" }, // 'right' 'left'
-    // vertical: { type: [String], default: "bottom" }, // 'bottom' 'top'
-    // right: { type: [Number, String], default: () => 20 },
-    // visibleRight: { type: [Number, String], default: () => 20 },
-    // top: { type: [Number, String], default: () => 100 },
-    // visibleTop: { type: [Number, String], default: () => -100 },
-
+    //
     horizontal: { type: [String], default: "right" }, // 'right' 'left'
     vertical: { type: [String], default: "bottom" }, // 'bottom' 'top'
     right: { type: [Number, String], default: () => 20 },
@@ -33,6 +29,7 @@ export const ScrollTop = defineComponent({
     bottom: { type: [Number, String], default: () => 100 },
     visibleBottom: { type: [Number, String], default: () => 100 },
   },
+  emits: ["scrollTop", "scrollBack"],
   setup(props, context) {
     function is0(num) {
       if (num === 0) return true;
@@ -107,12 +104,14 @@ export const ScrollTop = defineComponent({
       offsetY.value = Y;
       scrollController.context.scrollTo({ top: 0, behavior: props.behavior });
       onOff.value = true;
+      context.emit("scrollTop", 0);
     }
 
     function goBack() {
       offsetY.value = undefined;
       scrollController.context.scrollTo({ top: oldTop, behavior: props.behavior });
       onOff.value = false;
+      context.emit("scrollBack", oldTop);
     }
 
     function onClick() {
@@ -144,7 +143,7 @@ export const ScrollTop = defineComponent({
       html.value = el;
     }
 
-    context.expose({ scrollController });
+    context.expose({ scrollController, html, onOff, offsetY });
 
     return (v) => {
       return (
@@ -153,15 +152,17 @@ export const ScrollTop = defineComponent({
           onTouchstart={onTouchstart}
           onTouchmove={onTouchmove}
           onTouchend={onTouchend}
+          onClick={onClick}
           style={{ top: `${top.value}px`, left: `${left.value}px` }}
           class="scroll-top"
         >
           {renderSlot(context.slots, "default", { onOff: onOff.value }, () => [
-            <img
-              src={props.src}
-              class={["scroll-top-icon", onOff.value && "scroll-top-icon-act"]}
-              onClick={onClick}
-            />,
+            renderSlot(context.slots, "default", { onOff: onOff.value }, () => [
+              <img
+                src={props.src}
+                class={["scroll-top-icon", onOff.value && "scroll-top-icon-act"]}
+              />,
+            ]),
             <div class="text">{onOff.value ? props.backText : props.topText}</div>,
           ])}
         </div>

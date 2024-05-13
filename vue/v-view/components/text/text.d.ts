@@ -3,9 +3,6 @@ import {
   ComponentObjectPropsOptions,
   ComponentPropsOptions,
   ComputedOptions,
-  MethodOptions,
-  ComponentOptionsMixin,
-  ComponentOptionsMixin,
   ExtractPropTypes,
   ExtractPublicPropTypes,
   EmitsOptions,
@@ -27,10 +24,6 @@ export type RTextEmits = {
   click: (event: Event) => void;
 };
 
-// type ems = ["unfold", "fold", "click"];
-
-// type StringArray = string[];
-
 // type EventHandlers<T extends string[]> = {
 //   [K in T[number]]?: (...args: any[]) => any;
 // };
@@ -44,9 +37,7 @@ export type RTextEmits = {
 // };
 
 type RevEmits<T extends EmitsOptions> = T extends string[]
-  ? {
-      [K in `${Capitalize<T[number]>}`]?: (...args: any[]) => any;
-    }
+  ? { [K in Capitalize<T[number]>]: ((...args: any[]) => any) | null }
   : T;
 
 export type RTextComponent<

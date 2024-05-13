@@ -14,6 +14,7 @@ import {
   ref,
 } from "vue";
 import { useScrollController } from "../index";
+import { arrayBubbleMin, arrayBubbleMax } from "@rainbow_ljy/rainbow-js";
 
 const props = {
   listHook: Object,
@@ -40,7 +41,6 @@ const Context = defineComponent({
     const children = computed(() => props.defaultNodes.map((el) => el.component).filter(Boolean));
     const isUseHook = computed(() => !children.value.length);
     const listRenderData = computed(() => (isUseHook.value ? props.listHook.list : children.value));
-    let offsets = ref([]);
     const child = computed(() => children.value[props.listHook.index]);
     const scrollController = useScrollController({
       onScroll(event, sTop) {
@@ -54,7 +54,7 @@ const Context = defineComponent({
       },
     });
 
-    offsets = computed(() =>
+    const offsets = () =>
       itemHtmls.value
         .map((html) => {
           if (!html) return null;
@@ -63,11 +63,16 @@ const Context = defineComponent({
           const bottom = top + html.offsetHeight;
           return { t, top, bottom };
         })
-        .filter(Boolean),
-    );
+        .filter(Boolean);
 
     function layout(sTop) {
-      const index = offsets.value.findIndex((val) => val.top <= sTop && sTop < val.bottom);
+      let mOffset = offsets();
+      const min = arrayBubbleMin(mOffset, (val) => val.top);
+      const max = arrayBubbleMax(mOffset, (val) => val.bottom);
+      let index = mOffset.findIndex((val) => val.top <= sTop && sTop <= val.bottom);
+      if (sTop < min.top) index = 0;
+      if (max.bottom < sTop) index = mOffset.length - 1;
+
       if (index === -1) {
         return;
       }
@@ -79,7 +84,7 @@ const Context = defineComponent({
 
     function scrollTo() {
       const cProps = child.value?.props ?? {};
-      const offset = offsets.value[props.listHook.index];
+      const offset = offsets()[props.listHook.index];
       if (!offset) return;
       let top = offset.top;
       if (typeof cProps?.top === "number") top = top - cProps?.top;

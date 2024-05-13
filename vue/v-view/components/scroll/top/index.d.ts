@@ -11,6 +11,7 @@ export interface RScrollTopProps {
   behavior: "smooth" | "instant"; // smooth  instant
   backText: string;
   topText: string;
+  zIndex: number | string;
 
   left: number | string;
   right: number | string;

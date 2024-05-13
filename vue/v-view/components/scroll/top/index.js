@@ -9,6 +9,7 @@ export const RScrollTop = defineComponent({
     behavior: { type: String, default: "instant" }, // smooth  instant
     backText: { type: String, default: "返回" },
     topText: { type: String, default: "顶部" },
+    zIndex: { type: [Number, String], default: 20 },
 
     left: [Number, String],
     right: [Number, String],
@@ -153,7 +154,7 @@ export const RScrollTop = defineComponent({
           onTouchmove={onTouchmove}
           onTouchend={onTouchend}
           onClick={onClick}
-          style={{ top: `${top.value}px`, left: `${left.value}px` }}
+          style={{ top: `${top.value}px`, left: `${left.value}px`, zIndex: props.zIndex }}
           class="scroll-top"
         >
           {renderSlot(context.slots, "default", { onOff: onOff.value }, () => [

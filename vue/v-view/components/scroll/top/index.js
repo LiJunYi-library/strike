@@ -103,14 +103,14 @@ export const RScrollTop = defineComponent({
 
     function goTop(Y) {
       offsetY.value = Y;
-      scrollController.context.scrollTo({ top: 0, behavior: props.behavior });
+      scrollController.context.scrollTo({ top: 0, behavior: props.behavior }, false);
       onOff.value = true;
       context.emit("scrollTop", 0);
     }
 
     function goBack() {
       offsetY.value = undefined;
-      scrollController.context.scrollTo({ top: oldTop, behavior: props.behavior });
+      scrollController.context.scrollTo({ top: oldTop, behavior: props.behavior }, false);
       onOff.value = false;
       context.emit("scrollBack", oldTop);
     }

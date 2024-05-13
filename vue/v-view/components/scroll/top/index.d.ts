@@ -47,4 +47,4 @@ export type RScrollTopComponent<
   RScrollTopEmits & RevEmits<E>
 >;
 
-export declare const ScrollTop: RScrollTopComponent<RScrollTopProps, RScrollTopEmits>;
+export declare const RScrollTop: RScrollTopComponent<RScrollTopProps, RScrollTopEmits>;

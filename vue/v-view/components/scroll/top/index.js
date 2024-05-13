@@ -2,7 +2,7 @@ import "./index.scss";
 import { defineComponent, ref, computed, renderSlot } from "vue";
 import { useScrollController } from "../index";
 
-export const ScrollTop = defineComponent({
+export const RScrollTop = defineComponent({
   props: {
     src: { type: [Object, String], default: () => require("./top.png") },
     isBack: { type: Boolean, default: true },

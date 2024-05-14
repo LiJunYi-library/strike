@@ -17,35 +17,33 @@ const SelectHoc = (options = {}) => {
       label: String,
       ...ElSelect.props,
       listHook: Object,
+      stretch: Boolean,
       ...config.props,
     },
     emits: [...config.emits],
     setup(props, context) {
-      // eslint-disable-next-line
-      const { listHook } = props;
-      // console.log("listHook.isMultiple", listHook.isMultiple);
       return (vm) => {
         return (
-          <div class={["lib-select", config.className]}>
+          <div class={["lib-select", props.stretch && "lib-select-stretch", config.className]}>
             {renderSlot(context.slots, "start", {}, () =>
-              [config.renderStart(props)].filter(Boolean)
+              [config.renderStart(props)].filter(Boolean),
             )}
             <ElSelect
               {...props}
               {...context.attrs}
-              multiple={listHook.isMultiple}
-              loading={listHook.loading}
-              modelValue={listHook.value}
-              onUpdate:modelValue={(val) => listHook.updateValue(val)}
+              multiple={props.listHook.isMultiple}
+              loading={props.listHook.loading}
+              modelValue={props.listHook.value}
+              onUpdate:modelValue={(val) => props.listHook.updateValue(val)}
             >
-              {context?.slots?.content?.(listHook) ??
-                renderList(listHook.list, (item, index) => {
+              {context?.slots?.content?.(props.listHook) ??
+                renderList(props.listHook.list, (item, index) => {
                   return (
                     <ElSelect.Option
-                      key={listHook.formatterValue(item)}
-                      disabled={listHook.formatterDisabled(item)}
-                      label={listHook.formatterLabel(item)}
-                      value={listHook.formatterValue(item)}
+                      key={props.listHook.formatterValue(item)}
+                      disabled={props.listHook.formatterDisabled(item)}
+                      label={props.listHook.formatterLabel(item)}
+                      value={props.listHook.formatterValue(item)}
                     >
                       {renderSlot(context.slots, "default", { item, index })}
                     </ElSelect.Option>

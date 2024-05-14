@@ -29,6 +29,7 @@ const props = {
 
 const Context = defineComponent({
   props,
+  emits: ["change"],
   setup(props, context) {
     const pCtx = inject("RScrollPageContext") || {};
 

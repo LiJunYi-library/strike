@@ -13,6 +13,7 @@ export function FormItemHoc(options = {}) {
     props: {
       ...formItemProps,
       regExp: RegExp,
+      nowrap: Boolean,
       regExpTrigger: {
         type: String,
         default: "blur",
@@ -63,7 +64,12 @@ export function FormItemHoc(options = {}) {
           ...(props.rules || []),
         ].filter(Boolean);
         return (
-          <ElFormItem {...props} {...context.attrs} rules={rules}>
+          <ElFormItem
+            {...props}
+            {...context.attrs}
+            rules={rules}
+            class={["lib-form-item", props.nowrap && "lib-form-item-nowrap"]}
+          >
             {{ ...context.slots }}
           </ElFormItem>
         );

@@ -27,6 +27,7 @@ const props = {
 
 const Context = defineComponent({
   props,
+  emits: ["change"],
   setup(props, context) {
     const RScrollPageContext = inject("RScrollPageContext") || {};
     let isTriggerWatch = true;

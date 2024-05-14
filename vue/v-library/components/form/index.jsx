@@ -1,5 +1,6 @@
 import { ElForm, ElButton } from "element-plus";
 import { defineComponent, provide, reactive, inject, renderSlot } from "vue";
+import "./index.scss";
 export * from "./item";
 
 export function FormHoc(options = {}) {
@@ -42,7 +43,7 @@ export const Form = FormHoc();
 
 export const FormSubmit = defineComponent({
   props: {
-    comType:  { type: String, default: 'button' }, // button
+    comType: { type: String, default: "button" }, // button
     isValidate: { type: Boolean, default: true },
   },
   setup(props, context) {
@@ -61,7 +62,16 @@ export const FormSubmit = defineComponent({
           </ElButton>
         );
       }
-      return <div onClick={onClick}>{renderSlot(context.slots, "default")}</div>;
+
+      if (props.comType === "div") {
+        return (
+          <div onClick={onClick}>
+            {renderSlot(context.slots, "default", { onClick, ELFContext })}
+          </div>
+        );
+      }
+
+      return renderSlot(context.slots, "default", { onClick, ELFContext });
     };
   },
 });

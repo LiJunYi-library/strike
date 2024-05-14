@@ -7,3 +7,11 @@
     white-space: nowrap;
   }
 }
+
+.lib-select-stretch {
+  display: flex;
+  flex: 1;
+  .el-select {
+    flex: 1;
+  }
+}

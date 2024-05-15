@@ -129,7 +129,7 @@ function useMultiple2(props = {}) {
   // 反选
   function invertSelect() {
     hooks.context.SH.select = list.value.filter(
-      (val) => !hooks.context.SH.select.some((el) => el === val)
+      (val) => !hooks.context.SH.select.some((el) => el === val),
     );
     hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
     hooks.context.SH.label = hooks.context.SH.select.map((el) => formatterLabel(el));
@@ -250,6 +250,8 @@ function useAsyncMultiple2(props = {}) {
       promiseHook: asyncHooks,
     });
   }
+  const empty = ref(false);
+  asyncHooks.events.push(() => (empty.value = false));
 
   const params = useReactive({
     ...multipleHook.getProto(),
@@ -261,7 +263,8 @@ function useAsyncMultiple2(props = {}) {
     () => asyncHooks.data,
     (data) => {
       config.watchDataCb(params, data);
-    }
+      empty.value = params.list.length === 0;
+    },
   );
 
   return params;

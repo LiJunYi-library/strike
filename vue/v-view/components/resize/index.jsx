@@ -9,6 +9,7 @@ export const RResize = defineComponent({
   setup(props, context) {
     let html;
     let offset = {};
+
     useResizeObserver(
       () => html,
       (...arg) => {
@@ -22,19 +23,15 @@ export const RResize = defineComponent({
         if (oldOffset.width !== offset.width) context.emit("changeWidth", offset, ...arg);
         if (oldOffset.height !== offset.height) context.emit("changeHeight", offset, ...arg);
       },
-      props.time
+      props.time,
     );
 
+    function getHtml(el) {
+      html = el;
+    }
+
     return () => {
-      return (
-        <div
-          ref={(el) => {
-            html = el;
-          }}
-        >
-          {renderSlot(context.slots, "default")}
-        </div>
-      );
+      return <div ref={getHtml}>{renderSlot(context.slots, "default")}</div>;
     };
   },
 });

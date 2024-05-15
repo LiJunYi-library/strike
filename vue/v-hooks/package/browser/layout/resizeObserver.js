@@ -1,5 +1,5 @@
 import { onMounted, onBeforeUnmount } from "vue";
-import { timerDebounced } from "@rainbow_ljy/rainbow-js";
+import { timerDebounced, animationDebounced } from "@rainbow_ljy/rainbow-js";
 
 export function useResizeObserver(el, cb, time = false) {
   let resizeCallback = cb;
@@ -8,11 +8,16 @@ export function useResizeObserver(el, cb, time = false) {
     resizeCallback = timerDebounced(cb, time);
   }
 
+  if (time === true) {
+    resizeCallback = animationDebounced(cb);
+  }
+
   let resizeObserver;
+
   try {
     resizeObserver = new ResizeObserver(resizeCallback);
   } catch (error) {
-    //
+    console.warn(error);
   }
 
   function getEl() {
@@ -23,18 +28,27 @@ export function useResizeObserver(el, cb, time = false) {
 
   onMounted(() => {
     const ele = getEl();
+
+    if (!ele) return;
+
     if (ele instanceof Array) {
-      ele.forEach((item) => {
-        if (item) resizeObserver?.observe?.(item);
-      });
-    } else {
-      if (ele) resizeObserver?.observe?.(ele);
+      ele.filter(Boolean).forEach((item) => resizeObserver?.observe?.(item));
+      return;
     }
+
+    resizeObserver?.observe?.(ele);
   });
 
   onBeforeUnmount(() => {
     resizeObserver?.disconnect?.();
   });
+
+  if (!resizeObserver) {
+    return {
+      observe: () => undefined,
+      disconnect: () => undefined,
+    };
+  }
 
   return resizeObserver;
 }

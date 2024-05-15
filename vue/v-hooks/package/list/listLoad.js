@@ -42,6 +42,142 @@ function getListLoadProps(options) {
   return config;
 }
 
+function useListLoad2(props = {}) {
+  const config = getListLoadProps(props);
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
+
+  const list = ref(config.list);
+  const currentPage = ref(config.currentPage);
+  const pageSize = ref(config.pageSize);
+  const total = ref(0);
+  const finished = ref(false);
+  const empty = ref(false);
+  const listData = ref([]);
+  let loadingHooks = {};
+  if (config.loadingHooks) {
+    loadingHooks = useLoading({
+      loadingHook: config.loadingHooks,
+      promiseHook: asyncHooks,
+    });
+  }
+
+  const params = useReactive({
+    ...asyncHooks.getProto(),
+    ...loadingHooks?.getProto?.(),
+    list,
+    listData,
+    currentPage,
+    pageSize,
+    finished,
+    total,
+    empty,
+    nextBeginSend,
+    awaitConcatSend,
+    beginNextSend,
+    reset,
+  });
+
+  function reset() {
+    list.value = [];
+    listData.value = [];
+    currentPage.value = 1;
+    finished.value = false;
+    empty.value = false;
+    total.value = 0;
+  }
+
+  function beginNextSend(...arg) {
+    currentPage.value = 1;
+    finished.value = false;
+    empty.value = false;
+    total.value = 0;
+    config.beforeBegin(params);
+    return asyncHooks.nextSend(...arg).then((res) => {
+      listData.value = config.setList(res, params) || [];
+      list.value = listData.value;
+      currentPage.value = config.setCurrentPage(res, params);
+      total.value = config.setTotal(res, params);
+      finished.value = config.setFinished(res, params);
+      empty.value = list.value.length === 0;
+      config.fetchBeginCB(params);
+      if (listData.value.length === 0) return res;
+      if (list.value.length < pageSize.value) {
+        return awaitConcatSend(...arg);
+      }
+      return res;
+    });
+  }
+
+  function nextBeginSend(...arg) {
+    if (config.isBeginSendResetList) list.value = [];
+    listData.value = [];
+    currentPage.value = 1;
+    finished.value = false;
+    empty.value = false;
+    total.value = 0;
+    config.beforeBegin(params);
+    return asyncHooks.nextBeginSend(...arg).then((res) => {
+      listData.value = config.setList(res, params) || [];
+      list.value = listData.value;
+      currentPage.value = config.setCurrentPage(res, params);
+      total.value = config.setTotal(res, params);
+      finished.value = config.setFinished(res, params);
+      empty.value = list.value.length === 0;
+      config.fetchBeginCB(params);
+      if (listData.value.length === 0) return res;
+      if (list.value.length < pageSize.value) {
+        return awaitConcatSend(...arg);
+      }
+      return res;
+    });
+  }
+
+  function awaitConcatSend(...arg) {
+    if (finished.value === true) return;
+    return asyncHooks.awaitSend(...arg).then((res) => {
+      listData.value = config.setList(res, params) || [];
+      list.value.push(...listData.value);
+      currentPage.value = config.setCurrentPage(res, params);
+      total.value = config.setTotal(res, params);
+      finished.value = config.setFinished(res, params);
+      config.fetchConcatCB(params);
+      if (listData.value.length === 0) return res;
+      if (list.value.length < pageSize.value) {
+        return awaitConcatSend(...arg);
+      }
+      return res;
+    });
+  }
+
+  return params;
+}
+
+function useListLoadSelect(props = {}) {
+  const config = {
+    useListWatchList: (data, selectHooks, listLoadHooks) => {
+      selectHooks.updateListToResolveValue(data);
+    },
+    ...props,
+  };
+  const listLoadHooks = useListLoad2(props);
+  const selectHooks = useSelect2({ ...props, list: listLoadHooks.list });
+
+  const params = useReactive({
+    ...selectHooks.getProto(),
+    ...listLoadHooks.getProto(),
+  });
+
+  watch(
+    () => listLoadHooks.list,
+    (data) => {
+      config.useListWatchList(data, selectHooks, listLoadHooks);
+    },
+  );
+  return params;
+}
+
+////////////////////////
+
 function useListLoad(props = {}) {
   const config = getListLoadProps(props);
   const asyncHooks = usePromise(config.fetchCb, { ...config });
@@ -127,7 +263,23 @@ function useAsyncListLoad(props = {}) {
     total,
     nextBeginSend,
     awaitConcatSend,
+    beginNextSend,
   });
+
+  function beginNextSend(params) {
+    currentPage.value = 1;
+    finished.value = false;
+    total.value = 0;
+    config.beforeBegin(params.proxy);
+    return asyncHooks.nextBeginSend(...arg).then((res) => {
+      listData.value = config.setList(res, params.proxy);
+      list.value = listData.value;
+      currentPage.value = config.setCurrentPage(res, params.proxy);
+      total.value = config.setTotal(res, params.proxy);
+      finished.value = config.setFinished(res, params.proxy);
+      config.fetchBeginCB(params.proxy);
+    });
+  }
 
   function nextBeginSend(...arg) {
     list.value = [];
@@ -159,111 +311,5 @@ function useAsyncListLoad(props = {}) {
     });
   }
 
-  return params;
-}
-
-function useListLoad2(props = {}) {
-  const config = getListLoadProps(props);
-  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
-
-  const list = ref(config.list);
-  const currentPage = ref(config.currentPage);
-  const pageSize = ref(config.pageSize);
-  const total = ref(0);
-  const finished = ref(false);
-  const listData = ref([]);
-  let loadingHooks = {};
-  if (config.loadingHooks) {
-    loadingHooks = useLoading({
-      loadingHook: config.loadingHooks,
-      promiseHook: asyncHooks,
-    });
-  }
-
-  const params = useReactive({
-    ...asyncHooks.getProto(),
-    ...loadingHooks?.getProto?.(),
-    list,
-    listData,
-    currentPage,
-    pageSize,
-    finished,
-    total,
-    nextBeginSend,
-    awaitConcatSend,
-    reset,
-  });
-
-  function reset() {
-    list.value = [];
-    listData.value = [];
-    currentPage.value = 1;
-    finished.value = false;
-    total.value = 0;
-  }
-
-  function nextBeginSend(...arg) {
-    if (config.isBeginSendResetList) list.value = [];
-    listData.value = [];
-    currentPage.value = 1;
-    finished.value = false;
-    total.value = 0;
-    config.beforeBegin(params);
-    return asyncHooks.nextBeginSend(...arg).then((res) => {
-      listData.value = config.setList(res, params) || [];
-      list.value = listData.value;
-      currentPage.value = config.setCurrentPage(res, params);
-      total.value = config.setTotal(res, params);
-      finished.value = config.setFinished(res, params);
-      config.fetchBeginCB(params);
-      if (listData.value.length === 0) return res;
-      if (list.value.length < pageSize.value) {
-        return awaitConcatSend(...arg);
-      }
-      return res;
-    });
-  }
-
-  function awaitConcatSend(...arg) {
-    if (finished.value === true) return;
-    return asyncHooks.awaitSend(...arg).then((res) => {
-      listData.value = config.setList(res, params) || [];
-      list.value.push(...listData.value);
-      currentPage.value = config.setCurrentPage(res, params);
-      total.value = config.setTotal(res, params);
-      finished.value = config.setFinished(res, params);
-      config.fetchConcatCB(params);
-      if (listData.value.length === 0) return res;
-      if (list.value.length < pageSize.value) {
-        return awaitConcatSend(...arg);
-      }
-      return res;
-    });
-  }
-
-  return params;
-}
-
-function useListLoadSelect(props = {}) {
-  const config = {
-    useListWatchList: (data, selectHooks, listLoadHooks) => {
-      selectHooks.updateListToResolveValue(data);
-    },
-    ...props,
-  };
-  const listLoadHooks = useListLoad2(props);
-  const selectHooks = useSelect2({ ...props, list: listLoadHooks.list });
-
-  const params = useReactive({
-    ...selectHooks.getProto(),
-    ...listLoadHooks.getProto(),
-  });
-
-  watch(
-    () => listLoadHooks.list,
-    (data) => {
-      config.useListWatchList(data, selectHooks, listLoadHooks);
-    }
-  );
   return params;
 }

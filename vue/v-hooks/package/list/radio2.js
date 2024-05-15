@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { usePromise2, useLoading } from "../promise";
 import { getSelectProps } from "./select";
 import { useReactive, createSaveContext } from "../../other";
@@ -212,9 +212,14 @@ function useAsyncRadio2(props = {}) {
     fetchCb: () => undefined,
     ...props,
   };
+
+  let loadingHooks = {};
   const radioHooks = useRadio2(config);
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
-  let loadingHooks = {};
+  const empty = ref(false);
+  asyncHooks.events.push(() => (empty.value = false));
+  asyncHooks.successEvents.push(onSuccess);
+
   if (config.loadingHooks) {
     loadingHooks = useLoading({
       loadingHook: config.loadingHooks,
@@ -226,14 +231,13 @@ function useAsyncRadio2(props = {}) {
     ...radioHooks?.getProto?.(),
     ...asyncHooks?.getProto?.(),
     ...loadingHooks?.getProto?.(),
+    empty,
   });
 
-  watch(
-    () => asyncHooks.data,
-    (data) => {
-      config.watchDataCb(params, data);
-    }
-  );
+  function onSuccess() {
+    config.watchDataCb(params);
+    empty.value = params.list.length === 0;
+  }
 
   return params;
 }

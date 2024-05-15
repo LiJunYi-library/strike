@@ -26,6 +26,10 @@ export const loadingProps = {
     type: [Number, String],
     default: "没有更多了",
   },
+  beginText: {
+    type: [Number, String],
+    default: "正在加载中",
+  },
   loadingText: {
     type: [Number, String],
     default: "正在加载中",
@@ -36,7 +40,6 @@ export const loadingProps = {
   },
   emptySrc: {
     type: [Number, String],
-    // eslint-disable-next-line global-require
     default: require("./empty.png"),
   },
   emptyText: {
@@ -279,42 +282,100 @@ export const RListLoading = defineComponent({
 
 export const RLoading = defineComponent({
   props: {
-    loadingHook: {
-      type: Object,
-      default: () => ({}),
-    },
-    skelectonCount: {
-      type: Number,
-      default: 10,
-    },
-    loadingClass: String,
-    skelectonClass: String,
-    slots: Object,
+    promiseHook: [Object, Array],
+    loadingHook: [Object, Array],
+    isLoad: Boolean,
+    ...loadingProps,
   },
   setup(props, context) {
+    const asyncHooks = useLoading(props);
+
+    function renderError() {
+      return renderSlot(context.slots, "error", asyncHooks, () => [
+        <div class="r-c-error r-error" onClick={() => context.emit("errorClick")}>
+          <div class="r-c-error-text r-error-text">{props.errorText}</div>
+        </div>,
+      ]);
+    }
+
+    function renderBegin() {
+      return renderSlot(context.slots, "begin", asyncHooks, () => [
+        <div class="r-c-begin r-begin">
+          <RILoading class="r-c-loading-icon r-loading-icon" />
+          <div class={["r-c-begin-text r-begin-text"]}>{props.beginText}</div>
+        </div>,
+      ]);
+    }
+
+    function renderLoading() {
+      return renderSlot(context.slots, "loading", asyncHooks, () => [
+        <div class={["r-c-loading r-loading"]}>
+          <RILoading class="r-c-loading-icon r-loading-icon" />
+          <div class={["r-c-loading-text r-loading-text"]}>{props.loadingText}</div>
+        </div>,
+      ]);
+    }
+
+    function renderfinished() {
+      if (!props.finishedText) return null;
+      return renderSlot(context.slots, "finished", asyncHooks, () => [
+        <div class="r-c-finished r-finished">{props.finishedText}</div>,
+      ]);
+    }
+
+    function renderEmpty() {
+      if (!props.emptySrc && !props.emptyText) return null;
+      return renderSlot(context.slots, "empty", asyncHooks, () => [
+        <div class="r-c-empty r-empty">
+          {renderSlot(context.slots, "emptyImg", asyncHooks, () => [
+            props.emptySrc && (
+              <img class={"r-c-empty-img r-empty-img"} fit="contain" src={props.emptySrc} />
+            ),
+          ])}
+          {props.emptyText && <div class={"r-c-empty-text r-empty-text"}>{props.emptyText}</div>}
+        </div>,
+      ]);
+    }
+
+    function renderLoad() {
+      if (!props.loadText) return null;
+      return renderSlot(context.slots, "load", asyncHooks, () => [
+        <div class={["r-c-load r-load"]}>
+          <div onClick={() => context.emit("loadClick")} class={["r-c-load-text r-load-text"]}>
+            {props.loadText}
+          </div>
+        </div>,
+      ]);
+    }
+
+    function renderContent() {
+      if (asyncHooks.error) return renderError();
+      if (asyncHooks.begin) return renderBegin();
+      if (asyncHooks.loading) return renderLoading();
+      if (asyncHooks.empty) return renderEmpty();
+      if (asyncHooks.finished) return renderfinished();
+      if (!asyncHooks.finished) return renderLoad();
+      return null;
+    }
+
+   
+
     return () => {
-      const SLOTS = props.slots || context.slots;
-      if (props.loadingHook.begin === true) {
-        if (SLOTS?.begin) return SLOTS.begin();
+      const vNode = renderContent();
+      if (props.isLoad) {
         return [
-          <div class={["r-loading", props.loadingClass]}>
-            {props.skelectonCount
-              ? renderList(props.skelectonCount, (item, index) => {
-                  return (
-                    <div key={index} class="r-loading-skelecton-item">
-                      {renderSlot(SLOTS, "skelecton", props.loadingHook, () => [<RILoading />])}
-                    </div>
-                  );
-                })
-              : renderSlot(SLOTS, "loading", props.loadingHook, () => [<RILoading />])}
-          </div>,
+          [renderSlot(context.slots, "default"), <div class="r-loading-component">{vNode}</div>],
         ];
       }
+      if (vNode) return <div class="r-loading-component">{vNode}</div>;
       return renderSlot(context.slots, "default");
     };
   },
 });
 
+/**
+ *
+ */
 export const RLoadings = defineComponent({
   props: {
     loadingHook: {
@@ -328,9 +389,6 @@ export const RLoadings = defineComponent({
     parentHtml: HTMLElement,
   },
   setup(props, context) {
-    // eslint-disable-next-line
-    // const { loadingHook, promiseHook } = props;
-
     const isLoading = computed(() => {
       const loadings = [];
 
@@ -341,6 +399,7 @@ export const RLoadings = defineComponent({
       else loadings.push(props.loadingHook);
 
       const load = loadings.some((el) => el?.loading === true);
+
       return load;
     });
 
@@ -353,7 +412,7 @@ export const RLoadings = defineComponent({
     });
 
     function setRelative(bool = true) {
-      props.parentHtml.setAttribute("data-relative", bool);
+      props.parentHtml?.setAttribute?.("data-relative", bool);
     }
 
     return () => {
@@ -395,7 +454,7 @@ export const directiveLoading = {
             loadingHook={el.__loadingHook}
             parentHtml={el}
           />,
-          el
+          el,
         );
       },
     });
@@ -415,7 +474,7 @@ export const directivepromise = {
             loadingHook={el.__loadingHook}
             parentHtml={el}
           />,
-          el
+          el,
         );
       },
     });

@@ -157,6 +157,7 @@ export function useFetchHOC(props = {}) {
     let controller = new AbortController();
     let timer;
     const events = arrayEvents();
+    const successEvents = arrayEvents();
     const errEvents = arrayEvents();
     const fetchEvents = arrayEvents();
     const loading = ref(configs.loading);
@@ -170,8 +171,9 @@ export function useFetchHOC(props = {}) {
       begin,
       error,
       errorData,
-      errEvents,
       events,
+      errEvents,
+      successEvents,
       send,
       nextSend,
       awaitSend,
@@ -234,7 +236,7 @@ export function useFetchHOC(props = {}) {
         error.value = false;
         errorData.value = undefined;
         fetchEvents.remove(current);
-        events.invoke(successData);
+        successEvents.invoke(successData);
         config?.onSuccess?.(successData);
         clearTimeout(current.timer);
         options.fetchQueue?.remove?.(fetchPromise, config, params);
@@ -256,6 +258,7 @@ export function useFetchHOC(props = {}) {
         errorData.value = undefined;
         loading.value = true;
         config.onRequest(fetchConfig, config);
+        events.invoke(params);
         fetchPromise = fetch(URL, fetchConfig);
         if (config.isPushQueue) options.fetchQueue?.push?.(fetchPromise, config, params);
         const res = await fetchPromise;
@@ -368,17 +371,17 @@ export function createFetchApi(useFetch) {
     overload.addimpl("String", (url) => useFetch({ method: "post", url }));
     overload.addimpl(["String", "Object"], (url, body) => useFetch({ method: "post", url, body }));
     overload.addimpl(["String", "Function"], (url, body) =>
-      useFetch({ method: "post", url, body })
+      useFetch({ method: "post", url, body }),
     );
   }, false);
 
   const get = createOverload((overload) => {
     overload.addimpl("String", (url) => useFetch({ method: "get", url }));
     overload.addimpl(["String", "Object"], (url, urlParams) =>
-      useFetch({ method: "get", url, urlParams })
+      useFetch({ method: "get", url, urlParams }),
     );
     overload.addimpl(["String", "Function"], (url, urlParams) =>
-      useFetch({ method: "get", url, urlParams })
+      useFetch({ method: "get", url, urlParams }),
     );
   }, false);
 

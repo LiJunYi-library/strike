@@ -1,6 +1,5 @@
 .r-tab {
   background: white;
-
   --tab-height: 38px;
 
   .r-tab-scroll {
@@ -62,6 +61,8 @@
 
   .r-tab-item-active-line {
     position: absolute;
+    transform: translate(-50%);
+    left: 50%;
     bottom: 0;
     height: 3px;
     width: 100%;

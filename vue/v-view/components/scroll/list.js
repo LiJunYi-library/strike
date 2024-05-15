@@ -1,13 +1,4 @@
-import {
-  defineComponent,
-  renderSlot,
-  onBeforeUnmount,
-  ref,
-  inject,
-  renderList,
-  onMounted,
-} from "vue";
-import { ScrollController, useScrollController } from "./";
+import { defineComponent, renderSlot, renderList, onMounted } from "vue";
 import { useLoading } from "@rainbow_ljy/v-hooks";
 import { RILoading } from "../icon";
 
@@ -44,7 +35,6 @@ const mProps = {
   },
   emptySrc: {
     type: [Number, String],
-    // eslint-disable-next-line global-require
     default: require("./empty.png"),
   },
   emptyText: {

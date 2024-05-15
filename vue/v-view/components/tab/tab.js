@@ -12,15 +12,11 @@ import "./tab.scss";
 import { useResizeObserver } from "@rainbow_ljy/v-hooks";
 import { RLoading } from "../loading";
 
-// eslint-disable-next-line no-var
-var RTab;
-
-export { RTab };
-
 const Active = defineComponent({
   props: {
     listHook: Object,
     htmls: Object,
+    lineWidth: [Number, String],
   },
   setup(props, context) {
     const offset = ref({});
@@ -70,7 +66,7 @@ const Active = defineComponent({
       () => props.listHook.select,
       () => {
         transitionLoyout();
-      }
+      },
     );
 
     onMounted(() => {
@@ -91,7 +87,7 @@ const Active = defineComponent({
           class={["r-tab-item-active", isTransition.value && "r-tab-item-active-transition"]}
         >
           {renderSlot(context.slots, "default", props.listHook, () => [
-            <div class="r-tab-item-active-line" />,
+            <div class="r-tab-item-active-line" style={{ width: props.lineWidth }} />,
           ])}
         </div>
       );
@@ -99,15 +95,12 @@ const Active = defineComponent({
   },
 });
 
-RTab = defineComponent({
+export const RTab = defineComponent({
   props: {
     isObserverItems: Boolean,
     clickStop: Boolean,
     listHook: Object,
-    skelectonCount: {
-      type: Number,
-      default: 10,
-    },
+    lineWidth: [Number, String],
   },
   setup(props, context) {
     let activeNode;
@@ -121,7 +114,7 @@ RTab = defineComponent({
       () => htmls.scrollHtml,
       (es) => {
         activeNode?.loyout?.();
-      }
+      },
     );
 
     if (props.isObserverItems) {
@@ -129,7 +122,7 @@ RTab = defineComponent({
         () => htmls.itemsHtml,
         (es) => {
           activeNode?.loyout?.();
-        }
+        },
       );
     }
 
@@ -148,41 +141,39 @@ RTab = defineComponent({
       return (
         <div class="r-tab">
           <div class="r-tab-scroll" ref={(el) => (htmls.scrollHtml = el)}>
-            <RLoading
-              skelectonCount={props.skelectonCount}
-              loadingHook={props.listHook}
-              loadingClass="r-tab-list"
-              slots={context.slots}
-            >
-              <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
-                {renderList(props.listHook.list, (item, index) => {
-                  if (context?.slots?.item) return context?.slots?.item({ index, item });
-                  return (
-                    <div
-                      class={[
-                        "r-tab-item",
-                        "r-tab-item" + props.listHook.formatterValue(item),
-                        props.listHook.same(item) && "r-tab-item-same",
-                      ]}
-                      ref={(el) => {
-                        htmls.itemsHtml[index] = el;
-                      }}
-                      key={index}
-                      onClick={(event) => tabItemClick(event, item, index)}
-                    >
-                      {renderSlot(context.slots, "default", { index, item }, () => [
-                        <div> {props.listHook.formatterLabel(item)} </div>,
-                      ])}
-                    </div>
-                  );
-                })}
-                <Active listHook={props.listHook} htmls={htmls} ref={(el) => (activeNode = el)}>
-                  {{
-                    default: (...arg) => context.slots?.active?.(...arg),
-                  }}
-                </Active>
-              </div>
-            </RLoading>
+            <div class="r-tab-list" ref={(el) => (htmls.parentHtml = el)}>
+              {renderList(props.listHook.list, (item, index) => {
+                if (context?.slots?.item) return context?.slots?.item({ index, item });
+                return (
+                  <div
+                    class={[
+                      "r-tab-item",
+                      "r-tab-item" + props.listHook.formatterValue(item),
+                      props.listHook.same(item) && "r-tab-item-same",
+                    ]}
+                    ref={(el) => {
+                      htmls.itemsHtml[index] = el;
+                    }}
+                    key={index}
+                    onClick={(event) => tabItemClick(event, item, index)}
+                  >
+                    {renderSlot(context.slots, "default", { index, item }, () => [
+                      <div> {props.listHook.formatterLabel(item)} </div>,
+                    ])}
+                  </div>
+                );
+              })}
+              <Active
+                listHook={props.listHook}
+                htmls={htmls}
+                ref={(el) => (activeNode = el)}
+                lineWidth={props.lineWidth}
+              >
+                {{
+                  default: (...arg) => context.slots?.active?.(...arg),
+                }}
+              </Active>
+            </div>
           </div>
         </div>
       );
@@ -217,7 +208,7 @@ function RTabHoc(config = {}) {
             }}
           </Active>
         ),
-        []
+        [],
       );
 
       function tabItemClick(event, item, index) {

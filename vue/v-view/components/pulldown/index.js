@@ -4,7 +4,7 @@ import "./index.scss";
 
 export const RPulldown = defineComponent({
   props: {
-    label: { type: [String, Number], default: "" },
+    label: { type: [String, Number, Array], default: "" },
     defaultLabel: [String, Number],
     stopPropagation: { type: Boolean, default: true },
     labelClass: [String, Number],
@@ -27,7 +27,7 @@ export const RPulldown = defineComponent({
       () => {
         if (visible.value === props.visible) return;
         visible.value = props.visible;
-      }
+      },
     );
 
     function setVisible(v) {

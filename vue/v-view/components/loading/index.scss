@@ -74,6 +74,18 @@
   background-size: 100% 100%;
 }
 
+.r-loading-component-load {
+  .r-c-finished {
+    min-height: 50px;
+  }
+  .r-c-loading {
+    min-height: 50px;
+  }
+  .r-c-load {
+    min-height: 50px;
+  }
+}
+
 /*******************************/
 
 .r-loadings {

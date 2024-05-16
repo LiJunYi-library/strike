@@ -287,6 +287,7 @@ export const RLoading = defineComponent({
     isLoad: Boolean,
     ...loadingProps,
   },
+  emits: ["loadClick", "errorClick"],
   setup(props, context) {
     const asyncHooks = useLoading(props);
 
@@ -362,7 +363,12 @@ export const RLoading = defineComponent({
       const vNode = renderContent();
       if (props.isLoad) {
         return [
-          [renderSlot(context.slots, "default"), <div class="r-loading-component">{vNode}</div>],
+          [
+            renderSlot(context.slots, "default"),
+            <div class={["r-loading-component", props.isLoad && "r-loading-component-load"]}>
+              {vNode}
+            </div>,
+          ],
         ];
       }
       if (vNode) return <div class="r-loading-component">{vNode}</div>;

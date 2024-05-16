@@ -75,6 +75,10 @@
 }
 
 .r-loading-component-load {
+  .intersection {
+    min-height: 1px;
+  }
+
   .r-c-finished {
     min-height: 50px;
   }

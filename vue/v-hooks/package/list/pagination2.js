@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 import { usePromise2, useLoading } from "../promise";
-import {  nextTaskHoc } from "../abandon/async";
+import { nextTaskHoc } from "../abandon/async";
 import { useSelect2 } from "./select2";
 import { useReactive } from "../../other";
 
@@ -8,6 +8,7 @@ export { useFetchPagination2 };
 
 function getPaginationProps(options = {}) {
   const config = {
+    triggerFetch: true,
     isServerPaging: true,
     currentPage: 1,
     pageSize: 10,
@@ -61,7 +62,7 @@ function usePagination(props = {}) {
   const currentPage = ref(initProps.currentPage);
   const pageSize = ref(initProps.pageSize);
   const list = ref(initProps.list);
-  const total = computed(() => listSource.value.length);
+  const total = ref(listSource.value.length);
   const maxPage = computed(() => Math.ceil(total.value / pageSize.value) || 1);
 
   const params = useReactive({
@@ -70,9 +71,11 @@ function usePagination(props = {}) {
     pageSize,
     list,
     total,
+    maxPage,
     updateCurrentPage,
     updatePageSize,
     updateList,
+    updateTotal,
     reset,
   });
 
@@ -89,6 +92,13 @@ function usePagination(props = {}) {
 
   function updateList(l = []) {
     listSource.value = l;
+    total.value = listSource.value.length;
+    if (currentPage.value > maxPage.value) currentPage.value = maxPage.value;
+    list.value = paging(params);
+  }
+
+  function updateTotal(t = 0) {
+    total.value = t;
     if (currentPage.value > maxPage.value) currentPage.value = maxPage.value;
     list.value = paging(params);
   }
@@ -111,10 +121,11 @@ function useFetchPagination2(props = {}) {
   const total = ref(config.total);
   const prop = ref(config.prop);
   const order = ref(config.order);
+  const maxPage = computed(() => Math.ceil(total.value / pageSize.value) || 1);
 
   const selectHooks = config.selectHooks || useSelect2({ ...config });
   const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
-  const paginationHooks = usePagination(config);
+
   let loadingHooks = {};
   if (config.loadingHooks) {
     loadingHooks = useLoading({
@@ -143,15 +154,41 @@ function useFetchPagination2(props = {}) {
     order,
     list,
     total,
+    maxPage,
     nextBeginSend,
     nextSend,
-    updatePage,
+    updateCurrentPage,
+    updatePage: updateCurrentPage,
     updatePageSize,
     updateProp,
     updateOrder,
-    updateList,
     reset,
   });
+
+  function nextBeginSend(...arg) {
+    currentPage.value = config.currentPage;
+    pageSize.value = config.pageSize;
+    total.value = config.total;
+    list.value = config.list;
+    return asyncHooks.nextBeginSend(...arg).then((res) => {
+      onResponse();
+      return res;
+    });
+  }
+
+  function nextSend(...arg) {
+    return asyncHooks.nextSend(...arg).then((res) => {
+      onResponse();
+      return res;
+    });
+  }
+
+  function onResponse() {
+    total.value = config.formatterTotal(params);
+    list.value = config.formatterList(params);
+    if (currentPage.value > maxPage.value) currentPage.value = maxPage.value;
+    selectHooks.updateListAndReset(list.value);
+  }
 
   function reset() {
     currentPage.value = 1;
@@ -161,85 +198,30 @@ function useFetchPagination2(props = {}) {
     selectHooks.reset(list.value);
   }
 
-  function updateList(l = []) {
-    paginationHooks.updateList(l);
-    total.value = paginationHooks.total;
-    list.value = paginationHooks.list;
-    selectHooks.updateListAndReset(list.value);
-  }
-
-  function handleServerPagingRest() {
-    if (!config.isServerPaging) {
-      paginationHooks.updateList(config.formatterList(params));
-      total.value = paginationHooks.total;
-      list.value = paginationHooks.list;
-      selectHooks.updateListAndReset(list.value);
-      return;
-    }
-    total.value = config.formatterTotal(params);
-    list.value = config.formatterList(params);
-    selectHooks.updateListAndReset(list.value);
-  }
-
-  function handleServerPaging() {
-    if (!config.isServerPaging) {
-      paginationHooks.updatePageSize(pageSize.value);
-      paginationHooks.updateCurrentPage(currentPage.value);
-      list.value = paginationHooks.list;
-      selectHooks.updateListAndReset(list.value);
-      return false;
-    }
-    return true;
-  }
-
-  function nextBeginSend(...arg) {
-    currentPage.value = config.currentPage;
-    pageSize.value = config.pageSize;
-    total.value = config.total;
-    list.value = config.list;
-    return asyncHooks.nextBeginSend(...arg).then((res) => {
-      handleServerPagingRest();
-      return res;
-    });
-  }
-
-  function nextSend(...arg) {
-    return asyncHooks.nextSend(...arg).then((res) => {
-      handleServerPagingRest();
-      return res;
-    });
-  }
-
-  async function serverPaging() {
-    if (!handleServerPaging()) return;
-    await mergeEvent();
-    return nextSend();
-  }
-
-  async function serverBeginPaging() {
-    if (!config.isServerPaging) return;
-    await mergeEvent();
-    return nextBeginSend();
-  }
-
-  async function updatePage(p) {
+  async function updateCurrentPage(p) {
     currentPage.value = p;
-    return serverPaging();
+    await mergeEvent();
+    if (config.triggerFetch) return nextSend();
   }
 
   async function updatePageSize(size) {
     pageSize.value = size;
-    return serverPaging();
+    console.log(currentPage.value, maxPage.value);
+    if (currentPage.value > maxPage.value) currentPage.value = maxPage.value;
+    await mergeEvent();
+    if (config.triggerFetch) return nextSend();
   }
 
   async function updateProp(p) {
     prop.value = p;
-    return serverBeginPaging();
+    await mergeEvent();
+    if (config.triggerFetch) return nextBeginSend();
   }
 
   async function updateOrder(o) {
     order.value = o;
-    return serverBeginPaging();
+    await mergeEvent();
+    if (config.triggerFetch) return nextBeginSend();
   }
 
   return params;

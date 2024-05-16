@@ -1,6 +1,6 @@
 import { ref, reactive, computed } from "vue";
 import { usePromise } from "../promise";
-import {  nextTaskHoc } from "../abandon/async";
+import { nextTaskHoc } from "../abandon/async";
 import { useSelect } from "./select";
 import { useList } from "./list";
 
@@ -97,7 +97,7 @@ function usePagination(props = {}) {
     updatePage,
     updatePageSize,
     updatePagination,
-
+    updateCurrentPage: updatePage,
     reset,
     updateList,
     updateListAndReset,

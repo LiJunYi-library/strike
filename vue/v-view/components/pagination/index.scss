@@ -1,0 +1,12 @@
+.r-pagination {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .r-tab {
+    flex: 1;
+    overflow: hidden;
+  }
+}

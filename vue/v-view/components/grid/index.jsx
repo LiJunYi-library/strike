@@ -35,6 +35,7 @@ export const RGrid = defineComponent({
 const RGridListProps = {
   listHook: Object,
   list: Array,
+  renderCount: Number,
 };
 
 export const RGridList = defineComponent({
@@ -44,10 +45,41 @@ export const RGridList = defineComponent({
       const LIST = (props.listHook ? props.listHook.list : props.list) || [];
       return (
         <RGrid {...context.attrs}>
-          {renderList(LIST, (item, index) => {
+          {renderList(props.renderCount || LIST, (item, index) => {
             return context.slots?.default?.({ item, index });
           })}
         </RGrid>
+      );
+    };
+  },
+});
+
+export const RGridListSelect = defineComponent({
+  props: RGridListProps,
+  emits: ["change"],
+  setup(props, context) {
+    return () => {
+      return (
+        <RGridList {...context.attrs} {...props}>
+          {{
+            default: ({ item, index }) => {
+              return (
+                <div
+                  class={["r-grid-item", props.listHook.same(item) && "r-grid-item-same"]}
+                  key={index}
+                  onClick={(event) => {
+                    if (props.listHook.onSelect(item, index)) return;
+                    context.emit("change", item, index);
+                  }}
+                >
+                  {renderSlot(context.slots, "default", { index, item }, () => [
+                    <div> {props.listHook.formatterLabel(item)} </div>,
+                  ])}
+                </div>
+              );
+            },
+          }}
+        </RGridList>
       );
     };
   },

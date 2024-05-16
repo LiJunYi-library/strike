@@ -1,4 +1,43 @@
 .r-list-select-grid {
+  &.r-list-select {
+    padding: 16px 12px;
+    background: #f4f4fb;
+  }
+  .r-list-select-win {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 8px;
+    box-sizing: border-box;
+    background: #f4f4fb;
+    max-height: 300px;
+    overflow: scroll;
+  }
+  .r-list-item {
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 3px;
+    font-size: 13px;
+    font-family:
+      PingFangSC-Regular,
+      PingFang SC;
+    font-weight: 400;
+    color: #111111;
+  }
+  .r-list-item-same {
+    font-size: 13px;
+    font-family:
+      PingFangSC-Medium,
+      PingFang SC;
+    font-weight: 500;
+    color: #111111;
+    background: #eed9cd;
+    border-radius: 3px;
+  }
+}
+
+.r-list-select-grid {
   .r-list-select {
     padding: 16px 12px;
     background: #f4f4fb;
@@ -19,13 +58,17 @@
     background: #ffffff;
     border-radius: 3px;
     font-size: 13px;
-    font-family: PingFangSC-Regular, PingFang SC;
+    font-family:
+      PingFangSC-Regular,
+      PingFang SC;
     font-weight: 400;
     color: #111111;
   }
   .r-list-item-same {
     font-size: 13px;
-    font-family: PingFangSC-Medium, PingFang SC;
+    font-family:
+      PingFangSC-Medium,
+      PingFang SC;
     font-weight: 500;
     color: #111111;
     background: #eed9cd;

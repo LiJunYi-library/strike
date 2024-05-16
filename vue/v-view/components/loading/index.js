@@ -354,11 +354,9 @@ export const RLoading = defineComponent({
       if (asyncHooks.loading) return renderLoading();
       if (asyncHooks.empty) return renderEmpty();
       if (asyncHooks.finished) return renderfinished();
-      if (!asyncHooks.finished) return renderLoad();
+      if (asyncHooks.finished === false) return renderLoad();
       return null;
     }
-
-   
 
     return () => {
       const vNode = renderContent();

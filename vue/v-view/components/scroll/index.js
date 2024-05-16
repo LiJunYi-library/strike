@@ -63,11 +63,13 @@ export function useScrollController(props = {}) {
   const controller = reactive({
     onScrollTop: () => undefined,
     onScrollBottom: () => undefined,
+    onScrollUp: () => undefined,
+    onScrollDown: () => undefined,
     onScroll: () => undefined,
     onScrollend: () => undefined,
-    onFlotage: () => undefined,
     onResize: () => undefined,
     onMounted: () => undefined,
+    onFlotage: () => undefined,
     ...props,
     destroy,
     getOffsetTop,
@@ -107,6 +109,7 @@ export const RScroll = defineComponent({
     scrollController: Object,
     popupDisableScroll: { type: Boolean, default: false },
   },
+  emits: ["scrollDown", "scrollUp", "scrollChange", "scrollBottom"],
   setup(props, context) {
     const { scrollController: SC } = props;
     const RScrollContext = reactive({
@@ -129,7 +132,9 @@ export const RScroll = defineComponent({
           el.onResize(entries, RScrollContext.element.scrollTop);
         });
       });
-    } catch (error) {}
+    } catch (error) {
+      //
+    }
 
     function onScroll(event) {
       if (RScrollContext.isHandActuated) {
@@ -158,22 +163,24 @@ export const RScroll = defineComponent({
       event.scrollTop = scrollTop;
 
       if (space > 0) {
-        // console.log("向下滚动 onScrollBottom");
         RScrollContext.children.forEach((el) => {
-          el.onScrollBottom(event, scrollTop);
+          el.onScrollDown(event, scrollTop);
         });
+        context.emit("scrollDown", scrollTop);
       }
 
       if (space < 0) {
-        // console.log("向上滚动 onScrollTop");
         RScrollContext.children.forEach((el) => {
-          el.onScrollTop(event, scrollTop);
+          el.onScrollUp(event, scrollTop);
         });
+        context.emit("scrollUp", scrollTop);
       }
 
       RScrollContext.children.forEach((el) => {
         el.onScroll(event, scrollTop);
       });
+
+      handleScrollBottom(event, scrollTop);
 
       if (SC) SC.dispatchScroll(event);
 
@@ -186,6 +193,18 @@ export const RScroll = defineComponent({
       RScrollContext.children.forEach((el) => {
         el.onScrollend(event, scrollTop);
       });
+    }
+
+    function handleScrollBottom(event, STop) {
+      if (
+        RScrollContext.element.offsetHeight + STop >=
+        RScrollContext.contentElement.offsetHeight
+      ) {
+        RScrollContext.children.forEach((el) => {
+          el.onScrollBottom(event, scrollTop);
+        });
+        context.emit("scrollBottom", scrollTop);
+      }
     }
 
     RScrollContext.scrollTo = (top, isHandActuated = true) => {

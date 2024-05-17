@@ -18,20 +18,20 @@ export const RPagination = defineComponent({
 
     const select = useRadio2({ list: getNums(), value: props.listHook.currentPage });
 
+    function setSelectValue() {
+      if (select.value === props.listHook.currentPage) return;
+      select.updateValue(props.listHook.currentPage);
+    }
+
     watch(
       () => props.listHook.total,
       () => {
         select.updateList(getNums());
+        setSelectValue();
       },
     );
 
-    watch(
-      () => props.listHook.currentPage,
-      () => {
-        if (select.value === props.listHook.currentPage) return;
-        select.updateValue(props.listHook.currentPage);
-      },
-    );
+    watch(() => props.listHook.currentPage, setSelectValue);
 
     function onChange() {
       props.listHook.updateCurrentPage(select.value);

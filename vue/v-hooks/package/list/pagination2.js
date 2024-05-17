@@ -3,6 +3,7 @@ import { usePromise2, useLoading } from "../promise";
 import { nextTaskHoc } from "../abandon/async";
 import { useSelect2 } from "./select2";
 import { useReactive } from "../../other";
+import { useListSelect, useList } from "./list";
 
 export { useFetchPagination2, usePaginationList, useSelectPagination };
 
@@ -34,6 +35,7 @@ function getPaginationProps(options = {}) {
 
   return config;
 }
+
 // 静态分页
 function usePagination(props = {}) {
   const config = getPaginationProps(props);
@@ -111,6 +113,7 @@ function usePagination(props = {}) {
 
   return params;
 }
+
 // 静态分页 远程获取数据 可选择 不是远程分页
 function useSelectPagination(props = {}) {
   const config = {
@@ -157,8 +160,51 @@ function useSelectPagination(props = {}) {
 
   return params;
 }
+
 //远程获取数据  分页 可选择 增删改查
-function usePaginationList() {}
+function usePaginationList(props = {}) {
+  const config = {
+    ...getPaginationProps(props),
+    watchDataChange(params, listHooks, paginationHooks, selectHooks) {
+      listHooks.updateList(config.formatterList(params));
+    },
+    watchListChange: (params, listHooks, paginationHooks, selectHooks) => {
+      paginationHooks.updateList(listHooks.list);
+    },
+    watchPaginationChange(params, listHooks, paginationHooks, selectHooks) {
+      selectHooks.updateListToResolveValue(paginationHooks.list);
+    },
+  };
+
+  const paginationHooks = usePagination({ ...config });
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
+  const listHooks = useList({ ...config });
+  const selectHooks = config.selectHooks || useSelect2({ ...config });
+
+  const params = useReactive({
+    ...asyncHooks.getProto(),
+    ...selectHooks.getProto(),
+    ...listHooks.getProto(),
+    ...paginationHooks.getProto(),
+  });
+
+  watch(
+    () => asyncHooks.data,
+    () => config.watchDataChange(params, listHooks, paginationHooks, selectHooks),
+  );
+
+  watch(
+    () => listHooks.list,
+    () => config.watchListChange(params, listHooks, paginationHooks, selectHooks),
+  );
+
+  watch(
+    () => paginationHooks.list,
+    () => config.watchPaginationChange(params, listHooks, paginationHooks, selectHooks),
+  );
+
+  return params;
+}
 
 // 远程分页
 function useFetchPagination2(props = {}) {
@@ -255,7 +301,7 @@ function useFetchPagination2(props = {}) {
 
   async function updatePageSize(size) {
     pageSize.value = size;
-    console.log(currentPage.value, maxPage.value);
+
     if (currentPage.value > maxPage.value) currentPage.value = maxPage.value;
     await mergeEvent();
     if (config.triggerFetch) return nextSend();

@@ -144,7 +144,7 @@ function useList(props = {}) {
 
 function useAsyncList(props = {}) {
   const config = {
-    watchDataCb: ({ data, updateList }) => {
+    watchDataChange: ({ data, updateList }) => {
       updateList(data);
     },
     fetchCb: () => undefined,
@@ -168,9 +168,7 @@ function useAsyncList(props = {}) {
 
   watch(
     () => asyncHooks.data,
-    (data) => {
-      config.watchDataCb(params, data);
-    }
+    (data) => config.watchDataChange(params, data),
   );
 
   return params;
@@ -178,7 +176,7 @@ function useAsyncList(props = {}) {
 
 function useListSelect(props = {}) {
   const config = {
-    useListWatchList: (data, selectHooks, listHooks) => {
+    watchListChange: (data, selectHooks, listHooks) => {
       selectHooks.updateListToResolveValue(data);
     },
     ...props,
@@ -193,9 +191,7 @@ function useListSelect(props = {}) {
 
   watch(
     () => listHooks.list,
-    (data) => {
-      config.useListWatchList(data, selectHooks, listHooks);
-    }
+    (data) => config.watchListChange(data, selectHooks, listHooks),
   );
 
   return params;
@@ -203,7 +199,7 @@ function useListSelect(props = {}) {
 
 function useAsyncListSelect(props = {}) {
   const config = {
-    watchDataCb: ({ data, updateList }) => {
+    watchDataChange: ({ data, updateList }) => {
       updateList(data);
     },
     fetchCb: () => undefined,
@@ -227,9 +223,7 @@ function useAsyncListSelect(props = {}) {
 
   watch(
     () => asyncHooks.data,
-    (data) => {
-      config.watchDataCb(params, data);
-    }
+    (data) => config.watchDataChange(params, data),
   );
 
   return params;

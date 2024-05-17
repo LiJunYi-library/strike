@@ -154,11 +154,12 @@ function useListLoad2(props = {}) {
 
 function useListLoadSelect(props = {}) {
   const config = {
-    useListWatchList: (data, selectHooks, listLoadHooks) => {
+    watchListChange: (data, selectHooks, listLoadHooks) => {
       selectHooks.updateListToResolveValue(data);
     },
     ...props,
   };
+
   const listLoadHooks = useListLoad2(props);
   const selectHooks = useSelect2({ ...props, list: listLoadHooks.list });
 
@@ -169,9 +170,7 @@ function useListLoadSelect(props = {}) {
 
   watch(
     () => listLoadHooks.list,
-    (data) => {
-      config.useListWatchList(data, selectHooks, listLoadHooks);
-    },
+    (data) => config.watchListChange(data, selectHooks, listLoadHooks),
   );
   return params;
 }

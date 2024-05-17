@@ -206,7 +206,7 @@ function useRadio2(props = {}) {
 
 function useAsyncRadio2(props = {}) {
   const config = {
-    watchDataCb: ({ data, updateList }) => {
+    watchDataChange: ({ data, updateList }) => {
       updateList(data);
     },
     fetchCb: () => undefined,
@@ -235,7 +235,7 @@ function useAsyncRadio2(props = {}) {
   });
 
   function onSuccess() {
-    config.watchDataCb(params);
+    config.watchDataChange(params);
     empty.value = params.list.length === 0;
   }
 

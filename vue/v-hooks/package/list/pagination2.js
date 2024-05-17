@@ -1,10 +1,10 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { usePromise2, useLoading } from "../promise";
 import { nextTaskHoc } from "../abandon/async";
 import { useSelect2 } from "./select2";
 import { useReactive } from "../../other";
 
-export { useFetchPagination2 };
+export { useFetchPagination2, usePaginationList, useSelectPagination };
 
 function getPaginationProps(options = {}) {
   const config = {
@@ -34,7 +34,7 @@ function getPaginationProps(options = {}) {
 
   return config;
 }
-
+// 静态分页
 function usePagination(props = {}) {
   const config = getPaginationProps(props);
 
@@ -72,6 +72,7 @@ function usePagination(props = {}) {
     list,
     total,
     maxPage,
+    updatePage: updateCurrentPage,
     updateCurrentPage,
     updatePageSize,
     updateList,
@@ -110,6 +111,54 @@ function usePagination(props = {}) {
 
   return params;
 }
+// 静态分页 远程获取数据 可选择 不是远程分页
+function useSelectPagination(props = {}) {
+  const config = {
+    ...getPaginationProps(props),
+    watchListChange: (params, selectHooks, paginationHooks) => {
+      selectHooks.updateListAndReset(paginationHooks.list);
+    },
+    watchDataChange(params, selectHooks, paginationHooks) {
+      paginationHooks.updateList(config.formatterList(params));
+    },
+  };
+
+  const paginationHooks = usePagination({ ...config });
+  const asyncHooks = config.asyncHooks || usePromise2(config.fetchCb, { ...config });
+  const selectHooks = config.selectHooks || useSelect2({ ...config });
+
+  const params = useReactive({
+    ...selectHooks.getProto(),
+    ...asyncHooks.getProto(),
+    ...paginationHooks.getProto(),
+    nextBeginSend,
+    beginSend,
+  });
+
+  watch(
+    () => paginationHooks.list,
+    () => config.watchListChange(params, selectHooks, paginationHooks),
+  );
+
+  watch(
+    () => asyncHooks.data,
+    () => config.watchDataChange(params, selectHooks, paginationHooks),
+  );
+
+  function nextBeginSend(...arg) {
+    paginationHooks.reset();
+    return asyncHooks.nextBeginSend(...arg);
+  }
+
+  function beginSend(...arg) {
+    paginationHooks.reset();
+    return asyncHooks.beginSend(...arg);
+  }
+
+  return params;
+}
+//远程获取数据  分页 可选择 增删改查
+function usePaginationList() {}
 
 // 远程分页
 function useFetchPagination2(props = {}) {

@@ -152,7 +152,7 @@ export const PaginationTableHoc = (option = {}) => {
       context.expose(elTable);
 
       const defaultSort = (() => {
-        const mOrder = listHook.order ? parseOrder[listHook.order] : null;
+        const mOrder = listHook.order ? parseOrder?.[listHook?.order] : null;
         return reactive({
           prop: listHook.prop,
           order: mOrder,

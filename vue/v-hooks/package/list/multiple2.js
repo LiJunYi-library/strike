@@ -234,7 +234,7 @@ function useMultiple2(props = {}) {
 
 function useAsyncMultiple2(props = {}) {
   const config = {
-    watchDataCb({ data, updateList }) {
+    watchDataChange({ data, updateList }) {
       updateList(data);
     },
     fetchCb: () => undefined,
@@ -262,7 +262,7 @@ function useAsyncMultiple2(props = {}) {
   watch(
     () => asyncHooks.data,
     (data) => {
-      config.watchDataCb(params, data);
+      config.watchDataChange(params, data);
       empty.value = params.list.length === 0;
     },
   );

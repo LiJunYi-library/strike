@@ -172,7 +172,7 @@ function usePaginationList(props = {}) {
       paginationHooks.updateList(listHooks.list);
     },
     watchPaginationChange(params, listHooks, paginationHooks, selectHooks) {
-      selectHooks.updateListToResolveValue(paginationHooks.list);
+      selectHooks.updateListResolve(paginationHooks.list);
     },
   };
 

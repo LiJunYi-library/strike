@@ -98,6 +98,7 @@ function useMultiple2(props = {}) {
     verifyValueInList,
     updateListAndReset,
     updateListToResolveValue,
+    updateListResolve,
     invertSelect,
     allSelect,
     selectOfValue,
@@ -232,6 +233,13 @@ function useMultiple2(props = {}) {
     } else {
       reset();
     }
+  }
+
+  function updateListResolve(li) {
+    list.value = revArray(li);
+    const sList = hooks.context.SH.select.filter((el) => list.value.some((item) => item === el));
+    if (!sList.length) return reset();
+    else updateSelect(sList);
   }
 
   function updateListToResolveValue(li) {

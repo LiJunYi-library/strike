@@ -64,6 +64,7 @@ function useRadio2(props = {}) {
     verifyValueInList,
     updateListAndReset,
     updateListToResolveValue,
+    updateListResolve,
     getSelectOfValue,
     getLabelOfValue,
     getIndexOfValue,
@@ -165,6 +166,12 @@ function useRadio2(props = {}) {
   function updateListToResolveValue(li) {
     list.value = li;
     resolveValue();
+  }
+
+  function updateListResolve(li) {
+    list.value = li;
+    const ishave = list.value.some((item) => item === hooks.context.SH.select);
+    if (!ishave) return reset();
   }
 
   function updateListAndReset(li) {

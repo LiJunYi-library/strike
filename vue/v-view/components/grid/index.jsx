@@ -65,9 +65,14 @@ export const RGridListSelect = defineComponent({
             default: ({ item, index }) => {
               return (
                 <div
-                  class={["r-grid-item", props.listHook.same(item) && "r-grid-item-same"]}
+                  class={[
+                    "r-grid-item",
+                    props.listHook.formatterDisabled(item, index) && "r-grid-item-disabled",
+                    props.listHook.same(item) && "r-grid-item-same",
+                  ]}
                   key={index}
                   onClick={(event) => {
+                    if (props.listHook.formatterDisabled(item, index)) return;
                     if (props.listHook.onSelect(item, index)) return;
                     context.emit("change", item, index);
                   }}

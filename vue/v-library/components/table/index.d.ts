@@ -15,3 +15,4 @@ export declare const TableColumnButton: DefineComponent<any>;
 export declare const TableColumnText: DefineComponent<any>;
 export declare const TableColumnLink: DefineComponent<any>;
 export declare const TableColumnImg: DefineComponent<any>;
+export declare const TableColumnMultiple: DefineComponent<any>;

@@ -67,6 +67,10 @@ function useMultiple2(props = {}) {
   const label = ref(initParms.label);
   const index = ref(initParms.index);
   const contextHooks = createSaveContext({ value, select, label, index });
+  const isSelect = computed(() => hooks.context.SH.select.length > 0);
+  const unDisabledList = computed(() => list.value.filter((el, i) => !formatterDisabled(el, i)));
+  const isSelectAll = computed(() => isAllSelect());
+  const indeterminate = computed(() => (isSelectAll.value ? false : isSelect.value));
 
   const hooks = useReactive({
     list,
@@ -75,6 +79,9 @@ function useMultiple2(props = {}) {
     label,
     index,
     isMultiple,
+    isSelect,
+    isSelectAll,
+    indeterminate,
     isAllSelect,
     formatterValue,
     formatterLabel,
@@ -99,11 +106,18 @@ function useMultiple2(props = {}) {
     getSelectOfValue: selectOfValue,
     getLabelOfValue: labelOfValue,
     getIndexOfValue: indexOfValue,
+    triggerSelect,
     ...contextHooks,
   });
 
+  function triggerSelect() {
+    if (isAllSelect()) reset();
+    else allSelect();
+  }
+
   function isAllSelect() {
-    return hooks.context.SH.select.length === list.value.length;
+    if (!isSelect.value) return false;
+    return hooks.context.SH.select.length === unDisabledList.value.length;
   }
 
   //
@@ -114,6 +128,7 @@ function useMultiple2(props = {}) {
   function onSelect(item, i) {
     const val = formatterValue(item);
     const lab = formatterLabel(item);
+
     if (same(item)) {
       hooks.context.SH.select = hooks.context.SH.select.filter((v) => v !== item);
       hooks.context.SH.value = hooks.context.SH.select.map((v) => formatterValue(v));
@@ -128,7 +143,7 @@ function useMultiple2(props = {}) {
   }
   // 反选
   function invertSelect() {
-    hooks.context.SH.select = list.value.filter(
+    hooks.context.SH.select = unDisabledList.value.filter(
       (val) => !hooks.context.SH.select.some((el) => el === val),
     );
     hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
@@ -137,10 +152,10 @@ function useMultiple2(props = {}) {
   }
   // 全选
   function allSelect() {
-    hooks.context.SH.select = [...list.value];
+    hooks.context.SH.select = [...unDisabledList.value];
     hooks.context.SH.value = hooks.context.SH.select.map((el) => formatterValue(el));
     hooks.context.SH.label = hooks.context.SH.select.map((el) => formatterLabel(el));
-    hooks.context.SH.index = list.value.map((el, nth) => nth);
+    hooks.context.SH.index = list.value.reduce(reduceIndex(hooks.context.SH.select), []);
   }
 
   function reset() {

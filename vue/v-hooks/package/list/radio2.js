@@ -86,7 +86,7 @@ function useRadio2(props = {}) {
   }
 
   function onSelect(item, i) {
-    if (!config.Validator(hooks)) return;
+    if (!config.Validator(hooks)) return true;
     if (config.cancelSame && same(item, i)) {
       hooks.context.SH.select = undefined;
       hooks.context.SH.index = undefined;

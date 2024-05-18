@@ -38,7 +38,6 @@ export function TableColumnHoc(options = {}) {
       };
 
       return (vm) => {
-        // console.log("ElTableColumnvm", vm);
         _arguments.vm = vm;
         return (
           <ElTableColumn {...props} {...context.attrs} class={[config.class]}>
@@ -158,9 +157,9 @@ export const TableColumnLink = TableColumnHoc({
 export const TableColumnImg = TableColumnHoc({
   props: {},
   renderDefault({ props, context, vm, cellValue }, arg) {
-    // console.log(vm.$parent.scrollTo);
+    const propKey = props.prop || props.property;
     const attrs = objectFilter(context.attrs, /img_/g);
-    const imgList = vm.$parent.data.map((el) => el.img);
+    const imgList = vm.$parent.data.map((el) => el?.[propKey]);
     const popoverAttrs = objectFilter(context.attrs, /popover_/g);
     const pWidth = popoverAttrs.width || 500;
     return (
@@ -216,3 +215,4 @@ TableColumnImg.props.width = {
   default: "100",
 };
 /** */
+

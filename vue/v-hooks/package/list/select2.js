@@ -1,7 +1,7 @@
 import { useRadio2, useAsyncRadio2 } from "./radio2";
 import { useMultiple2, useAsyncMultiple2 } from "./multiple2";
 
-export { getSelectProps, useSelect2, useAsyncSelect2 };
+export { useSelect2, useAsyncSelect2 };
 
 function getSelectProps(options = {}) {
   return {

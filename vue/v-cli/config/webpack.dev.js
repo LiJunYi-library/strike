@@ -27,14 +27,16 @@ const processEnv = JSON.stringify({
 });
 
 const configPath = {
-  context:  path.resolve("", `./src`),
+  context: path.resolve(""),
   entry: path.resolve("", `./src/main.js`),
-  html: path.resolve("", './public/index.html'),
-  output:  path.resolve("", `./build`),
+  html: path.resolve("", "./public/index.html"),
+  output: path.resolve("", `./build`),
 };
 
-
-// console.log("configPath", configPath);
+const comPath = path.resolve("");
+console.log("comPath", comPath);
+const comPath2 = path.resolve(__dirname, "../../../node_modules/@rainbow_ljy");
+console.log("comPath2", comPath2);
 
 module.exports = {
   entry: configPath.entry,
@@ -55,6 +57,10 @@ module.exports = {
       {
         test: /\.less$/,
         use: getStyleLoader("less-loader"),
+      },
+      {
+        test: /\.scss$/,
+        use: getStyleLoader("sass-loader"),
       },
       {
         test: /\.sass$/,
@@ -81,6 +87,7 @@ module.exports = {
         type: "asset/resource",
       },
       //
+
       {
         test: /\.js?$/,
         include: configPath.context,
@@ -91,12 +98,47 @@ module.exports = {
           // plugins: [isDevelopment && require.resolve('react-refresh/babel')].filter(Boolean),
         },
       },
+      // {
+      //   test: /\.(js|jsx)$/, // 匹配 .js 和 .jsx 文件  //test: /\.js?$/,
+      //   include: [comPath, comPath2],
+      //   // loader: "babel-loader",
+      //   // options: {
+      //   //   cacheDirectory: true,
+      //   //   cacheCompression: true,
+      //   //   // plugins: [isDevelopment && require.resolve('react-refresh/babel')].filter(Boolean),
+      //   // },
+
+      //   use: {
+      //     // include: [comPath, comPath2],
+      //     loader: "babel-loader", // 使用 babel-loader 转译
+      //     options: {
+      //       presets: [
+      //         "@babel/preset-env", // 用于转译 ESNext 语法到目标环境支持的语法
+      //         "@vue/babel-preset-jsx",
+      //       ],
+      //     },
+      //   },
+      // },
+
       {
-        test: /\.vue$/,
+        test: /\.(jsx|js)$/, // 匹配JSX文件
+        // include: [comPath, comPath2],
+        // exclude: /node_modules\/(?!vuecoms\/).*/, //排除除了vuecoms以外的node_modules中的文件
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@vue/cli-plugin-babel/preset"],
+          },
+        },
+      },
+
+      {
+        test: /\.(vue)$/,
         loader: "vue-loader",
         options: {
           // cacheDirectory: path.resolve(__dirname, '../node_modules/.cache/vue-loader'),
         },
+        include: [comPath, comPath2],
       },
     ],
   },
@@ -140,7 +182,7 @@ module.exports = {
   mode: "development",
   devtool: "cheap-module-source-map",
   resolve: {
-    extensions: [".vue", ".js", ".json"],
+    extensions: [".vue", ".js", ".jsx", ".json"],
   },
   optimization: {
     splitChunks: {

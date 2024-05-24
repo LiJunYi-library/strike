@@ -1,0 +1,13 @@
+.r-scroll-fixed {
+  position: fixed;
+  width: 100%;
+  z-index: 11;
+}
+
+.r-scroll-fixed-show {
+  display: block;
+}
+
+.r-scroll-fixed-hide {
+  display: none;
+}

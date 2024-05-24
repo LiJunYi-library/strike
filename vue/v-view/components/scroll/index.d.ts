@@ -8,8 +8,6 @@ export declare const RScrollFlotage: DefineComponent<any>;
 
 export declare const RScrollFold: DefineComponent<any>;
 
-export declare const RScrollFixed: DefineComponent<any>;
-
 export declare const RScrollList: DefineComponent<any>;
 
 export declare const RScrollVirtualList: DefineComponent<any>;
@@ -28,3 +26,4 @@ export class ScrollController {
 export * from "./scroll-page";
 export * from "./message";
 export * from "./top";
+export * from "./fixed";

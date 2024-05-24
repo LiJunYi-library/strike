@@ -1,5 +1,6 @@
-import { defineComponent, renderSlot, onBeforeUnmount, ref, inject, com } from "vue";
-import { useScrollController } from "./";
+import { defineComponent, renderSlot, onBeforeUnmount, ref, inject, computed } from "vue";
+import { useScrollController } from "../index";
+import './index.scss';
 
 export const RScrollFixed = defineComponent({
   props: {
@@ -8,12 +9,24 @@ export const RScrollFixed = defineComponent({
     changeTop: Number,
     opacityFun: Function,
     opacityInversion: Boolean,
-    opacityTop: Number,
+    opacityTop: [Number, Array],
+    visibleTop: Number,
+    visibleInversion: Boolean,
   },
   setup(props, context) {
     const top = ref(props.top);
     const isChangeTop = ref(false);
     const scrollTop = ref(0);
+    const displayClass = computed(() => {
+      if (props.visibleTop === undefined) return '';
+      if (props.visibleInversion) {
+        if (scrollTop.value >= props.visibleTop) return 'r-scroll-fixed-hide';
+        return 'r-scroll-fixed-show';
+      }
+      if (scrollTop.value >= props.visibleTop) return 'r-scroll-fixed-show';
+      return 'r-scroll-fixed-hide';
+    })
+
 
     function layout(sTop) {
       scrollTop.value = sTop;
@@ -32,7 +45,17 @@ export const RScrollFixed = defineComponent({
     function getOpacity() {
       if (props.opacityFun) return props?.opacityFun?.(scrollTop.value);
       if (props.opacityTop === undefined) return 1;
-      const o = scrollTop.value / props.opacityTop;
+      if (!(props.opacityTop instanceof Array)) {
+        let o = scrollTop.value / props.opacityTop;
+        if (o > 1) o = 1;
+        if (props.opacityInversion) return 1 - o;
+        return o;
+      }
+
+      const [start, end] = props.opacityTop;
+      let o = (scrollTop.value - start) / end;
+      if (o < 0) o = 0;
+      if (o > 1) o = 1;
       if (props.opacityInversion) return 1 - o;
       return o;
     }
@@ -45,7 +68,7 @@ export const RScrollFixed = defineComponent({
             top: top.value + "px",
             opacity: getOpacity(),
           }}
-          class={["r-scroll-fixed", isChangeTop.value && "r-scroll-fixed-act"]}
+          class={["r-scroll-fixed", displayClass.value, isChangeTop.value && "r-scroll-fixed-act"]}
         >
           {renderSlot(context.slots, "default", {
             scrollTop: scrollTop.value,

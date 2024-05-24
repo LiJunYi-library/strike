@@ -336,18 +336,30 @@ export const RLoading = defineComponent({
         </div>,
       ]);
     }
-    function renderContent() {
+
+    function renderLoadState() {
+      if (asyncHooks.error) return renderError();
+      if (asyncHooks.begin) return renderBegin();
+      if (asyncHooks.finished){
+         if (asyncHooks.empty) return renderEmpty();
+         return renderfinished();
+      }
+      if (asyncHooks.finished === false) return renderLoading();
+      if (asyncHooks.finished === false) return renderLoad();
+      return null;
+    }
+
+    function renderState() {
       if (asyncHooks.error) return renderError();
       if (asyncHooks.begin) return renderBegin();
       if (asyncHooks.loading) return renderLoading();
       if (asyncHooks.empty) return renderEmpty();
       if (asyncHooks.finished) return renderfinished();
-      if (asyncHooks.finished === false) return renderLoad();
       return null;
     }
 
     return () => {
-      const vNode = renderContent();
+      const vNode = renderState();
       if (props.isLoad) {
         return [
           [
@@ -360,7 +372,7 @@ export const RLoading = defineComponent({
               ]}
             >
               <div ref={setIntersectionHtml} class="intersection"></div>
-              {vNode}
+              {renderLoadState()}
             </div>,
           ],
         ];

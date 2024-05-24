@@ -3,18 +3,14 @@ import {
   renderSlot,
   watch,
   provide,
-  inject,
-  onMounted,
   ref,
   computed,
   isRef,
   render,
   onBeforeUnmount,
   Teleport,
-  reactive,
   Transition,
 } from "vue";
-import { arrayRemove } from "@rainbow_ljy/rainbow-js";
 import { RGlobal } from "../../global";
 
 function useDocumentTouchstart(cb) {

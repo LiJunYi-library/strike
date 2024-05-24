@@ -28,6 +28,7 @@ module.exports = class Service {
     const config = formatterConfig({
       entry: main,
       htmlTemplate: htmlPath,
+      mode: "production",
     })
     const compiler = webpack(config);
     compiler.run();

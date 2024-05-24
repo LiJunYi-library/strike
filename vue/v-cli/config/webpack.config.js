@@ -2,11 +2,14 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const webpack = require("webpack");
-const isDevelopment = process.env.NODE_ENV !== "production";
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const getStyleLoader = (pre) => {
   return [
-    "vue-style-loader",
+    // "vue-style-loader",
+    MiniCssExtractPlugin.loader,
     "css-loader",
     {
       loader: "postcss-loader",
@@ -27,6 +30,7 @@ console.log("comPath2", comPath2);
 
 function formatterConfig(props) {
   const config = {
+    mode: "development",
     context: path.resolve(""),
     entry: '',
     htmlTemplate: '',
@@ -34,9 +38,12 @@ function formatterConfig(props) {
     ...props
   }
 
+  const isDevelopment = process.env.NODE_ENV !== "production";
+
   return {
     entry: config.entry,
     output: {
+      clean: true,
       path: config.outputPath,
       filename: "static/js/[name].js",
       chunkFilename: "static/js/[name].chuck.js",
@@ -90,7 +97,7 @@ function formatterConfig(props) {
           },
         },
         {
-          test: /\.(jsx|js)$/,
+          test: /\.(jsx|js|mjs)$/,
           use: {
             loader: "babel-loader",
             options: {
@@ -105,7 +112,7 @@ function formatterConfig(props) {
           options: {
 
           },
-          include: [comPath, comPath2],
+          // include: [comPath, comPath2],
         },
       ],
     },
@@ -134,13 +141,17 @@ function formatterConfig(props) {
       new webpack.DefinePlugin({
         __VUE_OPTIONS_API__: true,
         __VUE_PROD_DEVTOOLS__: false,
-        "process.env": { NODE_ENV: '"development"' },
+        "process.env": { NODE_ENV: `"${config.mode}"` },
       }),
+      new MiniCssExtractPlugin({
+        filename: 'static/css/[name].css',
+        chunkFilename: 'static/css/[name].chunk.css',
+      })
     ].filter(Boolean),
-    mode: "development",
-    devtool: "cheap-module-source-map",
+    mode: config.mode,
+    devtool: "source-map", //"cheap-module-source-map",
     resolve: {
-      extensions: [".vue", ".js", ".jsx", ".json"],
+      extensions: [".vue", ".js", ".mjs", ".jsx", ".json"],
     },
     optimization: {
       splitChunks: {
@@ -150,7 +161,11 @@ function formatterConfig(props) {
         name: (entrypoint) => `runtime~${entrypoint.name}.js`,
       },
       usedExports: true,
-
+      minimize: true,
+      minimizer: [
+        new CssMinimizerPlugin(),
+        new TerserPlugin(),
+      ],
     },
     devServer: {
       host: "localhost",

@@ -67,8 +67,11 @@ export function useScrollController(props = {}) {
         onScrollDown: () => undefined,
         onScroll: () => undefined,
         onScrollend: () => undefined,
+        onScrollRefresh: () => undefined,
         onResize: () => undefined,
         onMounted: () => undefined,
+        onTouchstart: () => undefined,
+        onTouchend: () => undefined,
         onFlotage: () => undefined,
         ...props,
         destroy,
@@ -109,7 +112,7 @@ export const RScroll = defineComponent({
         scrollController: Object,
         popupDisableScroll: { type: Boolean, default: false },
     },
-    emits: ["scrollDown", "scrollUp", "scrollChange", "scrollBottom"],
+    emits: ["scrollDown", "scrollUp", "scrollChange", "scrollBottom", "scrollRefresh"],
     setup(props, context) {
         const { scrollController: SC } = props;
         const RScrollContext = reactive({
@@ -125,6 +128,9 @@ export const RScroll = defineComponent({
         let prveTop = 0;
         let scrollTop = 0;
         let resizeObserver;
+        let stratTouche;
+        let refreshLock = false;
+        let scrollLock = false;
 
         try {
             resizeObserver = new ResizeObserver(([entries]) => {
@@ -262,9 +268,49 @@ export const RScroll = defineComponent({
             RScrollContext.contentElement = el;
         }
 
+        function onTouchstart(event) {
+            RScrollContext.children.forEach((el) => {
+                el?.onTouchstart?.(event);
+            });
+            if (scrollTop > 0) return scrollLock = true;
+            stratTouche = event.touches[0];
+        }
+
+        function onTouchmove(event) {
+            if (scrollTop > 0) return scrollLock = true;
+            if (scrollLock === true) return console.log('滚动锁');
+            const moveTouche = event.touches[0];
+            const moveY = moveTouche.pageY - stratTouche.pageY;
+            if (moveY > 10 && refreshLock === false) refreshLock = true;
+            if (refreshLock === true) {
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                let refreshHeight = moveY - 10;
+                event.refreshHeight = refreshHeight
+                RScrollContext.children.forEach((el) => {
+                    el.onScrollRefresh(event, refreshHeight);
+                });
+                context.emit("scrollRefresh", refreshHeight);
+            }
+        }
+
+        function onTouchend(event) {
+            refreshLock = false;
+            scrollLock = false;
+            RScrollContext.children.forEach((el) => {
+                el?.onTouchend?.(event);
+            });
+        }
+
         return (vm) => {
             return (
-                <div ref={onRef} class="r-scroll" onScroll={onScroll} onScrollend={onScrollend}>
+                <div ref={onRef}
+                    class="r-scroll"
+                    onTouchmove={onTouchmove}
+                    onTouchstart={onTouchstart}
+                    onTouchend={onTouchend}
+                    onScroll={onScroll}
+                    onScrollend={onScrollend}>
                     <div class="r-scroll-content" ref={onContentRef}>
                         {renderSlot(context.slots, "default")}
                     </div>

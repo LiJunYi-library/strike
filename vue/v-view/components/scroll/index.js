@@ -11,3 +11,4 @@ export * from "./virtual-scroll-list";
 export * from "./scroll-page";
 export * from "./message";
 export * from "./top";
+export * from "./refresh";

@@ -1,4 +1,4 @@
-import {DefineComponent} from 'vue';
+import { DefineComponent } from 'vue';
 
-declare const Refresh: DefineComponent<any>;
-export default Refresh;
+declare const RScrollRefresh: DefineComponent<any>;
+

@@ -1,5 +1,5 @@
 import { defineComponent, renderSlot, onBeforeUnmount, ref, inject, computed } from "vue";
-import { useScrollController } from "../index";
+import { useScrollController } from "../scroll";
 import './index.scss';
 
 export const RScrollFixed = defineComponent({

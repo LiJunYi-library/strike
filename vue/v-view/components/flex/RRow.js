@@ -4,7 +4,7 @@ export const RRow = defineComponent({
   props: {
     reverse: Boolean,
     wrap: Boolean,
-    justify: { type: String, default: "start" }, //start end  around  between  evenly  center stretch
+    justify: { type: String, default: "" }, //start end  around  between  evenly  center stretch
     align: { type: String, default: "center" }, //start   end center stretch  baseline
     auto: { type: [String, Boolean], default: "" }, //left   right  center ""
     fill: Boolean,

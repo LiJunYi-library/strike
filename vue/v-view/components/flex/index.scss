@@ -55,8 +55,17 @@
 
 //
 .r-flex-justify-auto-center {
+  margin: auto;
+}
+
+.r-flex-justify-auto-horizontal {
   margin-left: auto;
   margin-right: auto;
+}
+
+.r-flex-justify-auto-vertical {
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .r-flex-justify-auto-left {
@@ -65,6 +74,14 @@
 
 .r-flex-justify-auto-right {
   margin-right: auto;
+}
+
+.r-flex-justify-auto-bottom {
+  margin-bottom: auto;
+}
+
+.r-flex-justify-auto-top {
+  margin-top: auto;
 }
 
 //

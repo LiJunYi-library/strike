@@ -4,9 +4,9 @@ export interface RColumnProps {
   reverse: boolean;
   wrap: boolean;
   fill: boolean;
-  justify: "start" | "end" | "around" | "between" | "evenly" | "center" | "stretch";
-  align: "start" | "end" | "center" | "stretch" | "baseline";
-  auto: "left" | "right" | "center" | "";
+  justify: "start" | "end" | "around" | "between" | "evenly" | "center" | "stretch" | "";
+  align: "start" | "end" | "center" | "stretch" | "baseline" | "";
+  auto: "top" | "bottom" | "left" | "right" | "center" | "horizontal" | "vertical" | "";
 }
 
 export type RColumnEmits = {};

@@ -12,23 +12,23 @@ export const RScrollTop = defineComponent({
     zIndex: { type: [Number, String], default: 20 },
 
     left: [Number, String],
-    right: [Number, String],
+    // right: [Number, String],
     top: [Number, String],
-    bottom: [Number, String],
+    // bottom: [Number, String],
     visibleLeft: [Number, String],
-    visibleRight: [Number, String],
+    // visibleRight: [Number, String],
     visibleTop: [Number, String],
-    visibleBottom: [Number, String],
-    horizontal: { type: [String], default: "right" },
-    vertical: { type: [String], default: "bottom" },
+    // visibleBottom: [Number, String],
+    // horizontal: { type: [String], default: "right" },
+    // vertical: { type: [String], default: "bottom" },
 
     //
     horizontal: { type: [String], default: "right" }, // 'right' 'left'
     vertical: { type: [String], default: "bottom" }, // 'bottom' 'top'
-    right: { type: [Number, String], default: () => 20 },
-    visibleRight: { type: [Number, String], default: () => -400 },
-    bottom: { type: [Number, String], default: () => 100 },
-    visibleBottom: { type: [Number, String], default: () => 100 },
+    right: { type: [Number, String], default:  20 },
+    visibleRight: { type: [Number, String], default:  -400 },
+    bottom: { type: [Number, String], default:  100 },
+    visibleBottom: { type: [Number, String], default:  100 },
   },
   emits: ["scrollTop", "scrollBack"],
   setup(props, context) {

@@ -11,7 +11,7 @@ import {
   watch,
   nextTick,
 } from "vue";
-import { useScrollController } from "./";
+import { useScrollController } from ".";
 import { arrayLoop } from "@rainbow_ljy/rainbow-js";
 import { useListLoadingHoc, loadingProps } from "../loading";
 

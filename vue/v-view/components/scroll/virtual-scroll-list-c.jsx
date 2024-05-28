@@ -8,7 +8,7 @@ import {
   renderList,
   onMounted,
 } from "vue";
-import { ScrollController, useScrollController } from "./";
+import { ScrollController, useScrollController } from ".";
 import { useLoading } from "@rainbow_ljy/v-hooks";
 import { RILoading } from "../icon";
 import { arrayLoop, arrayLoopMap, arrayBubbleMin, arrayBubbleMax } from "@rainbow_ljy/rainbow-js";

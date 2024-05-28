@@ -1,6 +1,6 @@
 import { defineComponent, ref, onBeforeUnmount, computed, Transition, renderSlot } from "vue";
 import "./index.scss";
-import { useScrollController } from "../";
+import { useScrollController } from "..";
 
 export const RScrollMessage = defineComponent({
   props: {

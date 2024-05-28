@@ -5,7 +5,6 @@ import {
   computed,
   watch,
   onMounted,
-  fo,
   ref,
   onBeforeUnmount,
   onUnmounted,
@@ -75,11 +74,6 @@ class ItemAdapter {
   scrollTop = 0;
   uuId = 0;
 
-  intersectingTimer = undefined;
-  intersectingTimerType = "setTimeout"; //'setTimeout' 'setInterval'
-  intersectingtime = 0;
-  intersected = false;
-
   constructor(props) {
     Object.assign(this, props);
     this.isRenderCache = this.isRender;
@@ -131,10 +125,7 @@ class ItemAdapter {
     this.scrollTop = scrollTop;
     // if (this.parent.ID === 2) console.log("onScroll", this.parent);
     // console.log("onScroll small", scrollTop);
-    this.isRender = this.getIsRender(
-      scrollTop - this.parent.recycleSize,
-      scrollTop + window.innerHeight + this.parent.recycleSize
-    );
+    this.isRender = this.getIsRender(scrollTop - 500, scrollTop + window.innerHeight + 500);
     if (this.isRender !== this.isRenderCache) {
       this.dispatchRender();
       this.isRenderCache = this.isRender;
@@ -148,7 +139,7 @@ class Adapter {
   list = [];
   columnNum = 2;
   columns = [];
-  recycleSize = (window.innerHeight || 500) * 3;
+
   space = 10;
   scrollTop = 0;
   avgHeight = 0;
@@ -156,8 +147,7 @@ class Adapter {
   winHeight = window.innerHeight;
   winWidth = window.innerWidth;
   sapceHorizontal = 10;
-  itemThreshold = 0.2;
-  itemIntersectingtime = undefined;
+  itemThreshold = 0.2
 
   get itemWidth() {
     return (
@@ -250,7 +240,6 @@ class Adapter {
         data,
         index,
         parent: this,
-        intersectingtime: this.itemIntersectingtime,
         scrollTop: this.scrollTop,
         width: this.itemWidth,
         height: this.avgHeight,
@@ -269,8 +258,8 @@ class Adapter {
     item.left = minCol.left;
     minCol.height = minCol.height + item.height;
     item.isRender = item.getIsRender(
-      item.scrollTop - this.recycleSize,
-      item.scrollTop + window.innerHeight + this.recycleSize
+      item.scrollTop - 500,
+      item.scrollTop + window.innerHeight + 500
     );
   }
 
@@ -288,7 +277,6 @@ RVirtualListFalls = defineComponent({
     listHook: { type: Object, default: () => ({ proxy: {} }) },
     list: { type: Array, default: () => [] },
     itemThreshold: { type: Number, default: 0.2 },
-    itemIntersectingtime: Number,
     columnNum: { type: Number, default: 2 },
     skelectonCount: { type: Number, default: 4 },
     avgHeight: { type: Number, default: 210 },
@@ -322,8 +310,7 @@ RVirtualListFalls = defineComponent({
     const id = ref(ID);
     let vue;
     const { proxy: listHook } = props.listHook;
-    const { scrollContainer, avgHeight, space, sapceHorizontal, list, columnNum, itemThreshold } =
-      props;
+    const { scrollContainer, avgHeight, space, sapceHorizontal, list, columnNum ,itemThreshold} = props;
     const renderItems = ref([]);
     let bottomHtml;
 
@@ -332,7 +319,6 @@ RVirtualListFalls = defineComponent({
       avgHeight,
       space,
       itemThreshold,
-      itemIntersectingtime: props.itemIntersectingtime,
       sapceHorizontal,
       ID,
       array: list,
@@ -352,41 +338,34 @@ RVirtualListFalls = defineComponent({
       });
     }
 
-    let resizeObserver;
-    let intersectionObserver;
+    let resizeObserver = new ResizeObserver(async (...arg) => {
+      // 需要监听 offsetTop 变化
+      // let newWidth = vue.$el.offsetWidth;
+      // let newHeight = vue.$el.offsetHeight;
+      // adapter.page = getOffsetRect(vue.$el);
+      // if (id.value === 2) console.log("resizeObserver", adapter);
+    });
 
-    try {
-      resizeObserver = new ResizeObserver(async (...arg) => {
-        // 需要监听 offsetTop 变化
-        // let newWidth = vue.$el.offsetWidth;
-        // let newHeight = vue.$el.offsetHeight;
-        // adapter.page = getOffsetRect(vue.$el);
-        // if (id.value === 2) console.log("resizeObserver", adapter);
-      });
-    } catch (error) {}
-
-    try {
-      intersectionObserver = new IntersectionObserver(([entries]) => {
-        if (entries.isIntersecting && adapter.height > 0) {
-          context.emit("scrollEnd");
-        }
-      });
-    } catch (error) {}
+    const intersectionObserver = new IntersectionObserver(([entries]) => {
+      if (entries.isIntersecting && adapter.height > 0) {
+        context.emit("scrollEnd");
+      }
+    });
 
     context.expose(adapter);
 
     onMounted(() => {
       adapter.page = getOffsetRect(vue.$el);
-      if (resizeObserver) resizeObserver.observe(vue.$el);
-      if (intersectionObserver) intersectionObserver.observe(bottomHtml);
+      resizeObserver.observe(vue.$el);
+      intersectionObserver.observe(bottomHtml);
       scrollContainer.addEventListener("scroll", onScroll);
     });
 
     onBeforeUnmount(() => {
-      if (resizeObserver) resizeObserver.unobserve(vue.$el);
-      if (resizeObserver) resizeObserver.disconnect();
-      if (intersectionObserver) intersectionObserver.unobserve(bottomHtml);
-      if (intersectionObserver) intersectionObserver.disconnect();
+      resizeObserver.unobserve(vue.$el);
+      resizeObserver.disconnect();
+      intersectionObserver.unobserve(bottomHtml);
+      intersectionObserver.disconnect();
     });
 
     function renderfinished() {
@@ -444,24 +423,19 @@ RVirtualListFalls = defineComponent({
       return (
         <div class="r-virtual-list-begin">
           {renderSlot(context.slots, "begin", listHook, () => [
-            <div
-              class="r-virtual-list-skelectons"
-              style={{ padding: `0 ${props.sapceHorizontal}px` }}
-            >
-              {renderList(props.skelectonCount, (item, index) => {
-                return [
-                  <div
-                    class="r-virtual-list-skelecton"
-                    style={{
-                      width: `calc( (100% - ${space}px) / ${columnNum} )`,
-                      "margin-bottom": space + "px",
-                    }}
-                  >
-                    {renderSlot(context.slots, "skelecton", { item, index })}
-                  </div>,
-                ];
-              })}
-            </div>,
+              <div class="r-virtual-list-skelectons" style={{padding:`0 ${props.sapceHorizontal}px`}}>
+          {  renderList(props.skelectonCount, (item, index) => {
+              return [
+                <div class="r-virtual-list-skelecton" style={{
+                  width: `calc( (100% - ${space}px) / ${columnNum} )`,
+                  'margin-bottom': space + 'px'
+                }} >{
+                  renderSlot(context.slots, 'skelecton', {item, index})
+                }</div>
+                
+              ];
+            })}
+            </div>
             // <div class={"list-hint list-begin"}>正在加载中</div>,
           ])}
         </div>
@@ -469,11 +443,11 @@ RVirtualListFalls = defineComponent({
     }
 
     function onItemIntersection(...arg) {
-      context.emit("itemIntersection", ...arg);
+      context.emit('itemIntersection',...arg)
     }
 
     function onItemFirstIntersection(...arg) {
-      context.emit("itemFirstIntersection", ...arg);
+      context.emit('itemFirstIntersection',...arg)
     }
 
     return (vm) => {
@@ -491,8 +465,8 @@ RVirtualListFalls = defineComponent({
               // console.log(item.data);
               return (
                 <RVirtualListItem
-                  onFirstIntersection={onItemFirstIntersection}
-                  onIntersection={onItemIntersection}
+                  onFirstIntersection= {onItemFirstIntersection}
+                  onIntersection = {onItemIntersection}
                   top={item.top}
                   key={props.setKey(item.data, item.index, item.uuId)}
                   itemAdapter={item}
@@ -525,7 +499,7 @@ RVirtualListItem = defineComponent({
     top: { type: Number, default: 0 },
   },
   setup(props, context) {
-    const { itemAdapter, adapter } = props;
+    const { itemAdapter,adapter } = props;
     let vue;
 
     function heightListener() {
@@ -536,104 +510,35 @@ RVirtualListItem = defineComponent({
       }
     }
 
-    let resizeObserver;
-    let intersectionObserver;
-    let mutationObserver;
+    let resizeObserver = new ResizeObserver(async (...arg) => {
+      heightListener();
+    });
 
-    let options = { threshold: adapter.itemThreshold };
-    const config = { attributes: true, attributeFilter: ["style"] };
+    let options = {
+      threshold: adapter.itemThreshold,
+    };
 
-    function newMutationObserver() {
-      try {
-        mutationObserver = new MutationObserver((mutationsList) => {
-          console.log(mutationsList);
-          for (let mutation of mutationsList) {
-            if (mutation.type === "attributes" && mutation.attributeName === "style") {
-              const targetElement = mutation.target;
-              const previousHeight = targetElement.offsetHeight;
-
-              // 在这里处理高度变化
-              // 例如，检查当前高度和之前的高度是否相等，进行相应的操作
-              const currentHeight = targetElement.offsetHeight;
-              if (currentHeight !== previousHeight) {
-                // 高度发生变化，进行处理
-                console.log("元素高度发生变化");
-              }
-              break;
-            }
-          }
-        });
-      } catch (error) {}
-    }
-
-    try {
-      resizeObserver = new ResizeObserver(async (...arg) => {
-        heightListener();
-      });
-    } catch (error) {
-      newMutationObserver();
-    }
-
-    function handleIntersection(entries) {
-      if (!itemAdapter.intersectingtime) {
-        context.emit("intersection", itemAdapter, entries);
-        return;
-      }
-
-      if (itemAdapter.intersected) return;
-      itemAdapter.intersected = true;
-      context.emit("intersection", itemAdapter, entries);
-      if (itemAdapter.intersectingTimerType === "setTimeout") {
-        itemAdapter.intersectingTimer = setTimeout(() => {
-          itemAdapter.intersected = false;
-        }, itemAdapter.intersectingtime);
-      }
-    }
-
-    try {
-      intersectionObserver = new IntersectionObserver(([entries]) => {
-        itemAdapter.isIntersecting = entries.isIntersecting;
-        if (!itemAdapter.isIntersecting) {
-          if (itemAdapter.intersectingTimerType === "setInterval")
-            clearInterval(itemAdapter.intersectingTimer);
+    const intersectionObserver = new IntersectionObserver(([entries]) => {
+      if (entries.isIntersecting ) {
+        if(!itemAdapter.isIntersecting){ 
+          context.emit('firstIntersection',itemAdapter,entries)
+          itemAdapter.isIntersecting = true;
         }
-        if (entries.isIntersecting) {
-          if (!itemAdapter.isFirsIntersecting) {
-            context.emit("firstIntersection", itemAdapter, entries);
-            itemAdapter.isFirsIntersecting = true;
-          }
-          handleIntersection(entries);
-        }
-      }, options);
-    } catch (error) {}
-
-    function obs() {
-      if (resizeObserver) {
-        resizeObserver.observe(vue.$el);
-        return;
+        context.emit('intersection',itemAdapter,entries)
       }
-      if (mutationObserver) mutationObserver.observe(vue.$el, config);
-    }
-
-    function dis() {
-      if (resizeObserver) {
-        resizeObserver.unobserve(vue.$el);
-        resizeObserver.disconnect();
-        return;
-      }
-      if (mutationObserver) mutationObserver.disconnect();
-    }
+    },options);
 
     onMounted(() => {
       heightListener();
-      obs();
-      if (intersectionObserver) intersectionObserver.observe(vue.$el);
+      resizeObserver.observe(vue.$el);
+      intersectionObserver.observe(vue.$el);
     });
 
     onBeforeUnmount(() => {
-      dis();
-      if (intersectionObserver) intersectionObserver.unobserve(vue.$el);
-      if (intersectionObserver) intersectionObserver.disconnect();
+      resizeObserver.unobserve(vue.$el);
+      resizeObserver.disconnect();
+      intersectionObserver.unobserve(vue.$el);
+      intersectionObserver.disconnect();
     });
     return (vm) => {
       vue = vm;

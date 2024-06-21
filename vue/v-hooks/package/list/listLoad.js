@@ -212,7 +212,7 @@ function useListLoad(props = {}) {
     total.value = 0;
     config.beforeBegin(proxy);
     return asyncHooks.runBegin(...arg).then((res) => {
-      listData.value = config.setList(res, proxy);
+      listData.value = config.setList(res, proxy) || [];
       list.value = listData.value;
       currentPage.value = config.setCurrentPage(res, arguments_.proxy);
       total.value = config.setTotal(res, proxy);
@@ -229,7 +229,7 @@ function useListLoad(props = {}) {
       return;
     }
     return asyncHooks.run(...arg).then((res) => {
-      listData.value = config.setList(res, proxy);
+      listData.value = config.setList(res, proxy) || [];
       list.value.push(...listData.value);
       currentPage.value = config.setCurrentPage(res, arguments_.proxy);
       total.value = config.setTotal(res, proxy);
@@ -271,7 +271,7 @@ function useAsyncListLoad(props = {}) {
     total.value = 0;
     config.beforeBegin(params.proxy);
     return asyncHooks.nextBeginSend(...arg).then((res) => {
-      listData.value = config.setList(res, params.proxy);
+      listData.value = config.setList(res, params.proxy)  || [];
       list.value = listData.value;
       currentPage.value = config.setCurrentPage(res, params.proxy);
       total.value = config.setTotal(res, params.proxy);
@@ -288,7 +288,7 @@ function useAsyncListLoad(props = {}) {
     total.value = 0;
     config.beforeBegin(params.proxy);
     return asyncHooks.nextBeginSend(...arg).then((res) => {
-      listData.value = config.setList(res, params.proxy);
+      listData.value = config.setList(res, params.proxy) || [];
       list.value = listData.value;
       currentPage.value = config.setCurrentPage(res, params.proxy);
       total.value = config.setTotal(res, params.proxy);
@@ -301,7 +301,7 @@ function useAsyncListLoad(props = {}) {
     if (finished.value === true) return;
     if (asyncHooks.loading.value === true) return;
     return asyncHooks.awaitSend(...arg).then((res) => {
-      listData.value = config.setList(res, params.proxy);
+      listData.value = config.setList(res, params.proxy) || [];
       list.value.push(...listData.value);
       currentPage.value = config.setCurrentPage(res, params.proxy);
       total.value = config.setTotal(res, params.proxy);

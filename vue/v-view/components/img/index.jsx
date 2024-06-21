@@ -46,7 +46,7 @@ export const RImageHoc = (options = {}) => {
       let html, imgNode;
       const isRender = ref(!props.lazy);
       const error = ref(false);
-      const loading = ref(true);
+      const loading = ref(false);
       const cache = reactive({
         width: undefined,
         height: undefined,

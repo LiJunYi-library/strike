@@ -20,10 +20,14 @@ function useRadio2(props = {}) {
       valueItem: undefined,
       labelItem: undefined,
     };
-    if (options.index !== undefined) map.indexItem = options.list[options.index];
-    if (options.value !== undefined) map.valueItem = options.list.find(findForValue(options.value));
-    if (options.label !== undefined) map.labelItem = options.list.find(findForLabel(options.label));
-    const item = map[options.priority] || map.valueItem || map.indexItem || map.labelItem;
+    if (options.index !== undefined)
+      map.indexItem = options.list[options.index];
+    if (options.value !== undefined)
+      map.valueItem = options.list.find(findForValue(options.value));
+    if (options.label !== undefined)
+      map.labelItem = options.list.find(findForLabel(options.label));
+    const item =
+      map[options.priority] || map.valueItem || map.indexItem || map.labelItem;
 
     if (!item && !options.list.length) return { ...options };
 
@@ -112,7 +116,7 @@ function useRadio2(props = {}) {
     hooks.context.SH.index = undefined;
   }
 
-  function updateList(l, values = {}) {
+  function updateList(l = [], values = {}) {
     list.value = l;
     const arg = { ...config, list: l, ...values };
     const args = resolveProps(arg);
@@ -131,7 +135,9 @@ function useRadio2(props = {}) {
 
   function updateLabel(val) {
     hooks.context.SH.label = val;
-    hooks.context.SH.select = list.value.find(findForLabel(hooks.context.SH.label));
+    hooks.context.SH.select = list.value.find(
+      findForLabel(hooks.context.SH.label)
+    );
     hooks.context.SH.value = formatterValue(hooks.context.SH.select);
     hooks.context.SH.index = findIndex(list.value, hooks.context.SH.select);
   }
@@ -163,23 +169,23 @@ function useRadio2(props = {}) {
     }
   }
 
-  function updateListToResolveValue(li) {
+  function updateListToResolveValue(li = []) {
     list.value = li;
     resolveValue();
   }
 
-  function updateListResolve(li) {
+  function updateListResolve(li = []) {
     list.value = li;
     const ishave = list.value.some((item) => item === hooks.context.SH.select);
     if (!ishave) return reset();
   }
 
-  function updateListAndReset(li) {
+  function updateListAndReset(li = []) {
     list.value = li;
     reset();
   }
 
-  function resolveList(li) {
+  function resolveList(li= []) {
     list.value = li;
     const parms = resolveProps(hooks.context.SH);
     hooks.context.SH.select = parms.select;

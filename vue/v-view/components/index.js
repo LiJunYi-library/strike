@@ -21,3 +21,4 @@ export * from "./chart";
 export * from "./text";
 export * from "./flex";
 export * from "./pagination";
+export * from "./verificationCode";

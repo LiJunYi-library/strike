@@ -7,12 +7,17 @@ import { RILoading } from "../icon";
 export const RToastHoc = (consfig = {}) => {
   const option = {
     renderContent(props, context) {
+      const textC = (() => {
+        if (props.text instanceof Function) return props.text()
+        return props.text
+      })()
+
       return (
         <div class={["r-toast-content"]}>
           {props.iconClass && <i class={[props.iconClass]}></i>}
           {props.loading && renderSlot(context.slots, "icon", {}, () => [<RILoading class="r-toast-loading" />])}
           {props.loadingText && <div class="r-toast-loadingText">{props.loadingText} </div>}
-          {props.text && <div class="r-toast-text">{props.text} </div>}
+          {props.text && <div class="r-toast-text"> {textC} </div>}
           {renderSlot(context.slots, "default")}
         </div>
       );
@@ -21,7 +26,7 @@ export const RToastHoc = (consfig = {}) => {
   };
   return defineComponent({
     props: {
-      text: { type: String, default: "" },
+      text: { type: String, Function, default: "" },
       loadingText: { type: String, default: "" },
       visible: { type: Boolean, default: false },
       loading: { type: Boolean, default: false },

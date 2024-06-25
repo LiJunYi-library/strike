@@ -1,15 +1,14 @@
-import { defineComponent, renderSlot } from "vue";
+import { defineComponent } from "vue";
 
 export const RVerificationCode = defineComponent({
   props: {
     label: { type: String, default: "获取验证码" },
     timerHook: Object,
   },
-  emits: ['getCode'],
   setup(props, context) {
-    function onClick(params) {
+    async function onClick(event) {
+      await context.attrs?.onClick?.(event);
       props.timerHook.afresh();
-      context.emit('getCode')
     }
 
     function renderC() {
@@ -23,7 +22,7 @@ export const RVerificationCode = defineComponent({
     }
 
     return () => {
-      return <div class='r-verification-code'>
+      return <div class='r-verification-code' >
         {renderC()}
       </div>;
     };

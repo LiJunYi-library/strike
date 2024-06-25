@@ -1,0 +1,12 @@
+.r-input {
+  width: 100%;
+  outline: none;
+  border: none;
+}
+
+.r-input-error {
+  &::placeholder {
+    color: red;
+  }
+
+}

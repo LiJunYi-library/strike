@@ -11,3 +11,4 @@ export * from "./package/number";
 export * from "./package/def";
 export * from "./other";
 export * from "./package/require";
+export * from "./package/input";

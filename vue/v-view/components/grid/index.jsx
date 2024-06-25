@@ -5,6 +5,7 @@ import "./index.scss";
 const RGridProps = {
   columns: { type: Number, default: 1 },
   gap: [Number, String],
+  inline: Boolean,
   minWidth: Number,
 };
 
@@ -24,7 +25,7 @@ export const RGrid = defineComponent({
 
     return () => {
       return (
-        <RResize class="r-grid" style={style} onChangeWidth={changeWidth} time={true}>
+        <RResize class={[props.inline ? "r-grid-inline" : "r-grid"]} style={style} onChangeWidth={changeWidth} time={true}>
           {renderSlot(context.slots, "default")}
         </RResize>
       );

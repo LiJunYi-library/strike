@@ -25,3 +25,4 @@ export * from "./timerButton";
 export * from "./absolute";
 export * from "./nav";
 export * from "./input";
+export * from "./floatingBubble";

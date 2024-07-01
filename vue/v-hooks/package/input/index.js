@@ -25,7 +25,19 @@ export function useInput(props = {}) {
 
   const errorText = ref("");
 
-  const hooks = useReactive({ value, error, verification, unVerification, errorText })
+  const hooks = useReactive({ value, error, verification, verificat, unVerification, errorText })
+
+  function verificat() {
+    if (config.required === true) {
+      if (config.requiredVerify(value.value)) return false;
+    }
+
+    if (config.regexp instanceof RegExp) {
+      if (config.regexpVerify(config.regexp, value.value)) return false;
+    }
+
+    return config.customVerify(value.value);
+  }
 
   function verification() {
     return new Promise(async (resolve, reject) => {

@@ -22,7 +22,8 @@ const arguments = minimist(process.argv, {
 
 console.log("------------");
 
-const commands = ["server", "build"];
+const commands = ["server", "build", "servers", "builds"];
+
 const command = args[0];
 
 if (!commands.includes(command)) {

@@ -1,6 +1,6 @@
 {
-  "name": "@rainbow_ljy/v-view",
-  "version": "1.0.90",
+  "name": "@rainbow_ljy/v-chart",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "private": false,

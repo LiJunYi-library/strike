@@ -1,7 +1,12 @@
 .r-floating-bubble {
   position: fixed;
   z-index: 5;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  z-index: 30;
+}
+
+.r-floating-bubble-sticky{
+  position: sticky;
 }

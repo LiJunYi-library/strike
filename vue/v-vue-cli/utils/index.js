@@ -1,7 +1,7 @@
 const fs = require("node:fs/promises");
 const path = require("path");
 
-module.exports = { lookUp, getFiles }
+module.exports = { lookUp }
 
 async function lookUp(fNames, uri = "") {
     const fileP = path.resolve(uri);
@@ -22,9 +22,5 @@ async function lookUp(fNames, uri = "") {
 }
 
 
-async function getFiles(uri = "") {
-    const fileP = path.resolve(uri);
-    console.log( 'fileP' ,fileP);
-    const files = await fs.readdir(fileP);
-    return files
-}
+
+

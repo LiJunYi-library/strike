@@ -4,9 +4,6 @@ const elements = requireVueFilesCom(require.context("./elements", true, /\.(vue|
   name: "RChart",
 });
 
-// console.log(elements);
-// console.log(Object.keys(elements).join(","));
-
 export const {
   RChartAnnular,
   RChartBubble,

@@ -50,7 +50,7 @@ function getParams(config) {
   return config.urlParams;
 }
 
-export function parseParams(object) {
+export function parseParams(url = '', object) {
   if (!object) return "";
   if (typeof object !== "object") return object;
   if (!Object.keys(object).length) return "";
@@ -68,6 +68,7 @@ export function parseParams(object) {
     }
   }
   str = str.slice(0, -1);
+  if (url && url.includes('?')) return `&${str}`;
   return `?${str}`;
 }
 
@@ -205,7 +206,7 @@ export function useFetchHOC(props = {}) {
         });
       });
       controller = curController;
-      const url = config.baseUrl + config.url + parseParams(getParams(config));
+      const url = config.baseUrl + config.url + parseParams(config.url, getParams(config));
       const headers = getHeaders(config);
       const body = revBody(headers["Content-Type"], config);
       const fetchConfig = {
@@ -257,6 +258,7 @@ export function useFetchHOC(props = {}) {
         error.value = false;
         errorData.value = undefined;
         loading.value = true;
+        console.log(fetchConfig.headers);
         config.onRequest(fetchConfig, config);
         events.invoke(params);
         fetchPromise = fetch(URL, fetchConfig);
@@ -368,11 +370,15 @@ export function useFetchHOC(props = {}) {
 
 export function createFetchApi(useFetch) {
   const post = createOverload((overload) => {
-    overload.addimpl("String", (url) => useFetch({ method: "post", url }));
-    overload.addimpl(["String", "Object"], (url, body) => useFetch({ method: "post", url, body }));
-    overload.addimpl(["String", "Function"], (url, body) =>
-      useFetch({ method: "post", url, body }),
-    );
+    const postFetch = (arg = {}) => useFetch({
+      method: "post",
+      initHeaders: { "Content-Type": "application/json;charset=UTF-8" },
+      ...arg
+    })
+    overload.addimpl("Object", (obj) => postFetch(obj));
+    overload.addimpl("String", (url) => postFetch({ url }));
+    overload.addimpl(["String", "Object"], (url, body) => postFetch({ url, body }));
+    overload.addimpl(["String", "Function"], (url, body) => postFetch({ url, body }));
   }, false);
 
   const get = createOverload((overload) => {

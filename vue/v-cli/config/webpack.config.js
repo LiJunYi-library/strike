@@ -97,6 +97,11 @@ function formatterConfig(props) {
           },
         },
         {
+          test: /\.ts$/,
+          use: 'ts-loader',
+          exclude: /node_modules/,
+        },
+        {
           test: /\.(jsx|js|mjs)$/,
           use: {
             loader: "babel-loader",
@@ -151,7 +156,7 @@ function formatterConfig(props) {
     mode: config.mode,
     devtool: "source-map", //"cheap-module-source-map",
     resolve: {
-      extensions: [".vue", ".js", ".mjs", ".jsx", ".json"],
+      extensions: [".vue", ".js", ".mjs", ".jsx", ".json", '.ts'],
     },
     optimization: {
       splitChunks: {

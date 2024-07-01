@@ -336,6 +336,9 @@ importers:
       terser-webpack-plugin:
         specifier: ^5.3.10
         version: 5.3.10(esbuild@0.20.2)(webpack@5.82.0(esbuild@0.20.2)(webpack-cli@5.0.2(webpack-dev-server@4.13.3)(webpack@5.82.0)))
+      ts-loader:
+        specifier: ^9.5.1
+        version: 9.5.1(typescript@5.4.5)(webpack@5.82.0(esbuild@0.20.2)(webpack-cli@5.0.2(webpack-dev-server@4.13.3)(webpack@5.82.0)))
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -10642,6 +10645,9 @@ packages:
   vue-component-type-helpers@2.0.19:
     resolution: {integrity: sha512-cN3f1aTxxKo4lzNeQAkVopswuImUrb5Iurll9Gaw5cqpnbTAxtEMM1mgi6ou4X79OCyqYv1U1mzBHJkzmiK82w==}
 
+  vue-component-type-helpers@2.0.24:
+    resolution: {integrity: sha512-Jr5N8QVYEcbQuMN1LRgvg61758G8HTnzUlQsAFOxx6Y6X8kmhJ7C+jOvWsQruYxi3uHhhS6BghyRlyiwO99DBg==}
+
   vue-demi@0.14.6:
     resolution: {integrity: sha512-8QA7wrYSHKaYgUxDA5ZC24w+eHm3sYCbp0EzcDwKqN3p6HqtTCGR/GVsPyZW92unff4UlcSh++lmqDWN3ZIq4w==}
     engines: {node: '>=12'}
@@ -15354,7 +15360,7 @@ snapshots:
       ts-dedent: 2.2.0
       type-fest: 2.19.0
       vue: 3.3.13(typescript@5.4.5)
-      vue-component-type-helpers: 2.0.19
+      vue-component-type-helpers: 2.0.24
     transitivePeerDependencies:
       - encoding
       - prettier
@@ -24853,6 +24859,8 @@ snapshots:
       typescript: 5.4.5
 
   vue-component-type-helpers@2.0.19: {}
+
+  vue-component-type-helpers@2.0.24: {}
 
   vue-demi@0.14.6(vue@3.3.13(typescript@5.4.5)):
     dependencies:

@@ -17,7 +17,6 @@ export * from "./resize";
 export * from "./grid";
 export * from "./number";
 export * from "./toast";
-export * from "./chart";
 export * from "./text";
 export * from "./flex";
 export * from "./pagination";

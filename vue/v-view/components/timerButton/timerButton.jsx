@@ -1,4 +1,4 @@
-import { defineComponent, defineEmits } from "vue";
+import { defineComponent } from "vue";
 
 export const RTimerButtonHoc = (options = {}) => {
   const config = {
@@ -11,10 +11,12 @@ export const RTimerButtonHoc = (options = {}) => {
     props: {
       timerHook: Object,
       click: Function,
+      disabled: Boolean,
       ...config.props
     },
     setup(props, context) {
       async function onClick(event) {
+        if (props.disabled) return;
         event.stopPropagation();
         await context.attrs?.onInlineClick?.(event);
         props.timerHook.afresh();
@@ -31,7 +33,7 @@ export const RTimerButtonHoc = (options = {}) => {
       }
 
       return () => {
-        return <div class={['r-timer-button', config.class]} >
+        return <div class={['r-timer-button', props.disabled && 'r-timer-button-disabled', config.class]} >
           {renderC()}
         </div>;
       };

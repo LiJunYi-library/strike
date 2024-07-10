@@ -184,6 +184,7 @@ export function usePromise2(fun, options = {}) {
   const errAbout = { message: "about", code: 20 };
   const events = arrayEvents();
   const errEvents = arrayEvents();
+  const successEvents = arrayEvents();
 
   function create(params, task = [], promiseConfig = {}) {
     if (params instanceof Function) {
@@ -310,6 +311,9 @@ export function usePromise2(fun, options = {}) {
     loading,
     error,
     errorData,
+    events,
+    errEvents,
+    successEvents,
     send,
     beginSend,
     nextSend,

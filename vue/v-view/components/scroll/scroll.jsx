@@ -277,9 +277,11 @@ export const RScroll = defineComponent({
         }
 
         function onTouchmove(event) {
+            if (!stratTouche) return;
             if (scrollTop > 0) return scrollLock = true;
             if (scrollLock === true) return console.log('滚动锁');
             const moveTouche = event.touches[0];
+            if (!moveTouche) return;
             const moveY = moveTouche.pageY - stratTouche.pageY;
             if (moveY > 10 && refreshLock === false) refreshLock = true;
             if (refreshLock === true) {
@@ -297,6 +299,7 @@ export const RScroll = defineComponent({
         function onTouchend(event) {
             refreshLock = false;
             scrollLock = false;
+            stratTouche = undefined;
             RScrollContext.children.forEach((el) => {
                 el?.onTouchend?.(event);
             });

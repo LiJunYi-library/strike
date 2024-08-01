@@ -1,5 +1,5 @@
 import { RResize } from "../resize";
-import { defineComponent, reactive, renderSlot, renderList } from "vue";
+import { defineComponent, computed, renderSlot, renderList } from "vue";
 import "./index.scss";
 
 const RGridProps = {
@@ -18,14 +18,14 @@ export const RGrid = defineComponent({
       style["grid-template-columns"] = ` repeat(${newColumns}, 1fr)`;
     }
 
-    const style = reactive({
+    const style = computed(()=> ({
       "grid-template-columns": ` repeat(${props.columns}, 1fr)`,
       "grid-gap": props.gap + "px",
-    });
+    }));
 
     return () => {
       return (
-        <RResize class={[props.inline ? "r-grid-inline" : "r-grid"]} style={style} onChangeWidth={changeWidth} time={true}>
+        <RResize class={[props.inline ? "r-grid-inline" : "r-grid"]} style={style.value} onChangeWidth={changeWidth} time={true}>
           {renderSlot(context.slots, "default")}
         </RResize>
       );

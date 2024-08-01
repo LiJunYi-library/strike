@@ -92,7 +92,7 @@ function useListLoad2(props = {}) {
     empty.value = false;
     total.value = 0;
     config.beforeBegin(params);
-    return asyncHooks.nextSend(...arg).then((res) => {
+    return asyncHooks.nextBeginSend(...arg).then((res) => {
       listData.value = config.setList(res, params) || [];
       list.value = listData.value;
       currentPage.value = config.setCurrentPage(res, params);

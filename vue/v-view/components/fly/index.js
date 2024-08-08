@@ -7,21 +7,20 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-use-before-define */
 
-import {
-  defineComponent,
-  ref,
-  renderSlot,
-  reactive,
-  nextTick,
-  computed,
-  onMounted,
-  render,
-} from 'vue';
+import {defineComponent, ref, renderSlot, reactive, computed, onMounted, render} from 'vue';
 import {createAnimate} from './c';
 
 export const Fly = defineComponent({
   props: {
-    aniClass: {type: [Array, String], default: () => ''},
+    unFlyClass: {type: [Array, String], default: () => ''},
+    flyingClass: {type: [Array, String], default: () => ''},
+    unFlyStyle: {type: [Object, String], default: () => ({})},
+    flyingStyle: {type: [Object, String], default: () => ({})},
+    flyingTransition: {type: String, default: '0.8s'},
+
+    matrixs: {type: Array, default: () => []},
+    matrixFuns: {type: String, default: ''},
+
     targetId: {type: String, default: ''},
     targetEl: {type: HTMLElement, default: () => undefined},
     targetRef: {type: [Object, String], default: () => undefined},
@@ -29,15 +28,17 @@ export const Fly = defineComponent({
     isClickFly: {type: Boolean, default: true},
     isFeedback: {type: Boolean, default: false},
     isMountedFly: {type: Boolean, default: false},
-    transition: {type: String, default: '0.8s '},
+
     duration: {type: Number, default: 800},
-    matrixs: {type: Array, default: () => []},
-    matrixFuns: {type: String, default: ''},
     pointBezier: {type: Array, default: () => undefined},
   },
   emits: ['flyEnd', 'flyStart', 'click'],
   setup(props, context) {
-    const aniClass = ref(props.aniClass);
+    const unFlyClass = ref(props.unFlyClass);
+    const flyingClass = ref('');
+    const flyingStyle = ref('');
+    const flyingTransition = ref('');
+    const unFlyStyle = ref(props.unFlyStyle);
     let node;
     let targetHtml;
     const style = reactive({});
@@ -96,36 +97,42 @@ export const Fly = defineComponent({
     }
 
     function matrixFly(origin, tOrigin, matrix) {
-      style.transform = `matrix(${matrix.join(',')})`;
-      style.transition = props.transition;
-      aniClass.value = '';
       // debugger; 在下一帧更改位置
       requestAnimationFrame(() => {
         const translateMatrix = [1, 0, 0, 1, tOrigin.x - origin.x, tOrigin.y - origin.y];
         const targetMatrix = multiplyMatrixs(translateMatrix, matrix, ...props.matrixs);
-        // console.log('targetMatrix', targetMatrix);
-        node.style.transform = `matrix(${targetMatrix.join(',')}) ${props.matrixFuns}`;
+        style.transform = `matrix(${targetMatrix.join(',')}) ${props.matrixFuns}`;
       });
     }
 
     function animationFly(origin, tOrigin, matrix) {
+      flyingTransition.value = '';
       const tP = {
         x: tOrigin.x - origin.x,
         y: tOrigin.y - origin.y,
       };
       animate.setFrames([{x: 0, y: 0}, ...props.pointBezier, tP]);
-      console.log();
       animate.play(position => {
-        node.style.transform = `translate(${position.x}px,${position.y}px)`;
+        style.transform = `translate(${position.x}px,${position.y}px)`;
       });
     }
 
     async function flying() {
-      style.animationPlayState = 'paused';
+      flyingClass.value = '';
+      flyingStyle.value = '';
+      flyingTransition.value = '';
+      // style.animationPlayState = 'paused';
       const origin = getOrigin(node);
       const tOrigin = getOrigin(targetNode.value);
       const matrix = getMatrixValues(node);
+      style.transform = `matrix(${matrix.join(',')})`;
       context.emit('flyStart');
+      unFlyClass.value = '';
+      unFlyStyle.value = '';
+      flyingClass.value = props.flyingClass;
+      flyingStyle.value = props.flyingStyle;
+      flyingTransition.value = props.flyingTransition;
+      // style.animationPlayState = 'running';
       // console.log(origin);
       // console.log(tOrigin);
       // console.log(matrix);
@@ -134,17 +141,18 @@ export const Fly = defineComponent({
     }
 
     function onTransitionend() {
-      console.log('onTransitionend');
+      // console.log('onTransitionend');
       if (props.isRemove) node.remove();
+      flyingClass.value = '';
+      flyingStyle.value = '';
+      flyingTransition.value = '';
+      unFlyClass.value = props.unFlyClass;
+      unFlyStyle.value = props.unFlyStyle;
       context.emit('flyEnd');
       if (props.isFeedback) {
         props.targetRef?.feedback?.();
         props.targetRef?.value?.feedback?.();
       }
-    }
-
-    function onAnimationend(e) {
-      // console.log('onAnimationend');
     }
 
     function onRef(el) {
@@ -160,18 +168,17 @@ export const Fly = defineComponent({
     onMounted(() => {
       if (props.targetId) targetHtml = document.getElementById(props.targetId);
       if (props.isMountedFly) flying();
-      // console.log(multiplyMatrix([1, 0, 0, 1, 20, 30], [0.2, 0, 0, 0.2, 0, 0]));
     });
 
     context.expose({flying});
     return () => {
       return (
         <div
-          style={style}
-          class={['r-fly', aniClass.value]}
+          style={[style, {transition: flyingTransition.value}, flyingStyle.value, unFlyStyle.value]}
+          class={['r-fly', flyingClass.value, unFlyClass.value]}
           onClick={onClick}
           ref={onRef}
-          onAnimationend={onAnimationend}
+          onAnimationend={onTransitionend}
           onTransitionend={onTransitionend}>
           {renderSlot(context.slots, 'default')}
         </div>

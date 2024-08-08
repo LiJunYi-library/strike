@@ -17,9 +17,8 @@ export const Fly = defineComponent({
     unFlyStyle: {type: [Object, String], default: () => ({})},
     flyingStyle: {type: [Object, String], default: () => ({})},
     flyingTransition: {type: String, default: '0.8s'},
-
-    matrixs: {type: Array, default: () => []},
-    matrixFuns: {type: String, default: ''},
+    flyingMatrixs: {type: Array, default: () => []},
+    flyingTransform: {type: String, default: ''},
 
     targetId: {type: String, default: ''},
     targetEl: {type: HTMLElement, default: () => undefined},
@@ -100,8 +99,8 @@ export const Fly = defineComponent({
       // debugger; 在下一帧更改位置
       requestAnimationFrame(() => {
         const translateMatrix = [1, 0, 0, 1, tOrigin.x - origin.x, tOrigin.y - origin.y];
-        const targetMatrix = multiplyMatrixs(translateMatrix, matrix, ...props.matrixs);
-        style.transform = `matrix(${targetMatrix.join(',')}) ${props.matrixFuns}`;
+        const targetMatrix = multiplyMatrixs(translateMatrix, matrix, ...props.flyingMatrixs);
+        style.transform = `matrix(${targetMatrix.join(',')}) ${props.flyingTransform}`;
       });
     }
 
@@ -143,6 +142,7 @@ export const Fly = defineComponent({
     function onTransitionend() {
       // console.log('onTransitionend');
       if (props.isRemove) node.remove();
+      style.transform = '';
       flyingClass.value = '';
       flyingStyle.value = '';
       flyingTransition.value = '';

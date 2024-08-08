@@ -174,17 +174,22 @@ export function usePromise2(fun, options = {}) {
   const queue = [];
   const defQueue = [];
 
+  const errLoading = { message: "loading", code: 41 };
+  const errAbout = { message: "about", code: 20 };
+  const errTimeout = { message: "Request Timeout", code: 48 };
+
+  const events = arrayEvents();
+  const successEvents = arrayEvents();
+  const errEvents = arrayEvents();
+  const fetchEvents = arrayEvents();
+  let timer;
   const config = getPromiseConfig(options);
   const data = ref(config.data);
   const begin = ref(config.begin);
   const errorData = ref(config.errorData);
   const loading = ref(config.loading);
   const error = ref(config.error);
-  const errLoading = { message: "loading", code: 41 };
-  const errAbout = { message: "about", code: 20 };
-  const events = arrayEvents();
-  const errEvents = arrayEvents();
-  const successEvents = arrayEvents();
+
 
   function create(params, task = [], promiseConfig = {}) {
     if (params instanceof Function) {
@@ -325,4 +330,9 @@ export function usePromise2(fun, options = {}) {
   });
 
   return params;
+}
+
+
+export function usePromiseHoc(){
+  
 }

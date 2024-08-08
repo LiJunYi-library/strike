@@ -166,6 +166,7 @@ export function useFetchHOC(props = {}) {
     const begin = ref(configs.begin);
     const error = ref(configs.error);
     const errorData = ref(configs.errorData);
+    
     const params = useReactive({
       loading,
       data,

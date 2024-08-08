@@ -25,3 +25,5 @@ export * from "./absolute";
 export * from "./nav";
 export * from "./input";
 export * from "./floatingBubble";
+export * from "./animationFeedback";
+export * from "./fly";

@@ -5,6 +5,10 @@ export declare const Fly: DefineComponent<{
   aniClass: string | string[];
 }>;
 
+export declare const Fly2: DefineComponent<{
+  aniClass: string | string[];
+}>;
+
 export declare function RenderFly(div: HTMLElement, VNode: DefineComponent, appContext: any): void;
 
 export declare function useBezierTool(div: HTMLElement, appContext: any): void;

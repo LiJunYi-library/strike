@@ -17,17 +17,16 @@ import {
   render,
   watchEffect,
 } from 'vue';
-import './index.scss';
 import {createAnimate} from './c';
 
-export const Fly = defineComponent({
+export const Fly2 = defineComponent({
   props: {
     unFlyClass: {type: [Array, String], default: () => ''},
     unFlyStyle: {type: [Object, String], default: () => ({})},
 
     flyingClass: {type: [Array, String], default: () => ''},
     flyingStyle: {type: [Object, String], default: () => ({})},
-    flyingTransition: {type: String, default: '0.8s'},
+    flyingTransition: {type: String, default: ''},
     flyingMatrixs: {type: Array, default: () => []},
     flyingTransform: {type: String, default: ''},
 
@@ -42,20 +41,20 @@ export const Fly = defineComponent({
     duration: {type: Number, default: 800},
     pointBezier: {type: Array, default: () => undefined},
   },
-  emits: ['flyEnd', 'flyStart', 'fly-click'],
+  emits: ['flyEnd', 'flyStart', 'click'],
   setup(props, context) {
     const unFlyClass = ref(props.unFlyClass);
     const unFlyStyle = ref(props.unFlyStyle);
     const flyingClass = ref('');
     const flyingStyle = ref('');
     const flyingTransition = ref('');
+    const flyingAnimation = ref('');
     let isFlying = false;
-    let isClick = false;
     let node;
+    let styleNode;
     let targetHtml;
     const style = reactive({});
     const animate = createAnimate({onAnimationend: onTransitionend, duration: props.duration});
-    let clickEvent;
 
     watchEffect(() => {
       if (isFlying) {
@@ -71,7 +70,7 @@ export const Fly = defineComponent({
         flyingStyle.value = '';
         flyingTransition.value = '';
       }
-      // console.log('--------------');
+      console.log('--------------');
     });
 
     const targetNode = computed(() => {
@@ -128,11 +127,32 @@ export const Fly = defineComponent({
 
     function matrixFly(origin, tOrigin, matrix) {
       // debugger; 在下一帧更改位置
-      requestAnimationFrame(() => {
-        const translateMatrix = [1, 0, 0, 1, tOrigin.x - origin.x, tOrigin.y - origin.y];
-        const targetMatrix = multiplyMatrixs(translateMatrix, matrix, ...props.flyingMatrixs);
-        style.transform = `matrix(${targetMatrix.join(',')}) ${props.flyingTransform}`;
-      });
+      // requestAnimationFrame(() => {
+      const translateMatrix = [1, 0, 0, 1, tOrigin.x - origin.x, tOrigin.y - origin.y];
+      const targetMatrix = multiplyMatrixs(translateMatrix, matrix, ...props.flyingMatrixs);
+      const transform = `matrix(${targetMatrix.join(',')}) ${props.flyingTransform}`;
+      const id = Math.floor(Math.random() * 96587412);
+      const cssText = `
+        @keyframes flyingAnimation${id} {
+          0% {
+            transform: matrix(${matrix});
+            opacity: 1;
+          }
+          100% {
+            transform: ${transform};
+            opacity: 1;
+          }
+        }
+
+        .r-flying${id} {
+          animation: flyingAnimation${id} 8s;
+        } 
+      `;
+      styleNode.innerText = '';
+      styleNode.appendChild(document.createTextNode(cssText));
+      flyingAnimation.value = `r-flying${id}`;
+      // style.transform = `matrix(${targetMatrix.join(',')}) ${props.flyingTransform}`;
+      // });
     }
 
     function animationFly(origin, tOrigin, matrix) {
@@ -147,10 +167,7 @@ export const Fly = defineComponent({
       });
     }
 
-    let flyingArg;
-
-    async function flying(arg) {
-      flyingArg = arg;
+    async function flying() {
       flyingClass.value = '';
       flyingStyle.value = '';
       flyingTransition.value = '';
@@ -158,7 +175,7 @@ export const Fly = defineComponent({
       const origin = getOrigin(node);
       const tOrigin = getOrigin(targetNode.value);
       const matrix = getMatrixValues(node);
-      style.transform = `matrix(${matrix.join(',')})`;
+      // style.transform = `matrix(${matrix.join(',')})`;
       context.emit('flyStart');
       isFlying = true;
       unFlyClass.value = '';
@@ -169,24 +186,22 @@ export const Fly = defineComponent({
       // style.animationPlayState = 'running';
       // console.log(origin);
       // console.log(tOrigin);
-      // console.log('flying', flyingTransition);
+      // console.log(matrix);
       if (props.pointBezier) animationFly(origin, tOrigin, matrix);
       else matrixFly(origin, tOrigin, matrix);
     }
 
     function onTransitionend() {
-      // console.log('onTransitionend', flyingArg);
+      console.log('onTransitionend');
       if (props.isRemove) node.remove();
       style.transform = '';
       flyingClass.value = '';
+      flyingAnimation.value = '';
       flyingStyle.value = '';
       flyingTransition.value = '';
       unFlyClass.value = props.unFlyClass;
       unFlyStyle.value = props.unFlyStyle;
       isFlying = false;
-      isClick = false;
-      clickEvent?.onFlyEnd?.();
-      flyingArg?.onFlyEnd?.();
       context.emit('flyEnd');
       if (props.isFeedback) {
         props.targetRef?.feedback?.();
@@ -198,18 +213,14 @@ export const Fly = defineComponent({
       node = el;
     }
 
-    function onClick(e) {
-      if (isFlying) return;
-      if (props.isClickFly) flying();
-      e.flying = flying;
-      clickEvent = e;
-      context.emit('fly-click', e);
+    function onStyleRef(el) {
+      styleNode = el;
     }
 
-    function requestFlying(...arg) {
-      requestAnimationFrame(() => {
-        flying(...arg);
-      });
+    function onClick(e) {
+      if (props.isClickFly) flying();
+      e.flying = flying;
+      context.emit('click', e);
     }
 
     onMounted(() => {
@@ -217,33 +228,19 @@ export const Fly = defineComponent({
       if (props.isMountedFly) flying();
     });
 
-    context.expose({flying, requestFlying});
+    context.expose({flying});
     return () => {
       return (
         <div
           style={[style, {transition: flyingTransition.value}, flyingStyle.value, unFlyStyle.value]}
-          class={['r-fly', flyingClass.value, unFlyClass.value]}
+          class={['r-fly', flyingAnimation.value, flyingClass.value, unFlyClass.value]}
           onClick={onClick}
           ref={onRef}
-          onAnimationend={onTransitionend}
-          onTransitionend={onTransitionend}>
+          onAnimationend={onTransitionend}>
+          <style ref={onStyleRef}></style>
           {renderSlot(context.slots, 'default')}
         </div>
       );
     };
   },
 });
-
-export function RenderFly(div, VNode, isCache = false, appContext) {
-  let node = VNode;
-  if (VNode instanceof Function) node = VNode();
-  if (!VNode.appContext) VNode.appContext = appContext;
-  render(node, div);
-  if (!isCache) {
-    div.erudaEvents = undefined;
-    div._vnode = undefined;
-  }
-}
-
-export * from './BezierTool';
-export * from './Fly2';

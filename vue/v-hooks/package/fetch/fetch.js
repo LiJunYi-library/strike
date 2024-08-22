@@ -166,7 +166,7 @@ export function useFetchHOC(props = {}) {
     const begin = ref(configs.begin);
     const error = ref(configs.error);
     const errorData = ref(configs.errorData);
-    
+
     const params = useReactive({
       loading,
       data,
@@ -283,7 +283,7 @@ export function useFetchHOC(props = {}) {
                 return Promise.reject(errorData.value);
               })
               .then(async (mRes) => {
-                success(config.formatterData(mRes, d, res));
+                success(config.formatterData(mRes, d, res, config));
                 return Promise.resolve(data.value);
               });
           }

@@ -7,7 +7,7 @@ export * from "./page-view";
 export * from "./icon";
 export * from "./loading";
 export * from "./scroll";
-export * from "./layout";
+export * from "./aspectRatio";
 export * from "./dropdown";
 export * from "./popup";
 export * from "./pulldown";

@@ -63,16 +63,18 @@ function useRadio2(props = {}) {
     updateIndex,
     updateLabel,
     updateSelect,
+    getSelectOfValue,
+    getLabelOfValue,
+    getIndexOfValue,
+    someValue,
+
     resolveList,
     resolveValue,
     verifyValueInList,
     updateListAndReset,
     updateListToResolveValue,
     updateListResolve,
-    getSelectOfValue,
-    getLabelOfValue,
-    getIndexOfValue,
-    someValue,
+
   };
 
   const hooks = useReactive({

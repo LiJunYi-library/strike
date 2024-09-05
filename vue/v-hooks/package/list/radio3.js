@@ -1,4 +1,4 @@
-import { ref, reactive, watch } from "vue";
+import { ref, watch } from "vue";
 import { usePromise2, useLoading } from "../promise";
 import { getSelectProps } from "./select";
 import { useReactive } from "../../other";
@@ -39,21 +39,11 @@ function useRadio3(props = {}) {
   }
 
   const initParms = resolveProps(config);
-
   const list = ref(initParms.list);
   const select = ref(initParms.select);
   const value = ref(initParms.value);
   const label = ref(initParms.label);
   const index = ref(initParms.index);
-  const copyHook = ref(null);
-
-  const store = reactive({
-    list: [],
-    select: null,
-    value: null,
-    label: null,
-    index: null,
-  });
 
   const params = useReactive({
     list,
@@ -61,123 +51,35 @@ function useRadio3(props = {}) {
     value,
     label,
     index,
-    store,
-    copyHook,
-    transform, // 废弃
-    transformStore: changeContextToStore, // 废弃
-    changeContextToStore,
-    transformParams: changeContextToProxy, // 废弃
-    changeContextToProxy,
-    save,
-    restore,
-    save_changeContextToStore,
-    restore_changeContextToProxy,
-    onSelect,
-    same,
-    reset,
     formatterValue,
     formatterLabel,
     formatterDisabled,
+    //
+    onSelect,
+    same,
+    reset,
     updateList,
     updateValue,
     updateIndex,
     updateLabel,
     updateSelect,
-    resolveList,
-    resolveValue,
-    verifyValueInList,
-    updateListAndReset,
-    updateListToResolveValue,
+    //
     getSelectOfValue,
-    selectOfValue: getSelectOfValue, // 废弃
     getLabelOfValue,
-    labelOfValue: getLabelOfValue, // 废弃
     getIndexOfValue,
-    indexOfValue: getIndexOfValue, // 废弃
+    //
     someValue,
-    getContext,
+    someSelect,
+    resolveValue,
+    resolveSelect,
+    updateListToResolveValue,
+    updateListAndReset,
+    //
     copy,
-    saveValuesForCopyHook,
+    copyOf,
+    copyTo,
   });
 
-  let context = params;
-
-  function copy() {
-    // copyHook.value = useReactive({
-    //   ...params.getProto(),
-    //   select: ref(params.select),
-    //   value: ref(params.value),
-    //   label: ref(params.label),
-    //   index: ref(params.index),
-    // });
-
-    // const copy = useRadio2({
-    //   select: select.value,
-    //   value: value.value,
-    //   label: label.value,
-    //   index: index.value,
-    // }).getProto();
-    // copy.list = list;
-    // copyHook.value = useReactive(copy);
-
-    copyHook.value = useRadio3({
-      select: select.value,
-      value: value.value,
-      label: label.value,
-      index: index.value,
-    });
-    copyHook.value.list = list;
-  }
-
-  function saveValuesForCopyHook() {
-    select.value = copyHook.value.select;
-    value.value = copyHook.value.value;
-    label.value = copyHook.value.label;
-    index.value = copyHook.value.index;
-  }
-
-  function getContext() {
-    return context;
-  }
-
-  function save() {
-    store.select = params.select;
-    store.value = params.value;
-    store.label = params.label;
-    store.index = params.index;
-  }
-
-  function restore() {
-    params.select = store.select;
-    params.value = store.value;
-    params.label = store.label;
-    params.index = store.index;
-  }
-
-  function changeContextToStore() {
-    context = store;
-  }
-
-  function changeContextToProxy() {
-    context = params;
-  }
-
-  function save_changeContextToStore() {
-    save();
-    changeContextToStore();
-  }
-
-  function restore_changeContextToProxy() {
-    restore();
-    changeContextToProxy();
-  }
-
-  function transform() {
-    if (context === params) return (context = store);
-    if (context === store) return (context = params);
-  }
-
-  /** 功能区 **/
   function same(item, i) {
     return select.value === item;
   }
@@ -249,52 +151,10 @@ function useRadio3(props = {}) {
     value.value = parms.value;
     label.value = parms.label;
     index.value = parms.index;
-    resolveCopyHook();
   }
-
-  //
-  function resolveCopyHook() {
-    if (!copyHook.value) return;
-    copyHook.value.select = select.value;
-    copyHook.value.value = value.value;
-    copyHook.value.label = label.value;
-    copyHook.value.index = index.value;
-  }
-
-  function updateListToResolveValue(li) {
-    list.value = li;
-    resolveValue();
-    resolveCopyHook();
-  }
-
-  function updateListAndReset(li) {
-    list.value = li;
-    reset();
-    resolveCopyHook();
-  }
-
-  function resolveList(li) {
-    list.value = li;
-    const args = resolveProps(params);
-    select.value = args.select;
-    value.value = args.value;
-    label.value = args.label;
-    index.value = args.index;
-    resolveCopyHook();
-  }
-
-  function verifyValueInList() {
-    return list.value.some(findForValue(value.value));
-  }
-
-  function resolveValue(val = value.value) {
-    if (someValue(val)) updateValue(val);
-    else reset();
-  }
-
-  /** 功能区 **/
-
-  /** 辅助区 **/
+  /***
+   * 
+   */
   function getSelectOfValue(val) {
     return list.value.find?.(findForValue(val));
   }
@@ -306,11 +166,64 @@ function useRadio3(props = {}) {
   function getIndexOfValue(val) {
     return findIndex(list.value, getSelectOfValue(val));
   }
-
-  function someValue(val) {
+  /**
+   * 
+   ***/
+  function someValue(val = value.value) {
     return list.value.some(findForValue(val));
   }
-  /** 辅助区 **/
+
+  function someSelect(item = select.value) {
+    return list.value.some((el) => el === item)
+  }
+
+  function resolveValue(val = value.value) {
+    if (someValue(val)) updateValue(val);
+    else reset();
+  }
+
+  function resolveSelect(li = []) {
+    list.value = li;
+    if (!someSelect(select.value)) reset();
+  }
+
+  function updateListAndReset(li = []) {
+    list.value = li;
+    reset();
+  }
+
+  function updateListToResolveValue(li = []) {
+    list.value = li;
+    resolveValue();
+  }
+  /**
+ * 
+ */
+  function copy() {
+    let c = useRadio3(props);
+    c.list = list.value;
+    c.select = select.value;
+    c.value = value.value;
+    c.label = label.value;
+    c.index = index.value;
+    return c;
+  }
+
+  function copyOf(target) {
+    list.value = target.list;
+    select.value = target.select;
+    value.value = target.value;
+    label.value = target.label;
+    index.value = target.index;
+  }
+
+  function copyTo(target) {
+    target.list = list.value;
+    target.select = select.value;
+    target.value = value.value;
+    target.label = label.value;
+    target.index = index.value;
+  }
 
   return params;
 }

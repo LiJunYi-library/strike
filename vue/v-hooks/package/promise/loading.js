@@ -41,9 +41,9 @@ export function useLoading(props) {
 
     return arr.filter(Boolean);
   });
-
+  /////
   const begin = computed(() => lHooks.value.some((el) => el?.begin === true));
-
+  
   const loading = computed(() => lHooks.value.some((el) => el?.loading === true));
 
   return useReactive({ begin, loading, error, empty, finished });

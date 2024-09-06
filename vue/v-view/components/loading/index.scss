@@ -10,7 +10,7 @@
   color: red;
 }
 
-//
+
 .r-c-begin {
   display: flex;
   flex-direction: row;
@@ -19,7 +19,6 @@
   min-height: 200px;
 }
 
-//
 
 .r-c-loading {
   display: flex;
@@ -79,16 +78,20 @@
   .intersection {
     min-height: 1px;
   }
+
   .skelecton {
     background-image: url("./skelecton.png");
     background-size: 100% 100%;
   }
+
   .r-c-finished {
     min-height: 50px;
   }
+
   .r-c-loading {
     min-height: 50px;
   }
+
   .r-c-load {
     min-height: 50px;
   }
@@ -125,4 +128,26 @@
   color: white;
   left: 0;
   top: 0;
+}
+
+/*******************************/
+.r--loading {
+  position: relative;
+  .r-error,
+  .r-begin,
+  .r-loading,
+  .r-empty {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .r-error {}
+
+  .r-begin {}
+
+  .r-loading {}
+
+  .r-empty {}
 }

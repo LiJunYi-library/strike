@@ -1,12 +1,20 @@
 .r-tab {
+  width: 100%;
   background: white;
   --tab-height: 38px;
+
+  .r-tab-list-loading {
+    height: var(--tab-height);
+    justify-content: center;
+    align-items: center;
+  }
 
   .r-tab-scroll {
     max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     height: var(--tab-height);
+
     &::-webkit-scrollbar {
       display: none;
     }
@@ -23,11 +31,6 @@
     position: relative;
   }
 
-  .r-tab-list-loading {
-    height: var(--tab-height);
-    justify-content: center;
-    align-items: center;
-  }
 
   .r-tab-item {
     white-space: nowrap;

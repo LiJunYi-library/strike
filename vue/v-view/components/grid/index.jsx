@@ -2,7 +2,7 @@ import { RResize } from "../resize";
 import { defineComponent, computed, renderSlot, renderList } from "vue";
 import "./index.scss";
 
-const RGridProps = {
+export const RGridProps = {
   columns: { type: Number, default: 1 },
   gap: [Number, String],
   inline: Boolean,
@@ -33,7 +33,8 @@ export const RGrid = defineComponent({
   },
 });
 
-const RGridListProps = {
+export const RGridListProps = {
+  ...RGridProps,
   listHook: Object,
   list: Array,
   renderCount: Number,
@@ -45,7 +46,7 @@ export const RGridList = defineComponent({
     return () => {
       const LIST = (props.listHook ? props.listHook.list : props.list) || [];
       return (
-        <RGrid {...context.attrs}>
+        <RGrid {...props}>
           {renderList(props.renderCount || LIST, (item, index) => {
             return context.slots?.default?.({ item, index });
           })}
@@ -61,7 +62,7 @@ export const RGridListSelect = defineComponent({
   setup(props, context) {
     return () => {
       return (
-        <RGridList {...context.attrs} {...props}>
+        <RGridList  {...props}>
           {{
             default: ({ item, index }) => {
               return (

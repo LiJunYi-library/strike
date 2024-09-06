@@ -10,7 +10,6 @@
   color: red;
 }
 
-
 .r-c-begin {
   display: flex;
   flex-direction: row;
@@ -18,7 +17,6 @@
   align-items: center;
   min-height: 200px;
 }
-
 
 .r-c-loading {
   display: flex;
@@ -32,8 +30,6 @@
   justify-content: center;
   align-items: center;
 }
-
-//
 
 .r-c-load {
   display: flex;
@@ -74,29 +70,6 @@
   background-size: 100% 100%;
 }
 
-.r-loading-component-load {
-  .intersection {
-    min-height: 1px;
-  }
-
-  .skelecton {
-    background-image: url("./skelecton.png");
-    background-size: 100% 100%;
-  }
-
-  .r-c-finished {
-    min-height: 50px;
-  }
-
-  .r-c-loading {
-    min-height: 50px;
-  }
-
-  .r-c-load {
-    min-height: 50px;
-  }
-}
-
 /*******************************/
 
 .r-loadings {
@@ -131,8 +104,9 @@
 }
 
 /*******************************/
-.r--loading {
+.r-loading-mask {
   position: relative;
+
   .r-error,
   .r-begin,
   .r-loading,
@@ -142,12 +116,31 @@
     position: absolute;
     left: 0;
     top: 0;
+    min-height: auto;
+    background: white;
   }
-  .r-error {}
+}
 
-  .r-begin {}
+/****/
+.r-loading-load {
+  .intersection {
+    min-height: 1px;
+  }
 
-  .r-loading {}
+  .skelecton {
+    background-image: url("./skelecton.png");
+    background-size: 100% 100%;
+  }
 
-  .r-empty {}
+  .r-c-finished {
+    min-height: 50px;
+  }
+
+  .r-c-loading {
+    min-height: 50px;
+  }
+
+  .r-c-load {
+    min-height: 50px;
+  }
 }
